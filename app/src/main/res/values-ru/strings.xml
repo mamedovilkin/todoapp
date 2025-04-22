@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="new_task">Новая задача</string>
+    <string name="edit_task">Редактировать задачу</string>
+    <string name="delete">Удалить</string>
+    <string name="save">Сохранить</string>
+    <string name="cancel">Отменить</string>
+    <string name="no_tasks_yet">Пока нет задач</string>
+    <string name="no_tasks_yet_summary">Добавьте свои задачи чтобы\nотслеживать их</string>
+    <string name="something_went_wrong">Что-то пошло не так</string>
+    <string name="up">Вверх</string>
+    <string name="done">Готово</string>
+    <string name="warning">Предупреждение</string>
+    <string name="all_tasks_completed">Все задачи выполнены!</string>
+    <string name="search">Поиск</string>
+    <string name="select_date">Выбрать дату</string>
+    <string name="calendar">Календарь</string>
+    <string name="select_time">Выбрать время</string>
+    <string name="clock">Часы</string>
+    <string name="ok">ОК</string>
+    <string name="notification_permission_granted">Разрешение на уведомление предоставлено</string>
+    <string name="notification_permission_denied">Разрешение на уведомление отклонено</string>
+    <string name="date_pattern">dd.MM.yyyy</string>
+    <string name="datetime_pattern">EEE, d MMMM \'в\' hh:mm a</string>
+    <string name="datetime_today_pattern">\'Сегодня в\' hh:mm a</string>
+    <string name="datetime_year_pattern">EEE, d MMMM yyyy \'в\' hh:mm a</string>
+    <string name="datetime_24hour_pattern">EEE, d MMMM \'в\' HH:mm</string>
+    <string name="datetime_today_24hour_pattern">\'Сегодня в\' HH:mm</string>
+    <string name="datetime_year_24hour_pattern">EEE, d MMMM yyyy \'в\' HH:mm</string>
+    <string name="notification_channel">Напоминание о задаче</string>
+    <string name="task_deleted">Задача удалена</string>
+    <string name="undo">Отменить</string>
+    <plurals name="you_have_tasks_to_do">
+        <item quantity="one">У Вас есть %d задача!</item>
+        <item quantity="few">У Вас есть %d задачи!</item>
+        <item quantity="many">У Вас есть %d задач!</item>
+        <item quantity="other">У Вас есть %d задач!</item>
+    </plurals>
+    <string-array name="congratulations">
+        <item>Молодец!</item>
+        <item>Идеально!</item>
+        <item>Отлично!</item>
+        <item>Браво!</item>
+        <item>Очень хорошо!</item>
+        <item>Великолепно!</item>
+    </string-array>
+</resources>
