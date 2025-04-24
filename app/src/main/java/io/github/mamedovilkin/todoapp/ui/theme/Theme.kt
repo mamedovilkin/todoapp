@@ -84,8 +84,8 @@ fun ToDoAppTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = io.github.mamedovilkin.todoapp.ui.theme.typography,
-        shapes = io.github.mamedovilkin.todoapp.ui.theme.shapes,
+        typography = typography,
+        shapes = shapes,
         content = content
     )
 }

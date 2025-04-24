@@ -2,12 +2,8 @@ package io.github.mamedovilkin.todoapp.ui.screens
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
-import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.ViewModelProvider.AndroidViewModelFactory.Companion.APPLICATION_KEY
 import androidx.lifecycle.viewModelScope
-import androidx.lifecycle.viewmodel.initializer
-import androidx.lifecycle.viewmodel.viewModelFactory
-import io.github.mamedovilkin.todoapp.ToDoApp
+import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.mamedovilkin.todoapp.data.repository.TaskReminderRepository
 import io.github.mamedovilkin.todoapp.data.repository.TaskRepository
 import io.github.mamedovilkin.todoapp.data.room.Task
@@ -18,6 +14,7 @@ import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
+import javax.inject.Inject
 
 @Immutable
 data class HomeUiState(
@@ -27,7 +24,8 @@ data class HomeUiState(
     val notDoneTasksCount: Int = 0,
 )
 
-class HomeViewModel(
+@HiltViewModel
+class HomeViewModel @Inject constructor(
     private val taskRepository: TaskRepository,
     private val taskReminderRepository: TaskReminderRepository
 ) : ViewModel() {
@@ -126,15 +124,6 @@ class HomeViewModel(
                         )
                     }
                 }
-        }
-    }
-
-    companion object {
-        val factory: ViewModelProvider.Factory = viewModelFactory {
-            initializer {
-                val application = (this[APPLICATION_KEY] as ToDoApp)
-                HomeViewModel(application.taskRepository, application.taskReminderRepository)
-            }
         }
     }
 }

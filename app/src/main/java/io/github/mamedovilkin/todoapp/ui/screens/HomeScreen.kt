@@ -30,7 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.data.room.Task
 import io.github.mamedovilkin.todoapp.ui.common.EditTaskBottomSheet
@@ -47,7 +47,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     windowWidthSizeClass: WindowWidthSizeClass,
-    viewModel: HomeViewModel = viewModel(factory = HomeViewModel.factory)
+    viewModel: HomeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
     val lazyListState = rememberLazyListState()

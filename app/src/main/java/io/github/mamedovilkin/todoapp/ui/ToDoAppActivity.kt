@@ -16,10 +16,12 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
+import dagger.hilt.android.AndroidEntryPoint
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.screens.HomeScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 
+@AndroidEntryPoint
 class ToDoAppActivity : ComponentActivity() {
 
     private val notificationPermissionRequestCode = 101

@@ -3,8 +3,9 @@ package io.github.mamedovilkin.todoapp.data.repository
 import io.github.mamedovilkin.todoapp.data.room.Task
 import io.github.mamedovilkin.todoapp.data.room.TaskDao
 import kotlinx.coroutines.flow.Flow
+import javax.inject.Inject
 
-class TaskRepositoryImpl(
+class TaskRepositoryImpl @Inject constructor(
     private val taskDao: TaskDao
 ) : TaskRepository {
     override suspend fun insert(task: Task) = taskDao.insert(task)

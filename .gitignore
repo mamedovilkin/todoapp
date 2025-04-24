@@ -1,5 +1,5 @@
 *.iml
-Assets
+/Assets
 .gradle
 .idea
 .kotlin

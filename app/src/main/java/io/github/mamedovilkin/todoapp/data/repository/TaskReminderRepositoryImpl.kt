@@ -10,8 +10,11 @@ import io.github.mamedovilkin.todoapp.data.room.Task
 import io.github.mamedovilkin.todoapp.util.WORK_MANAGER_INPUT_DATA_KEY
 import io.github.mamedovilkin.todoapp.worker.TaskReminderWorker
 import java.util.concurrent.TimeUnit
+import javax.inject.Inject
 
-class TaskReminderRepositoryImpl(private val context: Context) : TaskReminderRepository {
+class TaskReminderRepositoryImpl @Inject constructor(
+    private val context: Context
+) : TaskReminderRepository {
 
     @SuppressLint("RestrictedApi")
     override fun scheduleReminder(task: Task) {
