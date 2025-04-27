@@ -2,7 +2,6 @@ package io.github.mamedovilkin.todoapp.ui.common
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -229,7 +228,7 @@ fun TaskItem(
             },
             color = if (task.isDone) Color(0xFF808080) else MaterialTheme.colorScheme.onBackground
         )
-        if (task.isDone) {
+        AnimatedVisibility(task.isDone) {
             IconButton(
                 onClick = onDelete,
                 modifier = Modifier.testTag(stringResource(R.string.delete))
@@ -400,7 +399,6 @@ private fun StickySearchBarPreview() {
     }
 }
 
-@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun TaskList(
     innerPadding: PaddingValues,
@@ -445,7 +443,7 @@ fun TaskList(
                     .animateItem(fadeInSpec = null, fadeOutSpec = null)
             ) {
                 Column {
-                    if (!task.isDone) {
+                    AnimatedVisibility(!task.isDone) {
                         Text(
                             text = convertMillisToDatetime(task.datetime, LocalContext.current),
                             style = MaterialTheme.typography.titleMedium,

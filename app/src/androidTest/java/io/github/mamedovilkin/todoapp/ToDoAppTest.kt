@@ -14,7 +14,6 @@ import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
-import io.github.mamedovilkin.todoapp.ui.ToDoApp
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
