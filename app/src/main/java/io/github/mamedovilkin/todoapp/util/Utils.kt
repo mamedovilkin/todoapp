@@ -24,8 +24,19 @@ fun convertToTime(hour: Int, minute: Int, context: Context): String {
 }
 
 fun convertMillisToDatetime(millis: Long, context: Context): String {
-    val pattern = if (DateFormat.is24HourFormat(context)) {
-        if (isTodayTask(millis)) {
+    val pattern = getPattern(millis, context)
+
+    val formatter = SimpleDateFormat(pattern, Locale.getDefault())
+    return formatter.format(Date(millis)).replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.getDefault()
+        ) else it.toString()
+    }
+}
+
+private fun getPattern(millis: Long, context: Context): String {
+    if (DateFormat.is24HourFormat(context)) {
+        return if (isTodayTask(millis)) {
             context.resources.getString(R.string.datetime_today_24hour_pattern)
         } else if (!isTaskThisYear(millis)) {
             context.resources.getString(R.string.datetime_year_24hour_pattern)
@@ -33,20 +44,13 @@ fun convertMillisToDatetime(millis: Long, context: Context): String {
             context.resources.getString(R.string.datetime_24hour_pattern)
         }
     } else {
-        if (isTodayTask(millis)) {
+        return if (isTodayTask(millis)) {
             context.resources.getString(R.string.datetime_today_pattern)
         } else if (!isTaskThisYear(millis)) {
             context.resources.getString(R.string.datetime_year_pattern)
         } else {
             context.resources.getString(R.string.datetime_pattern)
         }
-    }
-
-    val formatter = SimpleDateFormat(pattern, Locale.getDefault())
-    return formatter.format(Date(millis)).replaceFirstChar {
-        if (it.isLowerCase()) it.titlecase(
-            Locale.getDefault()
-        ) else it.toString()
     }
 }
 

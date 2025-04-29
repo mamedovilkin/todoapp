@@ -7,6 +7,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import io.github.mamedovilkin.todoapp.data.repository.TaskReminderRepository
 import io.github.mamedovilkin.todoapp.data.repository.TaskRepository
 import io.github.mamedovilkin.todoapp.data.room.Task
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -16,12 +17,18 @@ import kotlinx.coroutines.launch
 import java.util.UUID
 import javax.inject.Inject
 
+sealed class Result {
+    data class Failure(val error: Throwable): Result()
+    data class Success(val tasks: List<Task>): Result()
+    data object Loading : Result()
+    data object NoTasks : Result()
+}
+
 @Immutable
 data class HomeUiState(
     val query: String = "",
-    val errorMessage: String? = null,
-    val tasks: List<Task> = emptyList(),
     val notDoneTasksCount: Int = 0,
+    val result: Result = Result.Loading
 )
 
 @HiltViewModel
@@ -39,20 +46,28 @@ class HomeViewModel @Inject constructor(
 
     private fun observeTasks() {
         viewModelScope.launch {
+            delay(1000)
+
             taskRepository.tasks
                 .catch { error ->
                     _uiState.update { currentState ->
-                        currentState.copy(errorMessage = error.message)
+                        currentState.copy(result = Result.Failure(error))
                     }
                 }
                 .collect { tasks ->
-                    _uiState.update { currentState ->
-                        val notDoneTasksCount = tasks.filter { !it.isDone }.size
+                    if (tasks.isEmpty()) {
+                        _uiState.update { currentState ->
+                            currentState.copy(result = Result.NoTasks)
+                        }
+                    } else {
+                        _uiState.update { currentState ->
+                            val notDoneTasksCount = tasks.filter { !it.isDone }.size
 
-                        currentState.copy(
-                            tasks = tasks,
-                            notDoneTasksCount = notDoneTasksCount
-                        )
+                            currentState.copy(
+                                result = Result.Success(tasks = tasks),
+                                notDoneTasksCount = notDoneTasksCount
+                            )
+                        }
                     }
                 }
         }
@@ -114,13 +129,15 @@ class HomeViewModel @Inject constructor(
             taskRepository.searchForTasks("%${query.trim()}%")
                 .catch { error ->
                     _uiState.update { currentState ->
-                        currentState.copy(errorMessage = error.message)
+                        currentState.copy(
+                            result = Result.Failure(error = error)
+                        )
                     }
                 }
                 .collect { tasks ->
                     _uiState.update { currentState ->
                         currentState.copy(
-                            tasks = tasks
+                            result = Result.Success(tasks = tasks)
                         )
                     }
                 }

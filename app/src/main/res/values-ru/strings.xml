@@ -18,8 +18,6 @@
     <string name="select_time">Выбрать время</string>
     <string name="clock">Часы</string>
     <string name="ok">ОК</string>
-    <string name="notification_permission_granted">Разрешение на уведомление предоставлено</string>
-    <string name="notification_permission_denied">Разрешение на уведомление отклонено</string>
     <string name="date_pattern">dd.MM.yyyy</string>
     <string name="datetime_pattern">EEE, d MMMM \'в\' hh:mm a</string>
     <string name="datetime_today_pattern">\'Сегодня в\' hh:mm a</string>

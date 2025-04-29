@@ -97,11 +97,11 @@ fun HomeScreen(
         },
         modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->
-        when {
-            uiState.errorMessage != null -> {
-                ErrorScreen(message = uiState.errorMessage.toString())
+        when (val result = uiState.result) {
+            is Result.Failure -> {
+                ErrorScreen(message = result.error.message.toString())
             }
-            uiState.tasks.isNotEmpty() || uiState.query.isNotEmpty() -> {
+            is Result.Success -> {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.BottomCenter
@@ -109,7 +109,7 @@ fun HomeScreen(
                     TaskList(
                         innerPadding = innerPadding,
                         lazyListState = lazyListState,
-                        tasks = uiState.tasks,
+                        tasks = result.tasks,
                         count = uiState.notDoneTasksCount,
                         query = uiState.query,
                         onEdit = {
@@ -124,13 +124,13 @@ fun HomeScreen(
                             viewModel.deleteTask(it)
 
                             coroutineScope.launch {
-                                val result = snackbarHostState.showSnackbar(
+                                val snackBar = snackbarHostState.showSnackbar(
                                     message = context.getString(R.string.task_deleted),
                                     actionLabel = context.getString(R.string.undo),
                                     duration = SnackbarDuration.Short
                                 )
 
-                                when (result) {
+                                when (snackBar) {
                                     SnackbarResult.ActionPerformed -> {
                                         viewModel.newTask(it)
                                     }
@@ -165,8 +165,11 @@ fun HomeScreen(
                     }
                 }
             }
-            else -> {
+            is Result.NoTasks -> {
                 NoTasksScreen()
+            }
+            else -> {
+                LoadingScreen()
             }
         }
 

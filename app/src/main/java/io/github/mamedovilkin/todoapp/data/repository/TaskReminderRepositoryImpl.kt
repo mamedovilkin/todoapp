@@ -1,47 +1,37 @@
 package io.github.mamedovilkin.todoapp.data.repository
 
-import android.annotation.SuppressLint
+import android.Manifest
+import android.app.AlarmManager
+import android.app.PendingIntent
 import android.content.Context
-import androidx.work.Data
-import androidx.work.ExistingWorkPolicy
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
+import android.content.Intent
+import androidx.annotation.RequiresPermission
+import io.github.mamedovilkin.todoapp.receiver.TaskReminderReceiver
 import io.github.mamedovilkin.todoapp.data.room.Task
-import io.github.mamedovilkin.todoapp.util.WORK_MANAGER_INPUT_DATA_KEY
-import io.github.mamedovilkin.todoapp.worker.TaskReminderWorker
-import java.util.concurrent.TimeUnit
+import io.github.mamedovilkin.todoapp.util.TITLE_KEY
 import javax.inject.Inject
 
 class TaskReminderRepositoryImpl @Inject constructor(
     private val context: Context
 ) : TaskReminderRepository {
 
-    @SuppressLint("RestrictedApi")
+    private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val intent = Intent(context, TaskReminderReceiver::class.java)
+
+    @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     override fun scheduleReminder(task: Task) {
-        val duration = task.datetime - System.currentTimeMillis()
+        intent.putExtra(TITLE_KEY, task.title)
 
-        if (duration <= 0) {
-            return
-        }
+        val requestCode = task.id.hashCode()
+        val pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE)
 
-        val inputData = Data.Builder()
-            .putString(WORK_MANAGER_INPUT_DATA_KEY, task.title)
-            .build()
-
-        val request = OneTimeWorkRequestBuilder<TaskReminderWorker>()
-            .addTag("TASK_REMINDER_${task.id}")
-            .setInitialDelay(duration, TimeUnit.MILLISECONDS)
-            .setInputData(inputData)
-            .build()
-
-        WorkManager.getInstance(context).enqueueUniqueWork(
-            "TASK_REMINDER_${task.id}",
-            ExistingWorkPolicy.REPLACE,
-            request
-        )
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.datetime, pendingIntent)
     }
 
     override fun cancelReminder(task: Task) {
-        WorkManager.getInstance(context).cancelUniqueWork("TASK_REMINDER_${task.id}")
+        val requestCode = task.id.hashCode()
+        val pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE)
+
+        alarmManager.cancel(pendingIntent)
     }
 }

@@ -18,8 +18,6 @@
     <string name="select_time">Select time</string>
     <string name="clock">Clock</string>
     <string name="ok">OK</string>
-    <string name="notification_permission_granted">Notification permission granted</string>
-    <string name="notification_permission_denied">Notification permission denied</string>
     <string name="date_pattern">MM.dd.yyyy</string>
     <string name="datetime_pattern">EEE, MMM d \'at\' hh:mm a</string>
     <string name="datetime_today_pattern">\'Today at\' hh:mm a</string>

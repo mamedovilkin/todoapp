@@ -4,6 +4,7 @@ import io.github.mamedovilkin.todoapp.data.repository.TaskReminderRepository
 import io.github.mamedovilkin.todoapp.data.repository.TaskRepository
 import io.github.mamedovilkin.todoapp.data.room.Task
 import io.github.mamedovilkin.todoapp.ui.screens.HomeViewModel
+import io.github.mamedovilkin.todoapp.ui.screens.Result
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ class HomeViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
 
     @Before
-    fun setup() {
+    fun setUp() {
         Dispatchers.setMain(testDispatcher)
     }
 
@@ -45,7 +46,7 @@ class HomeViewModelTest {
 
         advanceUntilIdle()
 
-        val allTasks = homeViewModel.uiState.value.tasks
+        val allTasks = (homeViewModel.uiState.value.result as Result.Success).tasks
 
         assertEquals("Clean my room up", allTasks[0].title)
     }
@@ -56,14 +57,14 @@ class HomeViewModelTest {
         val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
         val homeViewModel = HomeViewModel(taskRepository, taskReminderRepository)
 
-        homeViewModel.newTask(Task(title = "Clean my room up"))
-        homeViewModel.deleteTask(Task(title = "Clean my room up"))
+        val task = Task(id = "0", title = "Clean my room up")
+
+        homeViewModel.newTask(task)
+        homeViewModel.deleteTask(task)
 
         advanceUntilIdle()
 
-        val allTasks = homeViewModel.uiState.value.tasks
-
-        assertTrue(allTasks.isEmpty())
+        assertTrue(homeViewModel.uiState.value.result is Result.NoTasks)
     }
 
     @Test
@@ -77,7 +78,7 @@ class HomeViewModelTest {
 
         advanceUntilIdle()
 
-        val allTasks = homeViewModel.uiState.value.tasks
+        val allTasks = (homeViewModel.uiState.value.result as Result.Success).tasks
 
         assertTrue(allTasks.first().isDone)
     }
@@ -93,7 +94,7 @@ class HomeViewModelTest {
 
         advanceUntilIdle()
 
-        val allTasks = homeViewModel.uiState.value.tasks
+        val allTasks = (homeViewModel.uiState.value.result as Result.Success).tasks
 
         assertEquals("Walk my dog", allTasks[0].title)
     }
@@ -125,9 +126,9 @@ class HomeViewModelTest {
 
         advanceUntilIdle()
 
-        val tasks = homeViewModel.uiState.value.tasks
+        val allTasks = (homeViewModel.uiState.value.result as Result.Success).tasks
 
-        assertEquals(1, tasks.size)
-        assertEquals("Do homework", tasks.first().title)
+        assertEquals(1, allTasks.size)
+        assertEquals("Do homework", allTasks.first().title)
     }
 }
