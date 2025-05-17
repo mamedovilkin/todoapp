@@ -28,6 +28,7 @@
     <string name="notification_channel">Напоминание о задаче</string>
     <string name="task_deleted">Задача удалена</string>
     <string name="undo">Отменить</string>
+    <string name="clear">Очистить</string>
     <plurals name="you_have_tasks_to_do">
         <item quantity="one">У Вас есть %d задача!</item>
         <item quantity="few">У Вас есть %d задачи!</item>

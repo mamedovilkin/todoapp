@@ -2,6 +2,10 @@ package io.github.mamedovilkin.todoapp.ui.common
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -29,6 +33,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
@@ -355,7 +360,8 @@ private fun StatisticsCardDonePreview() {
 @Composable
 fun StickySearchBar(
     query: String,
-    onSearch: (String) -> Unit
+    onSearch: (String) -> Unit,
+    onClear: () -> Unit,
 ) {
     TextField(
         value = query,
@@ -370,6 +376,23 @@ fun StickySearchBar(
                 imageVector = Icons.Filled.Search,
                 contentDescription = stringResource(R.string.search)
             )
+        },
+        trailingIcon = {
+            AnimatedVisibility(
+                query.isNotEmpty(),
+                enter = slideInHorizontally { (it) / 3 } + fadeIn(),
+                exit = slideOutHorizontally { (it) / 3 } + fadeOut(),
+            ) {
+                IconButton(
+                    onClick = onClear,
+                    modifier = Modifier.testTag("Clear")
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Close,
+                        contentDescription = stringResource(R.string.clear)
+                    )
+                }
+            }
         },
         colors = TextFieldDefaults.colors(
             focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
@@ -394,7 +417,8 @@ private fun StickySearchBarPreview() {
     ToDoAppTheme {
         StickySearchBar(
             query = "",
-            onSearch = {}
+            onSearch = {},
+            onClear = {}
         )
     }
 }
@@ -407,6 +431,7 @@ fun TaskList(
     count: Int,
     query: String,
     onSearch: (String) -> Unit,
+    onClear: () -> Unit,
     onEdit: (Task) -> Unit,
     onToggle: (Task) -> Unit,
     onDelete: (Task) -> Unit,
@@ -432,7 +457,8 @@ fun TaskList(
             ) {
                 StickySearchBar(
                     query = query,
-                    onSearch = onSearch
+                    onSearch = onSearch,
+                    onClear = onClear,
                 )
             }
         }
@@ -740,6 +766,7 @@ fun DateTimePickerTextFields(
                 .testTag("Date"),
             label = { Text(stringResource(R.string.select_date)) },
             readOnly = true,
+            singleLine = true,
             leadingIcon = {
                 Icon(
                     Icons.Default.DateRange,
@@ -757,6 +784,7 @@ fun DateTimePickerTextFields(
                 .testTag("Time"),
             label = { Text(stringResource(R.string.select_time)) },
             readOnly = true,
+            singleLine = true,
             leadingIcon = {
                 Icon(
                     Icons.Filled.AccessTime,

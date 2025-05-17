@@ -1,10 +1,11 @@
 package io.github.mamedovilkin.todoapp
 
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.mamedovilkin.todoapp.data.repository.TaskReminderRepository
 import io.github.mamedovilkin.todoapp.data.repository.TaskRepository
 import io.github.mamedovilkin.todoapp.data.room.Task
-import io.github.mamedovilkin.todoapp.ui.screens.HomeViewModel
-import io.github.mamedovilkin.todoapp.ui.screens.Result
+import io.github.mamedovilkin.todoapp.ui.screen.home.HomeViewModel
+import io.github.mamedovilkin.todoapp.ui.screen.home.Result
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.Dispatchers
@@ -18,10 +19,9 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class HomeViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()

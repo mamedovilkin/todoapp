@@ -1,9 +1,17 @@
+/*
+    IMPORTANT TO KNOW:
+    TO RUN TESTS IN THIS FILE CORRECTLY YOU NEED TO COMMENT PART OF CODE
+    IN ToDoAppActivity.kt FILE FROM LINE 29 TO LINE 41
+    ALSO RUN EACH FUNCTION SEPARATELY
+    AND DON'T FORGET UNCOMMENT THAT CODE AFTER ALL TESTS WILL FINISH.
+*/
 package io.github.mamedovilkin.todoapp
 
 import androidx.compose.ui.test.assertIsDisplayed
 import androidx.compose.ui.test.assertIsNotDisplayed
 import androidx.compose.ui.test.assertIsOn
-import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.isDisplayed
+import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
@@ -13,33 +21,22 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
-import org.junit.Before
+import io.github.mamedovilkin.todoapp.ui.ToDoAppActivity
 import org.junit.Rule
 import org.junit.Test
-import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 
-@RunWith(JUnit4::class)
 class ToDoAppTest {
 
     @get:Rule
-    val composeTestRule = createComposeRule()
-
-    @Before
-    fun setUp() {
-        composeTestRule.setContent {
-            ToDoAppTheme {
-                ToDoApp()
-            }
-        }
-    }
+    val composeTestRule = createAndroidComposeRule<ToDoAppActivity>()
 
     @Test
     fun homeScreen_noTasksYetTextDisplayed() {
-        composeTestRule
-            .onNodeWithText("No tasks yet")
-            .assertIsDisplayed()
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithText("No tasks yet")
+                .isDisplayed()
+        }
     }
 
     @Test
@@ -219,6 +216,10 @@ class ToDoAppTest {
 
         composeTestRule
             .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Toggle")
             .performClick()
 
         composeTestRule
@@ -444,6 +445,88 @@ class ToDoAppTest {
     }
 
     @Test
+    fun homeScreen_stickySearchBarClearButtonIsDisplayed() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Task")
+
+        composeTestRule
+            .onNodeWithTag("Date")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("OK")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Time")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("OK")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Search")
+            .performTextInput("Test")
+
+        composeTestRule
+            .onNodeWithTag("Clear")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun homeScreen_stickySearchBarClearButtonClickedQueryIsEmpty() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Task")
+
+        composeTestRule
+            .onNodeWithTag("Date")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("OK")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Time")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("OK")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Search")
+            .performTextInput("Test")
+
+        composeTestRule
+            .onNodeWithTag("Clear")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Test")
+            .assertIsNotDisplayed()
+    }
+
+    @Test
     fun homeScreen_stickySearchBarResultDisplayed() {
         repeat(2) { i ->
             composeTestRule
@@ -515,6 +598,10 @@ class ToDoAppTest {
             .performClick()
 
         composeTestRule
+            .onNodeWithTag("Toggle")
+            .performClick()
+
+        composeTestRule
             .onNodeWithTag("Delete")
             .performClick()
 
@@ -562,11 +649,11 @@ class ToDoAppTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("Delete")
+            .onNodeWithText("Delete")
             .performClick()
 
         composeTestRule
             .onNodeWithText("Walk my dog")
-            .assertIsDisplayed()
+            .assertIsNotDisplayed()
     }
 }

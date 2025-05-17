@@ -16,13 +16,12 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import dagger.hilt.android.AndroidEntryPoint
-import io.github.mamedovilkin.todoapp.ui.screens.HomeScreen
+import io.github.mamedovilkin.todoapp.ui.screen.home.HomeScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
+import io.github.mamedovilkin.todoapp.util.NOTIFICATION_PERMISSION_REQUEST_CODE
 
 @AndroidEntryPoint
 class ToDoAppActivity : ComponentActivity() {
-
-    private val notificationPermissionRequestCode = 101
 
     override fun onStart() {
         super.onStart()
@@ -36,7 +35,7 @@ class ToDoAppActivity : ComponentActivity() {
                 ActivityCompat.requestPermissions(
                     this,
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
-                    notificationPermissionRequestCode
+                    NOTIFICATION_PERMISSION_REQUEST_CODE
                 )
             }
         }

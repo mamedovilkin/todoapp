@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp.ui.screens
+package io.github.mamedovilkin.todoapp.ui.screen.home
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
@@ -44,6 +44,9 @@ import io.github.mamedovilkin.todoapp.ui.common.TaskList
 import io.github.mamedovilkin.todoapp.ui.common.ToDoAppTopBar
 import io.github.mamedovilkin.todoapp.ui.common.UpFloatingActionButton
 import io.github.mamedovilkin.todoapp.ui.common.isScrollingUp
+import io.github.mamedovilkin.todoapp.ui.screen.state.ErrorScreen
+import io.github.mamedovilkin.todoapp.ui.screen.state.LoadingScreen
+import io.github.mamedovilkin.todoapp.ui.screen.state.NoTasksScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import kotlinx.coroutines.launch
 
@@ -119,6 +122,7 @@ fun HomeScreen(
                         onSearch = {
                             viewModel.searchForTasks(it)
                         },
+                        onClear = { viewModel.searchForTasks("") },
                         onToggle = { viewModel.toggleDone(it) },
                         onDelete = {
                             viewModel.deleteTask(it)

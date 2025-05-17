@@ -3,6 +3,7 @@ package io.github.mamedovilkin.todoapp
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.mamedovilkin.todoapp.data.room.Task
 import io.github.mamedovilkin.todoapp.data.room.TaskDao
 import io.github.mamedovilkin.todoapp.data.room.TaskDatabase
@@ -14,11 +15,10 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.junit.runners.JUnit4
 import java.io.IOException
 import kotlin.jvm.Throws
 
-@RunWith(JUnit4::class)
+@RunWith(AndroidJUnit4::class)
 class TaskDaoTest {
 
     private lateinit var taskDao: TaskDao

@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp.ui.screens
+package io.github.mamedovilkin.todoapp.ui.screen.state
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column

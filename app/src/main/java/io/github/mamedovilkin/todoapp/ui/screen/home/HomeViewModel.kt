@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp.ui.screens
+package io.github.mamedovilkin.todoapp.ui.screen.home
 
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
