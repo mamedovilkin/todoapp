@@ -1,5 +1,4 @@
-![ToDoApp](app/src/main/res/mipmap-xxxhdpi/ic_launcher.png)
-# ToDoApp
+<img src="app/src/main/res/mipmap-xxxhdpi/ic_launcher.png" alt="ToDoApp" width="100" /><h1>ToDoApp</h1>
 
 **ToDoApp** is a minimalist, offline-first task manager designed to help you focus on your tasks without unnecessary distractions. It's perfect for users who value simplicity, privacy, and a clean interface.
 
@@ -13,23 +12,34 @@
 
 ## Screenshots
 
-### Home
-![Home](screenshots/HomeScreenshot.png)
-
-### Search
-![Search](screenshots/SearchScreenshot.png)
-
-### Dark Theme
-![Dark Theme](screenshots/DarkThemeScreenshot.png)
-
-### Notification
-![Notification](screenshots/NotificationScreenshot.png)
-
-### New Task
-![New Task](screenshots/NewTaskScreenshot.png)
-
-### Edit Task
-![Edit Task](screenshots/EditTaskScreenshot.png)
+<table>
+  <tr>
+    <td align="center">
+      <img src="screenshots/HomeScreenshot.png" alt="Home" width="150" /><br/>
+      <strong>Home</strong>
+    </td>
+    <td align="center">
+      <img src="screenshots/SearchScreenshot.png" alt="Search" width="150" /><br/>
+      <strong>Search</strong>
+    </td>
+    <td align="center">
+      <img src="screenshots/DarkThemeScreenshot.png" alt="Dark Theme" width="150" /><br/>
+      <strong>Dark Theme</strong>
+    </td>
+     <td align="center">
+      <img src="screenshots/NotificationScreenshot.png" alt="Notification" width="150" /><br/>
+      <strong>Notification</strong>
+    </td>
+    <td align="center">
+      <img src="screenshots/NewTaskScreenshot.png" alt="New Task" width="150" /><br/>
+      <strong>New Task</strong>
+    </td>
+    <td align="center">
+      <img src="screenshots/EditTaskScreenshot.png" alt="Edit Task" width="150" /><br/>
+      <strong>Edit Task</strong>
+    </td>
+  </tr>
+</table>
 
 ## Installation
 
