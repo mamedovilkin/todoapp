@@ -21,6 +21,7 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -54,6 +55,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun HomeScreen(
     windowWidthSizeClass: WindowWidthSizeClass,
+    shouldOpenNewTaskDialog: Boolean = false,
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val context = LocalContext.current
@@ -71,6 +73,10 @@ fun HomeScreen(
         }
     }
     val snackbarHostState = remember { SnackbarHostState() }
+
+    LaunchedEffect(Unit) {
+        showNewTaskBottomSheet = shouldOpenNewTaskDialog
+    }
 
     Scaffold(
         topBar = { ToDoAppTopBar() },

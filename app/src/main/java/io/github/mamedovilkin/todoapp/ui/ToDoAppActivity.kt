@@ -47,18 +47,28 @@ class ToDoAppActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
+            val shouldOpenNewTaskDialog = intent?.getStringExtra("action") == "new_task"
 
             ToDoAppTheme {
-                ToDoApp(windowWidthSizeClass = windowSizeClass.widthSizeClass)
+                ToDoApp(
+                    windowWidthSizeClass = windowSizeClass.widthSizeClass,
+                    shouldOpenNewTaskDialog
+                )
             }
         }
     }
 }
 
 @Composable
-fun ToDoApp(windowWidthSizeClass: WindowWidthSizeClass) {
+fun ToDoApp(
+    windowWidthSizeClass: WindowWidthSizeClass,
+    shouldOpenNewTaskDialog: Boolean = false
+) {
     Surface {
-        HomeScreen(windowWidthSizeClass = windowWidthSizeClass)
+        HomeScreen(
+            windowWidthSizeClass = windowWidthSizeClass,
+            shouldOpenNewTaskDialog = shouldOpenNewTaskDialog
+        )
     }
 }
 
