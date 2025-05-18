@@ -1,7 +1,7 @@
-package io.github.mamedovilkin.todoapp.data.repository
+package io.github.mamedovilkin.todoapp.reminder
 
 import android.app.PendingIntent
-import io.github.mamedovilkin.todoapp.data.room.Task
+import io.github.mamedovilkin.database.room.Task
 
 interface TaskReminderRepository {
     fun scheduleReminder(task: Task)

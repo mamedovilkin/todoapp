@@ -1,7 +1,7 @@
-package io.github.mamedovilkin.todoapp
+package io.github.mamedovilkin.database
 
-import io.github.mamedovilkin.todoapp.data.repository.TaskRepository
-import io.github.mamedovilkin.todoapp.data.room.Task
+import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.Task
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
 import kotlinx.coroutines.flow.first

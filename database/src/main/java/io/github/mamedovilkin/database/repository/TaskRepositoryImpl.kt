@@ -1,7 +1,7 @@
-package io.github.mamedovilkin.todoapp.data.repository
+package io.github.mamedovilkin.database.repository
 
-import io.github.mamedovilkin.todoapp.data.room.Task
-import io.github.mamedovilkin.todoapp.data.room.TaskDao
+import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.database.room.TaskDao
 import kotlinx.coroutines.flow.Flow
 import javax.inject.Inject
 

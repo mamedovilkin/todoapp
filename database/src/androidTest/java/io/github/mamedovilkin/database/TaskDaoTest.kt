@@ -1,22 +1,20 @@
-package io.github.mamedovilkin.todoapp
+package io.github.mamedovilkin.database
 
 import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.github.mamedovilkin.todoapp.data.room.Task
-import io.github.mamedovilkin.todoapp.data.room.TaskDao
-import io.github.mamedovilkin.todoapp.data.room.TaskDatabase
+import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.database.room.TaskDao
+import io.github.mamedovilkin.database.room.TaskDatabase
+import junit.framework.TestCase
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
-import junit.framework.TestCase.assertEquals
-import junit.framework.TestCase.assertTrue
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import java.io.IOException
-import kotlin.jvm.Throws
 
 @RunWith(AndroidJUnit4::class)
 class TaskDaoTest {
@@ -58,7 +56,7 @@ class TaskDaoTest {
     fun daoInsert_insertsTaskIntoDatabase() = runBlocking {
         addOneTaskToDatabase()
         val allTasks = taskDao.getTasks().first()
-        assertEquals(allTasks[0], task1)
+        TestCase.assertEquals(allTasks[0], task1)
     }
 
     @Test
@@ -66,8 +64,8 @@ class TaskDaoTest {
     fun daoGetTasks_returnsAllTasksFromDatabase() = runBlocking {
         addTwoTaskToDatabase()
         val allTasks = taskDao.getTasks().first()
-        assertEquals(allTasks[0], task1)
-        assertEquals(allTasks[1], task2)
+        TestCase.assertEquals(allTasks[0], task1)
+        TestCase.assertEquals(allTasks[1], task2)
     }
 
     @Test
@@ -79,8 +77,8 @@ class TaskDaoTest {
         taskDao.update(Task("2", "Call mom"))
 
         val allTasks = taskDao.getTasks().first()
-        assertEquals(allTasks[0], Task("2", "Call mom"))
-        assertEquals(allTasks[1], Task("1", "Walk my dog", true))
+        TestCase.assertEquals(allTasks[0], Task("2", "Call mom"))
+        TestCase.assertEquals(allTasks[1], Task("1", "Walk my dog", true))
     }
 
     @Test
@@ -91,6 +89,6 @@ class TaskDaoTest {
         taskDao.delete(task2)
 
         val allTasks = taskDao.getTasks().first()
-        assertTrue(allTasks.isEmpty())
+        TestCase.assertTrue(allTasks.isEmpty())
     }
 }

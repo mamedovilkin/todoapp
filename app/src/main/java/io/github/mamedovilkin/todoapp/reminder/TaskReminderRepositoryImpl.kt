@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp.data.repository
+package io.github.mamedovilkin.todoapp.reminder
 
 import android.Manifest
 import android.app.AlarmManager
@@ -6,8 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.RequiresPermission
-import io.github.mamedovilkin.todoapp.receiver.TaskReminderReceiver
-import io.github.mamedovilkin.todoapp.data.room.Task
+import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.util.FIVE_MINUTES_IN_MILLISECONDS
 import io.github.mamedovilkin.todoapp.util.TEN_MINUTES_IN_MILLISECONDS
 import io.github.mamedovilkin.todoapp.util.TITLE_KEY

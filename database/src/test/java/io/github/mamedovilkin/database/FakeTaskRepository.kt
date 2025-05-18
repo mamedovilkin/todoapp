@@ -1,7 +1,7 @@
-package io.github.mamedovilkin.todoapp
+package io.github.mamedovilkin.database
 
-import io.github.mamedovilkin.todoapp.data.repository.TaskRepository
-import io.github.mamedovilkin.todoapp.data.room.Task
+import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.Task
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 

@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp.data.room
+package io.github.mamedovilkin.database.room
 
 import androidx.room.Entity
 import androidx.room.PrimaryKey

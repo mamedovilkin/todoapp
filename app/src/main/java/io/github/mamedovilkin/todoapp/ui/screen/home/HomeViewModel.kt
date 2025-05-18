@@ -4,9 +4,9 @@ import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import io.github.mamedovilkin.todoapp.data.repository.TaskReminderRepository
-import io.github.mamedovilkin.todoapp.data.repository.TaskRepository
-import io.github.mamedovilkin.todoapp.data.room.Task
+import io.github.mamedovilkin.todoapp.reminder.TaskReminderRepository
+import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.Task
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

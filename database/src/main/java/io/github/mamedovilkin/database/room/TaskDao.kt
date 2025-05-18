@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp.data.room
+package io.github.mamedovilkin.database.room
 
 import androidx.room.Dao
 import androidx.room.Delete

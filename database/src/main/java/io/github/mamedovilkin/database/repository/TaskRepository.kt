@@ -1,6 +1,6 @@
-package io.github.mamedovilkin.todoapp.data.repository
+package io.github.mamedovilkin.database.repository
 
-import io.github.mamedovilkin.todoapp.data.room.Task
+import io.github.mamedovilkin.database.room.Task
 import kotlinx.coroutines.flow.Flow
 
 interface TaskRepository {

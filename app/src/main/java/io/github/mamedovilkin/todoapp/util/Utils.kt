@@ -3,7 +3,7 @@ package io.github.mamedovilkin.todoapp.util
 import android.content.Context
 import android.text.format.DateFormat
 import io.github.mamedovilkin.todoapp.R
-import io.github.mamedovilkin.todoapp.data.room.Task
+import io.github.mamedovilkin.database.room.Task
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date

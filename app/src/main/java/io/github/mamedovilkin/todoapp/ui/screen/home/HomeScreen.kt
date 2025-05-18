@@ -36,7 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.mamedovilkin.todoapp.R
-import io.github.mamedovilkin.todoapp.data.room.Task
+import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.ui.common.EditTaskBottomSheet
 import io.github.mamedovilkin.todoapp.ui.common.NewTaskBottomSheet
 import io.github.mamedovilkin.todoapp.ui.common.NewTaskFloatingActionButton
