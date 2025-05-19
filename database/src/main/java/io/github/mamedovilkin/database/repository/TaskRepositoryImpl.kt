@@ -3,9 +3,8 @@ package io.github.mamedovilkin.database.repository
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.TaskDao
 import kotlinx.coroutines.flow.Flow
-import javax.inject.Inject
 
-class TaskRepositoryImpl @Inject constructor(
+class TaskRepositoryImpl(
     private val taskDao: TaskDao
 ) : TaskRepository {
     override suspend fun insert(task: Task) = taskDao.insert(task)

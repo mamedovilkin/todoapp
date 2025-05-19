@@ -15,12 +15,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import dagger.hilt.android.AndroidEntryPoint
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_PERMISSION_REQUEST_CODE
 
-@AndroidEntryPoint
 class ToDoAppActivity : ComponentActivity() {
 
     override fun onStart() {

@@ -1,7 +1,7 @@
 package io.github.mamedovilkin.todoapp
 
 import android.app.PendingIntent
-import io.github.mamedovilkin.todoapp.reminder.TaskReminderRepository
+import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.database.room.Task
 
 class FakeTaskReminderRepository : TaskReminderRepository {

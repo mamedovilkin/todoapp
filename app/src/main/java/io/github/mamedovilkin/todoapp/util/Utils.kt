@@ -14,6 +14,12 @@ fun convertMillisToDate(millis: Long, context: Context): String {
     return formatter.format(Date(millis))
 }
 
+fun convertMillisToTime(millis: Long, context: Context): String {
+    val pattern = if (DateFormat.is24HourFormat(context)) "HH:mm" else "hh:mm a"
+    val formatter = SimpleDateFormat(pattern, Locale.getDefault())
+    return formatter.format(Date(millis))
+}
+
 fun convertToTime(hour: Int, minute: Int, context: Context): String {
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.HOUR_OF_DAY, hour)

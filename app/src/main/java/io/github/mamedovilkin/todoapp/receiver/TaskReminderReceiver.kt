@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp.reminder
+package io.github.mamedovilkin.todoapp.receiver
 
 import android.Manifest
 import android.app.NotificationChannel

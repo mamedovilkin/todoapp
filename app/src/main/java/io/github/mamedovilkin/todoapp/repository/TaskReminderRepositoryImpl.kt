@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp.reminder
+package io.github.mamedovilkin.todoapp.repository
 
 import android.Manifest
 import android.app.AlarmManager
@@ -7,12 +7,12 @@ import android.content.Context
 import android.content.Intent
 import androidx.annotation.RequiresPermission
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.todoapp.receiver.TaskReminderReceiver
 import io.github.mamedovilkin.todoapp.util.FIVE_MINUTES_IN_MILLISECONDS
 import io.github.mamedovilkin.todoapp.util.TEN_MINUTES_IN_MILLISECONDS
 import io.github.mamedovilkin.todoapp.util.TITLE_KEY
-import javax.inject.Inject
 
-class TaskReminderRepositoryImpl @Inject constructor(
+class TaskReminderRepositoryImpl(
     private val context: Context
 ) : TaskReminderRepository {
 
@@ -21,13 +21,15 @@ class TaskReminderRepositoryImpl @Inject constructor(
 
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     override fun scheduleReminder(task: Task) {
-        intent.putExtra(TITLE_KEY, task.title)
+        if (task.datetime > System.currentTimeMillis()) {
+            intent.putExtra(TITLE_KEY, task.title)
 
-        val pendingIntents = getPendingIntents(task)
+            val pendingIntents = getPendingIntents(task)
 
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.datetime, pendingIntents[0])
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.datetime + FIVE_MINUTES_IN_MILLISECONDS, pendingIntents[1])
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.datetime + TEN_MINUTES_IN_MILLISECONDS, pendingIntents[2])
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.datetime, pendingIntents[0])
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.datetime + FIVE_MINUTES_IN_MILLISECONDS, pendingIntents[1])
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.datetime + TEN_MINUTES_IN_MILLISECONDS, pendingIntents[2])
+        }
     }
 
     override fun cancelReminder(task: Task) {

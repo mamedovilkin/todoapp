@@ -1,7 +1,7 @@
 package io.github.mamedovilkin.todoapp
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.github.mamedovilkin.todoapp.reminder.TaskReminderRepository
+import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeViewModel

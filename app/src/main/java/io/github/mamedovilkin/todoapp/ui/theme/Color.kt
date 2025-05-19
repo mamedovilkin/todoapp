@@ -1,6 +1,7 @@
 package io.github.mamedovilkin.todoapp.ui.theme
 
 import androidx.compose.ui.graphics.Color
+import androidx.glance.color.ColorProvider
 
 val md_theme_light_primary = Color(0xFFFF5449)
 val md_theme_light_onPrimary = Color(0xFFFFFFFF)
@@ -47,3 +48,8 @@ val md_theme_dark_outline = Color(0xFFA08C89)
 val md_theme_dark_inverseOnSurface = Color(0xFF201A19)
 val md_theme_dark_inverseSurface = Color(0xFFEDE0DD)
 val md_theme_dark_inversePrimary = Color(0xFFFF5449)
+
+val textColor = ColorProvider(
+    day = Color.Black,
+    night = Color.White
+)

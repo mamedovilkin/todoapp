@@ -35,7 +35,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.ui.common.EditTaskBottomSheet
@@ -50,13 +49,14 @@ import io.github.mamedovilkin.todoapp.ui.screen.state.LoadingScreen
 import io.github.mamedovilkin.todoapp.ui.screen.state.NoTasksScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     windowWidthSizeClass: WindowWidthSizeClass,
     shouldOpenNewTaskDialog: Boolean = false,
-    viewModel: HomeViewModel = hiltViewModel()
+    viewModel: HomeViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val lazyListState = rememberLazyListState()

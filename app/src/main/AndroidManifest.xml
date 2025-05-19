@@ -17,10 +17,24 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ToDoApp"
         tools:targetApi="31">
+
         <receiver
-            android:name=".reminder.TaskReminderReceiver"
+            android:name=".receiver.TaskReminderReceiver"
             android:exported="true"
             android:permission="io.github.mamedovilkin.todoapp.TASK_REMINDER" />
+
+        <receiver
+            android:name=".receiver.ToDoAppWidgetReceiver"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/todoapp_widget_info"/>
+        </receiver>
+
         <activity
             android:name=".ui.ToDoAppActivity"
             android:exported="true"
