@@ -52,9 +52,11 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
             GlanceTheme {
                 Content(
                     tasks = filteredTasks,
-                    onToggle = { task ->
+                    onToggle = {
                         coroutineScope.launch {
-                            taskRepository.update(task.copy(isDone = !task.isDone))
+                            val task = it.copy(isDone = !it.isDone)
+
+                            taskRepository.update(task)
 
                             if (task.isDone) {
                                 taskReminderRepository.cancelReminder(task)
