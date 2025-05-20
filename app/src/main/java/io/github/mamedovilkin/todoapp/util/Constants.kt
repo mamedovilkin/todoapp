@@ -7,3 +7,5 @@ const val TITLE_KEY = "TITLE"
 const val NOTIFICATION_PERMISSION_REQUEST_CODE = 101
 const val FIVE_MINUTES_IN_MILLISECONDS = 300_000
 const val TEN_MINUTES_IN_MILLISECONDS = 600_000
+const val APP_LINK = "http://rustore.ru/catalog/app/io.github.mamedovilkin.todoapp"
+const val FEEDBACK_EMAIL = "ilkinmamedov0208@gmail.com"

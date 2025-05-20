@@ -32,6 +32,9 @@
     <string name="todoapp_widget_description">Управляйте сегодняшними незавершенными задачами</string>
     <string name="there_are_no_tasks_for_today">Нет задач на сегодня</string>
     <string name="refresh">Обновить</string>
+    <string name="menu">Меню</string>
+    <string name="feedback">Обратная связь</string>
+    <string name="rate_us">Оцените нас</string>
     <plurals name="you_have_tasks_to_do">
         <item quantity="one">У Вас есть %d задача!</item>
         <item quantity="few">У Вас есть %d задачи!</item>

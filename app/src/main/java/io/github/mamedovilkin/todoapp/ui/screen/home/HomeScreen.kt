@@ -19,6 +19,7 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -55,6 +56,7 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun HomeScreen(
     windowWidthSizeClass: WindowWidthSizeClass,
+    windowHeightSizeClass: WindowHeightSizeClass,
     shouldOpenNewTaskDialog: Boolean = false,
     viewModel: HomeViewModel = koinViewModel()
 ) {
@@ -79,7 +81,9 @@ fun HomeScreen(
     }
 
     Scaffold(
-        topBar = { ToDoAppTopBar() },
+        topBar = {
+            ToDoAppTopBar()
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) { snackbarData ->
             val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = {
                 if (it == SwipeToDismissBoxValue.EndToStart || it == SwipeToDismissBoxValue.StartToEnd) {
@@ -193,7 +197,7 @@ fun HomeScreen(
                 onCancel = {
                     showNewTaskBottomSheet = false
                 },
-                windowWidthSizeClass = windowWidthSizeClass
+                windowHeightSizeClass = windowHeightSizeClass
             )
         }
 
@@ -209,7 +213,7 @@ fun HomeScreen(
                 onCancel = {
                     showEditTaskBottomSheet = false
                 },
-                windowWidthSizeClass = windowWidthSizeClass
+                windowHeightSizeClass = windowHeightSizeClass
             )
         }
     }
@@ -219,6 +223,9 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenPreview() {
     ToDoAppTheme {
-        HomeScreen(windowWidthSizeClass = WindowWidthSizeClass.Compact)
+        HomeScreen(
+            windowWidthSizeClass = WindowWidthSizeClass.Compact,
+            windowHeightSizeClass = WindowHeightSizeClass.Expanded
+        )
     }
 }

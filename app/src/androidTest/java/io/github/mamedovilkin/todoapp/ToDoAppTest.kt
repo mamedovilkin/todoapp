@@ -1,7 +1,12 @@
 /*
     IMPORTANT TO KNOW:
-    TO RUN TESTS IN THIS FILE CORRECTLY YOU NEED TO COMMENT PART OF CODE
-    IN ToDoAppActivity.kt FILE FROM LINE 27 TO LINE 39
+    TO RUN TESTS IN THIS FILE CORRECTLY YOU NEED TO COMMENT THAT OF CODE
+    IN ToDoAppActivity.kt FILE
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ...
+    }
+
     ALSO RUN EACH FUNCTION SEPARATELY
     AND DON'T FORGET UNCOMMENT THAT CODE AFTER ALL TESTS WILL FINISH.
 */
@@ -29,6 +34,27 @@ class ToDoAppTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ToDoAppActivity>()
+
+    @Test
+    fun homeScreen_menuButtonClickedMenuDisplayed() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithTag("Menu")
+                .isDisplayed()
+        }
+
+        composeTestRule
+            .onNodeWithTag("Menu")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Feedback")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Rate us")
+            .assertIsDisplayed()
+    }
 
     @Test
     fun homeScreen_noTasksYetTextDisplayed() {

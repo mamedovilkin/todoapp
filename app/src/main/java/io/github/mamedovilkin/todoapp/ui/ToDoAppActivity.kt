@@ -9,6 +9,7 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
@@ -50,6 +51,7 @@ class ToDoAppActivity : ComponentActivity() {
             ToDoAppTheme {
                 ToDoApp(
                     windowWidthSizeClass = windowSizeClass.widthSizeClass,
+                    windowHeightSizeClass = windowSizeClass.heightSizeClass,
                     shouldOpenNewTaskDialog
                 )
             }
@@ -60,11 +62,13 @@ class ToDoAppActivity : ComponentActivity() {
 @Composable
 fun ToDoApp(
     windowWidthSizeClass: WindowWidthSizeClass,
+    windowHeightSizeClass: WindowHeightSizeClass,
     shouldOpenNewTaskDialog: Boolean = false
 ) {
     Surface {
         HomeScreen(
             windowWidthSizeClass = windowWidthSizeClass,
+            windowHeightSizeClass = windowHeightSizeClass,
             shouldOpenNewTaskDialog = shouldOpenNewTaskDialog
         )
     }
@@ -74,6 +78,9 @@ fun ToDoApp(
 @Composable
 fun GreetingPreview() {
     ToDoAppTheme {
-        ToDoApp(windowWidthSizeClass = WindowWidthSizeClass.Compact)
+        ToDoApp(
+            windowWidthSizeClass = WindowWidthSizeClass.Compact,
+            windowHeightSizeClass = WindowHeightSizeClass.Expanded
+        )
     }
 }

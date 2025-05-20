@@ -1,5 +1,6 @@
 package io.github.mamedovilkin.todoapp.ui.common
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.fadeIn
@@ -7,12 +8,14 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -36,17 +39,21 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Title
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
+import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
@@ -63,11 +70,13 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
+import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
-import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
@@ -76,6 +85,7 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -95,34 +105,78 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
+import io.github.mamedovilkin.todoapp.util.APP_LINK
 import io.github.mamedovilkin.todoapp.util.convertMillisToDate
 import io.github.mamedovilkin.todoapp.util.convertMillisToDatetime
 import io.github.mamedovilkin.todoapp.util.convertToTime
 import io.github.mamedovilkin.todoapp.util.isExpired
 import java.util.Calendar
+import androidx.core.net.toUri
+import io.github.mamedovilkin.todoapp.util.FEEDBACK_EMAIL
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ToDoAppTopBar(modifier: Modifier = Modifier) {
-    CenterAlignedTopAppBar(
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    val context = LocalContext.current
+
+    TopAppBar(
         title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically
-            ) {
+            Box(modifier = Modifier.fillMaxWidth()) {
                 Icon(
                     painter = painterResource(R.drawable.ic_launcher_foreground),
                     contentDescription = stringResource(R.string.app_name),
-                    tint = MaterialTheme.colorScheme.background
+                    tint = MaterialTheme.colorScheme.background,
+                    modifier = Modifier
+                        .align(Alignment.Center)
+                        .padding(end = 16.dp)
                 )
+                IconButton(
+                    onClick = { expanded = true },
+                    modifier = Modifier
+                        .align(Alignment.CenterEnd)
+                        .testTag("Menu")
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.MoreVert,
+                        contentDescription = stringResource(R.string.menu),
+                        tint = MaterialTheme.colorScheme.background,
+                    )
+                    DropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false },
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.feedback)) },
+                            onClick = {
+                                val subject = context.getString(R.string.app_name)
+                                val intent = Intent(Intent.ACTION_SENDTO).apply {
+                                    data = "mailto:$FEEDBACK_EMAIL?subject=$subject".toUri()
+                                }
+
+                                context.startActivity(intent)
+                                expanded = false
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.rate_us)) },
+                            onClick = {
+                                val intent = Intent(Intent.ACTION_VIEW, APP_LINK.toUri())
+                                context.startActivity(intent)
+                                expanded = false
+                            }
+                        )
+                    }
+                }
             }
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
-            titleContentColor = Color.White
         ),
         modifier = modifier
     )
@@ -498,7 +552,7 @@ fun NewTaskBottomSheet(
     sheetState: SheetState,
     onSave: (Task) -> Unit,
     onCancel: () -> Unit,
-    windowWidthSizeClass: WindowWidthSizeClass
+    windowHeightSizeClass: WindowHeightSizeClass
 ) {
     var title by remember { mutableStateOf("") }
     var date by remember { mutableLongStateOf(Calendar.getInstance().timeInMillis) }
@@ -544,7 +598,7 @@ fun NewTaskBottomSheet(
                     hour = it1
                     minute = it2
                 },
-                windowWidthSizeClass = windowWidthSizeClass
+                windowHeightSizeClass = windowHeightSizeClass
             )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -582,7 +636,7 @@ fun EditTaskBottomSheet(
     onSave: (Task) -> Unit,
     onDelete: (Task) -> Unit,
     onCancel: () -> Unit,
-    windowWidthSizeClass: WindowWidthSizeClass
+    windowHeightSizeClass: WindowHeightSizeClass
 ) {
     var title by remember { mutableStateOf(task.title) }
     val calendar = Calendar.getInstance()
@@ -631,7 +685,7 @@ fun EditTaskBottomSheet(
                     hour = it1
                     minute = it2
                 },
-                windowWidthSizeClass = windowWidthSizeClass
+                windowHeightSizeClass = windowHeightSizeClass
             )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -672,14 +726,14 @@ fun DateTimePickerTextFields(
     minute: Int,
     onDateSelected: (Long) -> Unit,
     onTimeSelected: (Int, Int) -> Unit,
-    windowWidthSizeClass: WindowWidthSizeClass
+    windowHeightSizeClass: WindowHeightSizeClass
 ) {
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = date,
-        initialDisplayMode = if (windowWidthSizeClass == WindowWidthSizeClass.Compact) {
-            DisplayMode.Picker
-        } else {
+        initialDisplayMode = if (windowHeightSizeClass == WindowHeightSizeClass.Compact) {
             DisplayMode.Input
+        } else {
+            DisplayMode.Picker
         }
     )
     val timePickerState = rememberTimePickerState(
@@ -688,6 +742,7 @@ fun DateTimePickerTextFields(
     )
     var showDatePicker by remember { mutableStateOf(false) }
     var showTimePicker by remember { mutableStateOf(false) }
+    var showTimeInput by remember { mutableStateOf(false) }
     val datePickerInteractionSource = remember { MutableInteractionSource() }
     val timePickerInteractionSource = remember { MutableInteractionSource() }
 
@@ -710,6 +765,11 @@ fun DateTimePickerTextFields(
     if (showDatePicker) {
         DatePickerDialog(
             onDismissRequest = { showDatePicker = false },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text(stringResource(R.string.cancel))
+                }
+            },
             confirmButton = {
                 TextButton(onClick = {
                     onDateSelected(datePickerState.selectedDateMillis ?: 0)
@@ -718,20 +778,47 @@ fun DateTimePickerTextFields(
                     Text(stringResource(R.string.ok))
                 }
             },
-            dismissButton = {
-                TextButton(onClick = { showDatePicker = false }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            }
+            colors = DatePickerDefaults.colors(
+                containerColor = MaterialTheme.colorScheme.surfaceVariant,
+            )
         ) {
-            DatePicker(state = datePickerState)
+            DatePicker(
+                state = datePickerState,
+                showModeToggle = windowHeightSizeClass != WindowHeightSizeClass.Compact,
+                title = {
+                    Text(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                        text = stringResource(R.string.select_date),
+                        style = MaterialTheme.typography.labelMedium
+                    )
+                },
+                colors = DatePickerDefaults.colors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    selectedDayContainerColor = MaterialTheme.colorScheme.primary,
+                    selectedDayContentColor = MaterialTheme.colorScheme.onPrimary,
+                    todayDateBorderColor = MaterialTheme.colorScheme.primary,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface,
+                    headlineContentColor = MaterialTheme.colorScheme.onSurface
+                )
+            )
         }
     }
 
     if (showTimePicker) {
-        AlertDialog(
-            title = { Text(stringResource(R.string.select_time)) },
+        TimePickerDialog(
             onDismissRequest = { showTimePicker = false },
+            switchButton = {
+                IconButton(onClick = {
+                    showTimeInput = !showTimeInput
+                }) {
+                    Icon(
+                        imageVector = if (showTimeInput) Icons.Outlined.AccessTime  else Icons.Outlined.Keyboard,
+                        contentDescription = stringResource(R.string.select_time)
+                    )
+                }
+            },
             dismissButton = {
                 TextButton(onClick = { showTimePicker = false }) {
                     Text(stringResource(R.string.cancel))
@@ -744,16 +831,14 @@ fun DateTimePickerTextFields(
                 }) {
                     Text(stringResource(R.string.ok))
                 }
-            },
-            text = {
-                TimePicker(
-                    state = timePickerState
-                )
-            },
-            properties = DialogProperties(
-                usePlatformDefaultWidth = windowWidthSizeClass == WindowWidthSizeClass.Compact
-            )
-        )
+            }
+        ) {
+            if (showTimeInput) {
+                TimeInput(state = timePickerState)
+            } else {
+                TimePicker(state = timePickerState)
+            }
+        }
     }
 
     Row(modifier = Modifier.fillMaxWidth()) {
@@ -792,5 +877,59 @@ fun DateTimePickerTextFields(
                 )
             }
         )
+    }
+}
+
+@Composable
+fun TimePickerDialog(
+    onDismissRequest: () -> Unit,
+    switchButton: @Composable (() -> Unit),
+    dismissButton: @Composable (() -> Unit)? = null,
+    confirmButton: @Composable (() -> Unit),
+    content: @Composable () -> Unit,
+) {
+    Dialog(
+        onDismissRequest = onDismissRequest,
+        properties = DialogProperties(
+            usePlatformDefaultWidth = false
+        ),
+    ) {
+        Surface(
+            shape = MaterialTheme.shapes.extraLarge,
+            tonalElevation = 6.dp,
+            modifier = Modifier
+                .width(IntrinsicSize.Min)
+                .height(IntrinsicSize.Min)
+                .background(
+                    shape = MaterialTheme.shapes.extraLarge,
+                    color = MaterialTheme.colorScheme.surfaceVariant
+                ),
+            color = MaterialTheme.colorScheme.surfaceVariant
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 20.dp),
+                    text = stringResource(R.string.select_time),
+                    style = MaterialTheme.typography.labelMedium
+                )
+                content()
+                Row(
+                    modifier = Modifier
+                        .height(40.dp)
+                        .fillMaxWidth()
+                ) {
+                    switchButton()
+                    Spacer(modifier = Modifier.weight(1f))
+                    dismissButton?.invoke()
+                    confirmButton()
+                }
+            }
+        }
     }
 }
