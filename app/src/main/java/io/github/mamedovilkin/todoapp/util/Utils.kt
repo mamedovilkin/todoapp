@@ -3,7 +3,7 @@ package io.github.mamedovilkin.todoapp.util
 import android.content.Context
 import android.text.format.DateFormat
 import io.github.mamedovilkin.todoapp.R
-import io.github.mamedovilkin.todoapp.data.room.Task
+import io.github.mamedovilkin.database.room.Task
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -11,6 +11,12 @@ import java.util.Locale
 
 fun convertMillisToDate(millis: Long, context: Context): String {
     val formatter = SimpleDateFormat(context.resources.getString(R.string.date_pattern), Locale.getDefault())
+    return formatter.format(Date(millis))
+}
+
+fun convertMillisToTime(millis: Long, context: Context): String {
+    val pattern = if (DateFormat.is24HourFormat(context)) "HH:mm" else "hh:mm a"
+    val formatter = SimpleDateFormat(pattern, Locale.getDefault())
     return formatter.format(Date(millis))
 }
 

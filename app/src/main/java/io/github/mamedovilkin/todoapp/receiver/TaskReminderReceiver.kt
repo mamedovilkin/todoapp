@@ -11,36 +11,47 @@ import android.os.Build
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
+import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.ToDoAppActivity
 import io.github.mamedovilkin.todoapp.util.CHANNEL_ID
+import io.github.mamedovilkin.todoapp.util.MARK_TASK_COMPLETED_ACTION
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_ID
 import io.github.mamedovilkin.todoapp.util.REQUEST_CODE
-import io.github.mamedovilkin.todoapp.util.TITLE_KEY
+import io.github.mamedovilkin.todoapp.util.TASK_KEY
 
 class TaskReminderReceiver : BroadcastReceiver() {
 
+    @Suppress("DEPRECATION")
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onReceive(context: Context?, intent: Intent?) {
-        if (context != null && intent != null) {
-            val title = intent.getStringExtra(TITLE_KEY).toString()
+        if (intent != null) {
+            val task = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(TASK_KEY, Task::class.java)
+            } else {
+                intent.getParcelableExtra<Task>(TASK_KEY)
+            }
 
-            createNotification(title, context)
+            if (context != null && task != null) {
+                createNotification(task, context)
+            }
         }
     }
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
-    private fun createNotification(title: String, context: Context) {
+    private fun createNotification(task: Task, context: Context) {
         createNotificationChannelIfNeeded(context)
 
         val pendingIntent: PendingIntent = createPendingIntent(context)
+        val markTaskCompletedPendingIntent: PendingIntent = createMarkCompletedPendingIntent(context, task)
 
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_task)
-            .setContentTitle(title)
+            .setContentTitle(task.title)
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVibrate(LongArray(0))
             .setContentIntent(pendingIntent)
+            .addAction(0, context.getString(R.string.mark_as_completed), markTaskCompletedPendingIntent)
             .setAutoCancel(true)
 
         NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build())
@@ -70,14 +81,25 @@ class TaskReminderReceiver : BroadcastReceiver() {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
-        var flags = PendingIntent.FLAG_UPDATE_CURRENT
-        flags = flags or PendingIntent.FLAG_IMMUTABLE
-
         return PendingIntent.getActivity(
             context,
             REQUEST_CODE,
             intent,
-            flags
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+    }
+
+    private fun createMarkCompletedPendingIntent(context: Context, task: Task): PendingIntent {
+        val intent = Intent(context, MarkTaskCompletedReceiver::class.java).apply {
+            action = MARK_TASK_COMPLETED_ACTION
+            putExtra(TASK_KEY, task)
+        }
+
+        return PendingIntent.getBroadcast(
+            context,
+            task.id.hashCode(),
+            intent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
     }
 }

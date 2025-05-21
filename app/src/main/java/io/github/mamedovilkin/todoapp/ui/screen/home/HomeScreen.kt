@@ -19,8 +19,10 @@ import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -34,9 +36,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.hilt.navigation.compose.hiltViewModel
 import io.github.mamedovilkin.todoapp.R
-import io.github.mamedovilkin.todoapp.data.room.Task
+import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.ui.common.EditTaskBottomSheet
 import io.github.mamedovilkin.todoapp.ui.common.NewTaskBottomSheet
 import io.github.mamedovilkin.todoapp.ui.common.NewTaskFloatingActionButton
@@ -49,12 +50,15 @@ import io.github.mamedovilkin.todoapp.ui.screen.state.LoadingScreen
 import io.github.mamedovilkin.todoapp.ui.screen.state.NoTasksScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import kotlinx.coroutines.launch
+import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HomeScreen(
     windowWidthSizeClass: WindowWidthSizeClass,
-    viewModel: HomeViewModel = hiltViewModel()
+    windowHeightSizeClass: WindowHeightSizeClass,
+    shouldOpenNewTaskDialog: Boolean = false,
+    viewModel: HomeViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val lazyListState = rememberLazyListState()
@@ -72,8 +76,14 @@ fun HomeScreen(
     }
     val snackbarHostState = remember { SnackbarHostState() }
 
+    LaunchedEffect(Unit) {
+        showNewTaskBottomSheet = shouldOpenNewTaskDialog
+    }
+
     Scaffold(
-        topBar = { ToDoAppTopBar() },
+        topBar = {
+            ToDoAppTopBar()
+        },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) { snackbarData ->
             val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = {
                 if (it == SwipeToDismissBoxValue.EndToStart || it == SwipeToDismissBoxValue.StartToEnd) {
@@ -187,7 +197,7 @@ fun HomeScreen(
                 onCancel = {
                     showNewTaskBottomSheet = false
                 },
-                windowWidthSizeClass = windowWidthSizeClass
+                windowHeightSizeClass = windowHeightSizeClass
             )
         }
 
@@ -203,7 +213,7 @@ fun HomeScreen(
                 onCancel = {
                     showEditTaskBottomSheet = false
                 },
-                windowWidthSizeClass = windowWidthSizeClass
+                windowHeightSizeClass = windowHeightSizeClass
             )
         }
     }
@@ -213,6 +223,9 @@ fun HomeScreen(
 @Composable
 private fun HomeScreenPreview() {
     ToDoAppTheme {
-        HomeScreen(windowWidthSizeClass = WindowWidthSizeClass.Compact)
+        HomeScreen(
+            windowWidthSizeClass = WindowWidthSizeClass.Compact,
+            windowHeightSizeClass = WindowHeightSizeClass.Expanded
+        )
     }
 }

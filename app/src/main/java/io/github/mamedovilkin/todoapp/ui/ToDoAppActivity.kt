@@ -9,18 +9,17 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.Surface
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import dagger.hilt.android.AndroidEntryPoint
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_PERMISSION_REQUEST_CODE
 
-@AndroidEntryPoint
 class ToDoAppActivity : ComponentActivity() {
 
     override fun onStart() {
@@ -47,18 +46,31 @@ class ToDoAppActivity : ComponentActivity() {
         enableEdgeToEdge()
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
+            val shouldOpenNewTaskDialog = intent?.getStringExtra("action") == "new_task"
 
             ToDoAppTheme {
-                ToDoApp(windowWidthSizeClass = windowSizeClass.widthSizeClass)
+                ToDoApp(
+                    windowWidthSizeClass = windowSizeClass.widthSizeClass,
+                    windowHeightSizeClass = windowSizeClass.heightSizeClass,
+                    shouldOpenNewTaskDialog
+                )
             }
         }
     }
 }
 
 @Composable
-fun ToDoApp(windowWidthSizeClass: WindowWidthSizeClass) {
+fun ToDoApp(
+    windowWidthSizeClass: WindowWidthSizeClass,
+    windowHeightSizeClass: WindowHeightSizeClass,
+    shouldOpenNewTaskDialog: Boolean = false
+) {
     Surface {
-        HomeScreen(windowWidthSizeClass = windowWidthSizeClass)
+        HomeScreen(
+            windowWidthSizeClass = windowWidthSizeClass,
+            windowHeightSizeClass = windowHeightSizeClass,
+            shouldOpenNewTaskDialog = shouldOpenNewTaskDialog
+        )
     }
 }
 
@@ -66,6 +78,9 @@ fun ToDoApp(windowWidthSizeClass: WindowWidthSizeClass) {
 @Composable
 fun GreetingPreview() {
     ToDoAppTheme {
-        ToDoApp(windowWidthSizeClass = WindowWidthSizeClass.Compact)
+        ToDoApp(
+            windowWidthSizeClass = WindowWidthSizeClass.Compact,
+            windowHeightSizeClass = WindowHeightSizeClass.Expanded
+        )
     }
 }

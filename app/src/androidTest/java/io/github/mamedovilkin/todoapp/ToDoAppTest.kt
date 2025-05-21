@@ -1,7 +1,12 @@
 /*
     IMPORTANT TO KNOW:
-    TO RUN TESTS IN THIS FILE CORRECTLY YOU NEED TO COMMENT PART OF CODE
-    IN ToDoAppActivity.kt FILE FROM LINE 29 TO LINE 41
+    TO RUN TESTS IN THIS FILE CORRECTLY YOU NEED TO COMMENT THAT OF CODE
+    IN ToDoAppActivity.kt FILE
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        ...
+    }
+
     ALSO RUN EACH FUNCTION SEPARATELY
     AND DON'T FORGET UNCOMMENT THAT CODE AFTER ALL TESTS WILL FINISH.
 */
@@ -31,6 +36,27 @@ class ToDoAppTest {
     val composeTestRule = createAndroidComposeRule<ToDoAppActivity>()
 
     @Test
+    fun homeScreen_menuButtonClickedMenuDisplayed() {
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithTag("Menu")
+                .isDisplayed()
+        }
+
+        composeTestRule
+            .onNodeWithTag("Menu")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Feedback")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Rate us")
+            .assertIsDisplayed()
+    }
+
+    @Test
     fun homeScreen_noTasksYetTextDisplayed() {
         composeTestRule.waitUntil {
             composeTestRule
@@ -48,22 +74,6 @@ class ToDoAppTest {
         composeTestRule
             .onNodeWithTag("New task")
             .performTextInput("Walk my dog")
-
-        composeTestRule
-            .onNodeWithTag("Date")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Time")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
 
         composeTestRule
             .onNodeWithText("Save")
@@ -84,22 +94,6 @@ class ToDoAppTest {
             composeTestRule
                 .onNodeWithTag("New task")
                 .performTextInput("Task #$i")
-
-            composeTestRule
-                .onNodeWithTag("Date")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText("OK")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithTag("Time")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText("OK")
-                .performClick()
 
             composeTestRule
                 .onNodeWithText("Save")
@@ -132,22 +126,6 @@ class ToDoAppTest {
             .performTextInput("Walk my dog")
 
         composeTestRule
-            .onNodeWithTag("Date")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Time")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
             .onNodeWithText("Save")
             .performClick()
 
@@ -162,22 +140,6 @@ class ToDoAppTest {
         composeTestRule
             .onNodeWithTag("Edit task")
             .performTextInput("Clean my room up")
-
-        composeTestRule
-            .onNodeWithTag("Date")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Time")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
 
         composeTestRule
             .onNodeWithText("Save")
@@ -197,22 +159,6 @@ class ToDoAppTest {
         composeTestRule
             .onNodeWithTag("New task")
             .performTextInput("Walk my dog")
-
-        composeTestRule
-            .onNodeWithTag("Date")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Time")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
 
         composeTestRule
             .onNodeWithText("Save")
@@ -246,22 +192,6 @@ class ToDoAppTest {
             .performTextInput("Walk my dog")
 
         composeTestRule
-            .onNodeWithTag("Date")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Time")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
             .onNodeWithText("Save")
             .performClick()
 
@@ -279,22 +209,6 @@ class ToDoAppTest {
         composeTestRule
             .onNodeWithTag("New task")
             .performTextInput("Walk my dog")
-
-        composeTestRule
-            .onNodeWithTag("Date")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Time")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
 
         composeTestRule
             .onNodeWithText("Save")
@@ -319,22 +233,6 @@ class ToDoAppTest {
             composeTestRule
                 .onNodeWithTag("New task")
                 .performTextInput("Task #$i")
-
-            composeTestRule
-                .onNodeWithTag("Date")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText("OK")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithTag("Time")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText("OK")
-                .performClick()
 
             composeTestRule
                 .onNodeWithText("Save")
@@ -362,22 +260,6 @@ class ToDoAppTest {
                 .performTextInput("Task #$i")
 
             composeTestRule
-                .onNodeWithTag("Date")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText("OK")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithTag("Time")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText("OK")
-                .performClick()
-
-            composeTestRule
                 .onNodeWithText("Save")
                 .performClick()
         }
@@ -385,6 +267,12 @@ class ToDoAppTest {
         composeTestRule
             .onNodeWithTag("Tasks List")
             .performScrollToIndex(10)
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithText("Task #10")
+                .isDisplayed()
+        }
 
         composeTestRule
             .onNodeWithTag("Up")
@@ -405,22 +293,6 @@ class ToDoAppTest {
             composeTestRule
                 .onNodeWithTag("New task")
                 .performTextInput("Task #$i")
-
-            composeTestRule
-                .onNodeWithTag("Date")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText("OK")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithTag("Time")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText("OK")
-                .performClick()
 
             composeTestRule
                 .onNodeWithText("Save")
@@ -455,22 +327,6 @@ class ToDoAppTest {
             .performTextInput("Task")
 
         composeTestRule
-            .onNodeWithTag("Date")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Time")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
             .onNodeWithText("Save")
             .performClick()
 
@@ -492,22 +348,6 @@ class ToDoAppTest {
         composeTestRule
             .onNodeWithTag("New task")
             .performTextInput("Task")
-
-        composeTestRule
-            .onNodeWithTag("Date")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Time")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
 
         composeTestRule
             .onNodeWithText("Save")
@@ -538,22 +378,6 @@ class ToDoAppTest {
                 .performTextInput("Task #$i")
 
             composeTestRule
-                .onNodeWithTag("Date")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText("OK")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithTag("Time")
-                .performClick()
-
-            composeTestRule
-                .onNodeWithText("OK")
-                .performClick()
-
-            composeTestRule
                 .onNodeWithText("Save")
                 .performClick()
         }
@@ -576,22 +400,6 @@ class ToDoAppTest {
         composeTestRule
             .onNodeWithTag("New task")
             .performTextInput("Task")
-
-        composeTestRule
-            .onNodeWithTag("Date")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Time")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
 
         composeTestRule
             .onNodeWithText("Save")
@@ -623,22 +431,6 @@ class ToDoAppTest {
         composeTestRule
             .onNodeWithTag("New task")
             .performTextInput("Walk my dog")
-
-        composeTestRule
-            .onNodeWithTag("Date")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Time")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("OK")
-            .performClick()
 
         composeTestRule
             .onNodeWithText("Save")

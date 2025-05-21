@@ -2,8 +2,8 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.ksp)
-    alias(libs.plugins.hilt)
 }
 
 android {
@@ -14,8 +14,8 @@ android {
         applicationId = "io.github.mamedovilkin.todoapp"
         minSdk = 24
         targetSdk = 35
-        versionCode = 4
-        versionName = "1.2"
+        versionCode = 5
+        versionName = "1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -45,30 +45,45 @@ android {
 }
 
 dependencies {
+    // Database
+    implementation(project(":database"))
+
     // Android Jetpack
-    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.material3.window.size.class1)
+    implementation(libs.androidx.material.icons.extended)
     implementation(libs.androidx.lifecycle.runtime.ktx)
-    implementation(libs.androidx.activity.compose)
-    implementation(platform(libs.androidx.compose.bom))
-    implementation(libs.androidx.ui)
-    implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.ui.tooling.preview)
+    implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.glance.material)
+    implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.material3)
+    implementation(libs.androidx.core.ktx)
+    implementation(libs.androidx.ui)
+
+    // Jetpack Compose
+    implementation(libs.androidx.lifecycle.runtime.compose)
+    implementation(platform(libs.androidx.compose.bom))
+    implementation(libs.androidx.activity.compose)
+
+    // ViewModel
     implementation(libs.androidx.lifecycle.viewmodel.compose)
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
-    implementation(libs.kotlinx.coroutines.core)
-    implementation(libs.kotlinx.coroutines.android)
-    implementation(libs.androidx.room.runtime)
-    ksp(libs.androidx.room.compiler)
-    implementation(libs.androidx.room.ktx)
-    implementation(libs.androidx.lifecycle.runtime.compose)
-    implementation(libs.androidx.material.icons.extended)
-    implementation(libs.androidx.material3.window.size.class1)
-    implementation(libs.androidx.hilt.navigation.compose)
 
-    // Hilt
-    implementation(libs.hilt.android)
-    ksp(libs.hilt.android.compiler)
+    // Coroutines
+    implementation(libs.kotlinx.coroutines.android)
+    implementation(libs.kotlinx.coroutines.core)
+
+    // Room
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
+    // Koin
+    implementation(project.dependencies.platform(libs.koin.bom))
+    implementation(libs.koin.core)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
+    implementation(libs.koin.compose.navigation)
 
     // Lottie
     implementation(libs.lottie.compose)
@@ -76,15 +91,15 @@ dependencies {
     // Testing
     testImplementation(libs.junit)
 
+    androidTestImplementation(platform(libs.androidx.compose.bom))
+    androidTestImplementation(libs.androidx.ui.test.junit4)
+    androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.core.testing)
     androidTestImplementation(libs.androidx.work.testing)
     androidTestImplementation(libs.androidx.junit)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
 
-    debugImplementation(libs.androidx.ui.tooling)
     debugImplementation(libs.androidx.ui.test.manifest)
+    debugImplementation(libs.androidx.ui.tooling)
 
     // LeakCanary
     debugImplementation(libs.leakcanary.android)
