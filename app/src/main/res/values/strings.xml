@@ -35,6 +35,7 @@
     <string name="menu">Menu</string>
     <string name="feedback">Feedback</string>
     <string name="rate_us">Rate us</string>
+    <string name="mark_as_completed">Mark as completed</string>
     <plurals name="you_have_tasks_to_do">
         <item quantity="one">You have task to do!</item>
         <item quantity="other">You have %d tasks to do!</item>

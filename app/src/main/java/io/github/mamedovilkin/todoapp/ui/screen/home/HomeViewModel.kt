@@ -97,8 +97,14 @@ class HomeViewModel(
     }
 
     fun updateTask(task: Task) = viewModelScope.launch {
-        taskReminderRepository.scheduleReminder(task)
-        taskRepository.update(task)
+        var updatedTask = task
+
+        if (task.datetime > System.currentTimeMillis() && task.isDone) {
+            updatedTask = task.copy(isDone = false)
+        }
+
+        taskReminderRepository.scheduleReminder(updatedTask)
+        taskRepository.update(updatedTask)
     }
 
     fun searchForTasks(query: String) {

@@ -10,7 +10,7 @@ import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.receiver.TaskReminderReceiver
 import io.github.mamedovilkin.todoapp.util.FIVE_MINUTES_IN_MILLISECONDS
 import io.github.mamedovilkin.todoapp.util.TEN_MINUTES_IN_MILLISECONDS
-import io.github.mamedovilkin.todoapp.util.TITLE_KEY
+import io.github.mamedovilkin.todoapp.util.TASK_KEY
 
 class TaskReminderRepositoryImpl(
     private val context: Context
@@ -22,7 +22,7 @@ class TaskReminderRepositoryImpl(
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
     override fun scheduleReminder(task: Task) {
         if (task.datetime > System.currentTimeMillis()) {
-            intent.putExtra(TITLE_KEY, task.title)
+            intent.putExtra(TASK_KEY, task)
 
             val pendingIntents = getPendingIntents(task)
 
