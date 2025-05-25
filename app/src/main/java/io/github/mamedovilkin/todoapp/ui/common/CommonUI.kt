@@ -19,6 +19,7 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -33,27 +34,28 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Keyboard
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.FloatingActionButton
@@ -85,13 +87,14 @@ import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -105,73 +108,63 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
+import com.bumptech.glide.integration.compose.GlideImage
+import com.google.firebase.auth.FirebaseUser
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
-import io.github.mamedovilkin.todoapp.util.APP_LINK
 import io.github.mamedovilkin.todoapp.util.convertMillisToDate
 import io.github.mamedovilkin.todoapp.util.convertMillisToDatetime
 import io.github.mamedovilkin.todoapp.util.convertToTime
 import io.github.mamedovilkin.todoapp.util.isExpired
 import java.util.Calendar
-import androidx.core.net.toUri
-import io.github.mamedovilkin.todoapp.util.FEEDBACK_EMAIL
+import io.github.mamedovilkin.todoapp.ui.activity.SettingsActivity
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
-fun ToDoAppTopBar(modifier: Modifier = Modifier) {
-    var expanded by rememberSaveable { mutableStateOf(false) }
+fun ToDoAppTopBar(
+    modifier: Modifier = Modifier,
+    firebaseUser: FirebaseUser? = null
+) {
     val context = LocalContext.current
 
-    TopAppBar(
+    CenterAlignedTopAppBar(
         title = {
-            Box(modifier = Modifier.fillMaxWidth()) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_launcher_foreground),
-                    contentDescription = stringResource(R.string.app_name),
-                    tint = MaterialTheme.colorScheme.background,
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .padding(end = 16.dp)
-                )
-                IconButton(
-                    onClick = { expanded = true },
-                    modifier = Modifier
-                        .align(Alignment.CenterEnd)
-                        .testTag("Menu")
-                ) {
+            Icon(
+                painter = painterResource(R.drawable.ic_launcher_foreground),
+                contentDescription = stringResource(R.string.app_name),
+                tint = MaterialTheme.colorScheme.background
+            )
+        },
+        actions = {
+            IconButton(
+                onClick = {
+                    context.startActivity(
+                        Intent(context, SettingsActivity::class.java)
+                    )
+                },
+                modifier = Modifier.testTag(stringResource(R.string.settings))
+            ) {
+                val currentUser = firebaseUser
+                if (currentUser == null || currentUser.photoUrl == null) {
                     Icon(
-                        imageVector = Icons.Default.MoreVert,
-                        contentDescription = stringResource(R.string.menu),
+                        imageVector = Icons.Outlined.Settings,
+                        contentDescription = stringResource(R.string.settings),
                         tint = MaterialTheme.colorScheme.background,
                     )
-                    DropdownMenu(
-                        expanded = expanded,
-                        onDismissRequest = { expanded = false },
-                    ) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.feedback)) },
-                            onClick = {
-                                val subject = context.getString(R.string.app_name)
-                                val intent = Intent(Intent.ACTION_SENDTO).apply {
-                                    data = "mailto:$FEEDBACK_EMAIL?subject=$subject".toUri()
-                                }
-
-                                context.startActivity(intent)
-                                expanded = false
-                            }
-                        )
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.rate_us)) },
-                            onClick = {
-                                val intent = Intent(Intent.ACTION_VIEW, APP_LINK.toUri())
-                                context.startActivity(intent)
-                                expanded = false
-                            }
-                        )
-                    }
+                } else {
+                    GlideImage(
+                        model = currentUser.photoUrl.toString(),
+                        contentDescription = stringResource(R.string.settings),
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                    )
                 }
             }
         },
@@ -285,7 +278,7 @@ fun TaskItem(
             } else {
                 MaterialTheme.typography.headlineMedium
             },
-            color = if (task.isDone) Color(0xFF808080) else MaterialTheme.colorScheme.onBackground
+            color = if (task.isDone) Color.Gray else MaterialTheme.colorScheme.onPrimaryContainer
         )
         AnimatedVisibility(task.isDone) {
             IconButton(
@@ -417,52 +410,70 @@ fun StickySearchBar(
     onSearch: (String) -> Unit,
     onClear: () -> Unit,
 ) {
-    TextField(
-        value = query,
-        onValueChange = { onSearch(it) },
-        placeholder = {
-            Text(
-                text = stringResource(R.string.search),
-            )
-        },
-        leadingIcon = {
-            Icon(
-                imageVector = Icons.Filled.Search,
-                contentDescription = stringResource(R.string.search)
-            )
-        },
-        trailingIcon = {
-            AnimatedVisibility(
-                query.isNotEmpty(),
-                enter = slideInHorizontally { (it) / 3 } + fadeIn(),
-                exit = slideOutHorizontally { (it) / 3 } + fadeOut(),
-            ) {
-                IconButton(
-                    onClick = onClear,
-                    modifier = Modifier.testTag("Clear")
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Close,
-                        contentDescription = stringResource(R.string.clear)
+    Column {
+        Surface(
+            modifier = Modifier.background( MaterialTheme.colorScheme.background)
+        ) {
+            TextField(
+                value = query,
+                onValueChange = { onSearch(it) },
+                placeholder = {
+                    Text(
+                        text = stringResource(R.string.search),
                     )
-                }
-            }
-        },
-        colors = TextFieldDefaults.colors(
-            focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-            cursorColor = MaterialTheme.colorScheme.primary,
-            focusedIndicatorColor = Color.Transparent,
-            unfocusedIndicatorColor = Color.Transparent,
-            disabledIndicatorColor = Color.Transparent
-        ),
-        shape = CircleShape,
-        singleLine = true,
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(8.dp)
-    )
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.Search,
+                        contentDescription = stringResource(R.string.search)
+                    )
+                },
+                trailingIcon = {
+                    AnimatedVisibility(
+                        query.isNotEmpty(),
+                        enter = slideInHorizontally { (it) / 3 } + fadeIn(),
+                        exit = slideOutHorizontally { (it) / 3 } + fadeOut(),
+                    ) {
+                        IconButton(
+                            onClick = onClear,
+                            modifier = Modifier.testTag(stringResource(R.string.clear))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Close,
+                                contentDescription = stringResource(R.string.clear)
+                            )
+                        }
+                    }
+                },
+                colors = TextFieldDefaults.colors(
+                    focusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    unfocusedContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+                    cursorColor = MaterialTheme.colorScheme.primary,
+                    focusedIndicatorColor = Color.Transparent,
+                    unfocusedIndicatorColor = Color.Transparent,
+                    disabledIndicatorColor = Color.Transparent
+                ),
+                shape = CircleShape,
+                singleLine = true,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = 8.dp)
+                    .padding(horizontal = 8.dp)
+            )
+        }
+        Spacer(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(16.dp)
+                .background(
+                    brush = Brush.verticalGradient(
+                        colors = listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background, Color.Transparent),
+                        startY = 0.5F
+                    ),
+                )
+        )
+    }
 }
 
 @Preview(showBackground = true)
@@ -479,6 +490,7 @@ private fun StickySearchBarPreview() {
 
 @Composable
 fun TaskList(
+    showStatistics: Boolean,
     innerPadding: PaddingValues,
     lazyListState: LazyListState,
     tasks: List<Task>,
@@ -498,24 +510,24 @@ fun TaskList(
         state = lazyListState,
         contentPadding = PaddingValues(top = 0.dp, bottom = 72.dp)
     ) {
-        item {
-            AnimatedContent(
-                targetState = count
-            ) { targetCount ->
-                StatisticsCard(count = targetCount)
+        if (showStatistics) {
+            item {
+                AnimatedContent(
+                    targetState = count
+                ) { targetCount ->
+                    StatisticsCard(count = targetCount)
+                }
             }
         }
+
         stickyHeader {
-            Surface(
-                color = MaterialTheme.colorScheme.background
-            ) {
-                StickySearchBar(
-                    query = query,
-                    onSearch = onSearch,
-                    onClear = onClear,
-                )
-            }
+            StickySearchBar(
+                query = query,
+                onSearch = onSearch,
+                onClear = onClear,
+            )
         }
+
         items(tasks, key = { it.id }) { task ->
             Box(
                 modifier = Modifier
@@ -687,33 +699,28 @@ fun EditTaskBottomSheet(
                 },
                 windowHeightSizeClass = windowHeightSizeClass
             )
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            Button(
+                onClick = {
+                    calendar.clear()
+                    calendar.timeInMillis = date
+                    calendar.set(Calendar.HOUR_OF_DAY, hour)
+                    calendar.set(Calendar.MINUTE, minute)
+                    onSave(task.copy(title = title, datetime = calendar.timeInMillis))
+                },
+                enabled = title.isNotEmpty(),
                 modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedButton(
-                    onClick = onCancel,
-                    modifier = Modifier.weight(1F)
-                ) { Text(stringResource(R.string.cancel)) }
-                FilledTonalButton(
-                    onClick = {
-                        onDelete(task)
-                        onCancel()
-                    },
-                    modifier = Modifier.weight(1F)
-                ) { Text(stringResource(R.string.delete)) }
-                Button(
-                    onClick = {
-                        calendar.clear()
-                        calendar.timeInMillis = date
-                        calendar.set(Calendar.HOUR_OF_DAY, hour)
-                        calendar.set(Calendar.MINUTE, minute)
-                        onSave(task.copy(title = title, datetime = calendar.timeInMillis))
-                    },
-                    enabled = title.isNotEmpty(),
-                    modifier = Modifier.weight(1F)
-                ) { Text(stringResource(R.string.save)) }
-            }
+            ) { Text(stringResource(R.string.save)) }
+            FilledTonalButton(
+                onClick = {
+                    onDelete(task)
+                    onCancel()
+                },
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(stringResource(R.string.delete)) }
+            OutlinedButton(
+                onClick = onCancel,
+                modifier = Modifier.fillMaxWidth()
+            ) { Text(stringResource(R.string.cancel)) }
         }
     }
 }
@@ -810,13 +817,15 @@ fun DateTimePickerTextFields(
         TimePickerDialog(
             onDismissRequest = { showTimePicker = false },
             switchButton = {
-                IconButton(onClick = {
-                    showTimeInput = !showTimeInput
-                }) {
-                    Icon(
-                        imageVector = if (showTimeInput) Icons.Outlined.AccessTime  else Icons.Outlined.Keyboard,
-                        contentDescription = stringResource(R.string.select_time)
-                    )
+                if (windowHeightSizeClass != WindowHeightSizeClass.Compact) {
+                    IconButton(onClick = {
+                        showTimeInput = !showTimeInput
+                    }) {
+                        Icon(
+                            imageVector = if (showTimeInput) Icons.Outlined.AccessTime  else Icons.Outlined.Keyboard,
+                            contentDescription = stringResource(R.string.select_time)
+                        )
+                    }
                 }
             },
             dismissButton = {
@@ -833,7 +842,7 @@ fun DateTimePickerTextFields(
                 }
             }
         ) {
-            if (showTimeInput) {
+            if (showTimeInput || windowHeightSizeClass == WindowHeightSizeClass.Compact) {
                 TimeInput(state = timePickerState)
             } else {
                 TimePicker(state = timePickerState)
@@ -932,4 +941,110 @@ fun TimePickerDialog(
             }
         }
     }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun SettingsTopBar(
+    onBack: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    TopAppBar(
+        title = {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                IconButton(onClick = onBack) {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                        contentDescription = stringResource(R.string.settings),
+                        tint = MaterialTheme.colorScheme.background,
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.settings),
+                    color = MaterialTheme.colorScheme.background,
+                    fontSize = 24.sp
+                )
+            }
+        },
+        colors = TopAppBarDefaults.topAppBarColors(
+            containerColor = MaterialTheme.colorScheme.primary,
+        ),
+        modifier = modifier
+    )
+}
+
+@Composable
+fun Setting(
+    imageVector: ImageVector,
+    title: String,
+    onClick: () -> Unit,
+    showArrow: Boolean = true,
+) {
+    Card(
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.primaryContainer
+        ),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(bottom = 16.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier
+                .fillMaxSize()
+                .clickable { onClick() }
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                modifier = Modifier
+                    .padding(16.dp)
+            ) {
+                Icon(
+                    imageVector = imageVector,
+                    contentDescription = title,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    modifier = Modifier.size(24.dp)
+                )
+                Column(
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = title,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                        style = MaterialTheme.typography.headlineMedium
+                    )
+                }
+            }
+            AnimatedVisibility(showArrow) {
+                Icon(
+                    imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                    contentDescription = null,
+                    modifier = Modifier
+                        .padding(end = 16.dp)
+                        .size(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun SettingsCategory(
+    category: String
+) {
+    Text(
+        text = category,
+        color = MaterialTheme.colorScheme.onPrimaryContainer,
+        style = MaterialTheme.typography.headlineMedium,
+        modifier = Modifier
+            .padding(horizontal = 16.dp)
+            .padding(bottom = 16.dp)
+    )
 }

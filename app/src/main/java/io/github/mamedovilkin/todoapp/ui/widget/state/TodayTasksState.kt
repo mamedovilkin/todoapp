@@ -24,7 +24,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import io.github.mamedovilkin.database.room.Task
-import io.github.mamedovilkin.todoapp.ui.ToDoAppActivity
+import io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity
 import io.github.mamedovilkin.todoapp.ui.theme.textColor
 import io.github.mamedovilkin.todoapp.util.convertMillisToTime
 

@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp
+package io.github.mamedovilkin.todoapp.mock
 
 import android.app.PendingIntent
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository

@@ -32,10 +32,22 @@
     <string name="todoapp_widget_description">Управляйте сегодняшними незавершенными задачами</string>
     <string name="there_are_no_tasks_for_today">Нет задач на сегодня</string>
     <string name="refresh">Обновить</string>
-    <string name="menu">Меню</string>
+    <string name="settings">Настройки</string>
+    <string name="google_account">Google Аккаунт</string>
+    <string name="sign_in_to_your_google_account">Войдите в свой Google Аккаунт</string>
+    <string name="sign_out">Выйти</string>
+    <string name="do_you_really_want_to_sign_out">Вы действительно хотите выйти?</string>
+    <string name="show_statistics">Показывать статистику</string>
+    <string name="about">О приложении</string>
     <string name="feedback">Обратная связь</string>
     <string name="rate_us">Оцените нас</string>
+    <string name="tell_a_friend">Расскажи другу</string>
+    <string name="about_developer">О разработчике</string>
+    <string name="version">Версия %s</string>
     <string name="mark_as_completed">Отметить как выполнено</string>
+    <string name="tell_a_friend_text">
+        Привет! 👋\n\nХочу порекомендовать тебе классное приложение, которое помогает мне не забывать важные дела — ToDoApp.\n\nПростое, удобное и без лишнего — самое то для ежедневных задач ✅\n\nСкачай и попробуй:\n📲https://www.rustore.ru/catalog/app/io.github.mamedovilkin.todoapp
+    </string>
     <plurals name="you_have_tasks_to_do">
         <item quantity="one">У Вас есть %d задача!</item>
         <item quantity="few">У Вас есть %d задачи!</item>

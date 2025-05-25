@@ -27,7 +27,7 @@ import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
-import io.github.mamedovilkin.todoapp.ui.ToDoAppActivity
+import io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity
 import io.github.mamedovilkin.todoapp.ui.widget.action.RefreshAction
 import io.github.mamedovilkin.todoapp.ui.widget.state.NoTasksState
 import io.github.mamedovilkin.todoapp.ui.widget.state.TodayTasksState

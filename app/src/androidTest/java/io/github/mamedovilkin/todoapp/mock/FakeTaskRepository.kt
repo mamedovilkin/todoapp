@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp
+package io.github.mamedovilkin.todoapp.mock
 
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task

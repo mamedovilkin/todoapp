@@ -3,10 +3,12 @@ package io.github.mamedovilkin.todoapp.ui.screen.home
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseUser
+import io.github.mamedovilkin.auth.repository.AuthRepository
+import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -24,26 +26,52 @@ sealed class Result {
 
 @Immutable
 data class HomeUiState(
+    val currentUser: FirebaseUser? = null,
     val query: String = "",
     val notDoneTasksCount: Int = 0,
+    val showStatistics: Boolean = false,
     val result: Result = Result.Loading
 )
 
 class HomeViewModel(
+    private val authRepository: AuthRepository,
     private val taskRepository: TaskRepository,
-    private val taskReminderRepository: TaskReminderRepository
+    private val taskReminderRepository: TaskReminderRepository,
+    private val dataStoreRepository: DataStoreRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    init {
-        observeTasks()
+    fun isSignedIn() = viewModelScope.launch {
+        authRepository.addAuthStateListener { currentUser ->
+            _uiState.update { currentState ->
+                currentState.copy(
+                    currentUser = currentUser
+                )
+            }
+        }
     }
 
-    private fun observeTasks() = viewModelScope.launch {
-        delay(1000)
+    fun getShowStatistics() = viewModelScope.launch {
+        dataStoreRepository.showStatistics
+            .catch {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        showStatistics = false
+                    )
+                }
+            }
+            .collect {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        showStatistics = it
+                    )
+                }
+            }
+    }
 
+    fun observeTasks() = viewModelScope.launch {
         taskRepository.tasks
             .catch { error ->
                 _uiState.update { currentState ->
@@ -116,24 +144,24 @@ class HomeViewModel(
 
         if (query.isEmpty()) {
             observeTasks()
-        }
-
-        viewModelScope.launch {
-            taskRepository.searchForTasks("%${query.trim()}%")
-                .catch { error ->
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            result = Result.Failure(error = error)
-                        )
+        } else {
+            viewModelScope.launch {
+                taskRepository.searchForTasks("%${query.trim()}%")
+                    .catch { error ->
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                result = Result.Failure(error = error)
+                            )
+                        }
                     }
-                }
-                .collect { tasks ->
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            result = Result.Success(tasks = tasks)
-                        )
+                    .collect { tasks ->
+                        _uiState.update { currentState ->
+                            currentState.copy(
+                                result = Result.Success(tasks = tasks)
+                            )
+                        }
                     }
-                }
+            }
         }
     }
 }

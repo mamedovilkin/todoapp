@@ -78,11 +78,17 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         showNewTaskBottomSheet = shouldOpenNewTaskDialog
+
+        viewModel.observeTasks()
+        viewModel.isSignedIn()
+        viewModel.getShowStatistics()
     }
 
     Scaffold(
         topBar = {
-            ToDoAppTopBar()
+            ToDoAppTopBar(
+                firebaseUser = uiState.currentUser
+            )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) { snackbarData ->
             val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = {
@@ -120,6 +126,7 @@ fun HomeScreen(
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     TaskList(
+                        showStatistics = uiState.showStatistics,
                         innerPadding = innerPadding,
                         lazyListState = lazyListState,
                         tasks = result.tasks,

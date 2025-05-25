@@ -25,6 +25,7 @@ android {
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -47,7 +48,8 @@ android {
 }
 
 dependencies {
-    // Database
+    // Modules
+    implementation(project(":auth"))
     implementation(project(":database"))
 
     // Android Jetpack
@@ -57,6 +59,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.glance.appwidget)
     implementation(libs.androidx.glance.material)
+    implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.ui.graphics)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.core.ktx)
@@ -91,18 +94,28 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.auth)
 
     // Lottie
     implementation(libs.lottie.compose)
 
+    // Coil
+    implementation(libs.compose)
+
     // Testing
     testImplementation(libs.junit)
+    testImplementation(libs.kotlinx.coroutines.test)
+
+    // Mockito
+    testImplementation(libs.mockito.kotlin)
+    testImplementation(libs.mockito.core)
 
     androidTestImplementation(platform(libs.androidx.compose.bom))
     androidTestImplementation(libs.androidx.ui.test.junit4)
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.core.testing)
     androidTestImplementation(libs.androidx.work.testing)
+    androidTestImplementation(libs.mockito.android)
     androidTestImplementation(libs.androidx.junit)
 
     debugImplementation(libs.androidx.ui.test.manifest)

@@ -32,10 +32,22 @@
     <string name="todoapp_widget_description">Manage today\'s uncompleted tasks</string>
     <string name="there_are_no_tasks_for_today">There are no tasks for today</string>
     <string name="refresh">Refresh</string>
-    <string name="menu">Menu</string>
+    <string name="settings">Settings</string>
+    <string name="google_account">Google Account</string>
+    <string name="sign_in_to_your_google_account">Sign in to your Google Account</string>
+    <string name="sign_out">Sign out</string>
+    <string name="do_you_really_want_to_sign_out">Do you really want to sign out?</string>
+    <string name="show_statistics">Show statistics</string>
+    <string name="about">About</string>
     <string name="feedback">Feedback</string>
     <string name="rate_us">Rate us</string>
+    <string name="tell_a_friend">Tell a friend</string>
+    <string name="about_developer">About developer</string>
+    <string name="version">Version %s</string>
     <string name="mark_as_completed">Mark as completed</string>
+    <string name="tell_a_friend_text">
+        Hi! 👋\n\nI want to recommend you a cool app that helps me not to forget important things — ToDoApp.\n\nSimple, convenient and without unnecessary things — just right for everyday tasks ✅\n\nDownload and try:\n📲https://www.rustore.ru/catalog/app/io.github.mamedovilkin.todoapp
+    </string>
     <plurals name="you_have_tasks_to_do">
         <item quantity="one">You have task to do!</item>
         <item quantity="other">You have %d tasks to do!</item>

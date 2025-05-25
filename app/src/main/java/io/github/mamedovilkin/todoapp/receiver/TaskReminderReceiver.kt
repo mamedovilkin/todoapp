@@ -13,7 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.R
-import io.github.mamedovilkin.todoapp.ui.ToDoAppActivity
+import io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity
 import io.github.mamedovilkin.todoapp.util.CHANNEL_ID
 import io.github.mamedovilkin.todoapp.util.MARK_TASK_COMPLETED_ACTION
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_ID

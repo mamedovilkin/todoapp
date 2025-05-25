@@ -26,34 +26,32 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import io.github.mamedovilkin.todoapp.ui.ToDoAppActivity
+import io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity
 import org.junit.Rule
 import org.junit.Test
 
-class ToDoAppTest {
+class HomeScreenTest {
 
     @get:Rule
     val composeTestRule = createAndroidComposeRule<ToDoAppActivity>()
 
     @Test
-    fun homeScreen_menuButtonClickedMenuDisplayed() {
+    fun homeScreen_settingsButtonClickedMenuDisplayed() {
         composeTestRule.waitUntil {
             composeTestRule
-                .onNodeWithTag("Menu")
+                .onNodeWithTag("Settings")
                 .isDisplayed()
         }
 
         composeTestRule
-            .onNodeWithTag("Menu")
+            .onNodeWithTag("Settings")
             .performClick()
 
-        composeTestRule
-            .onNodeWithText("Feedback")
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithText("Rate us")
-            .assertIsDisplayed()
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithText("Settings")
+                .isDisplayed()
+        }
     }
 
     @Test

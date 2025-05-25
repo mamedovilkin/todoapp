@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp.ui
+package io.github.mamedovilkin.todoapp.ui.activity
 
 import android.Manifest
 import android.content.pm.PackageManager

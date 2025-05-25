@@ -1,9 +1,16 @@
 package io.github.mamedovilkin.todoapp
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
+import io.github.mamedovilkin.auth.repository.AuthRepository
+import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.todoapp.mock.FakeDataStoreRepository
+import io.github.mamedovilkin.todoapp.mock.FakeFailureAuthRepository
+import io.github.mamedovilkin.todoapp.mock.FakeSuccessAuthRepository
+import io.github.mamedovilkin.todoapp.mock.FakeTaskReminderRepository
+import io.github.mamedovilkin.todoapp.mock.FakeTaskRepository
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeViewModel
 import io.github.mamedovilkin.todoapp.ui.screen.home.Result
 import junit.framework.TestCase.assertEquals
@@ -25,6 +32,16 @@ import org.junit.runner.RunWith
 class HomeViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+    private val authRepository: AuthRepository = FakeSuccessAuthRepository()
+    private val taskRepository: TaskRepository = FakeTaskRepository()
+    private val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
+    private val dataStoreRepository: DataStoreRepository = FakeDataStoreRepository()
+    private val homeViewModel = HomeViewModel(
+        authRepository,
+        taskRepository,
+        taskReminderRepository,
+        dataStoreRepository
+    )
 
     @Before
     fun setUp() {
@@ -37,12 +54,50 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun viewModelNewTask_insertNewTask() = runTest {
-        val taskRepository: TaskRepository = FakeTaskRepository()
-        val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
-        val homeViewModel = HomeViewModel(taskRepository, taskReminderRepository)
+    fun viewModelIsSignedIn_currentUser() = runTest {
+        homeViewModel.isSignedIn()
 
+        advanceUntilIdle()
+
+        val currentUser = homeViewModel.uiState.value.currentUser
+
+        assertTrue(currentUser != null)
+    }
+
+    @Test
+    fun viewModelIsSignedIn_null() = runTest {
+        val authRepository: AuthRepository = FakeFailureAuthRepository()
+        val homeViewModel = HomeViewModel(
+            authRepository,
+            taskRepository,
+            taskReminderRepository,
+            dataStoreRepository
+        )
+        homeViewModel.isSignedIn()
+
+        advanceUntilIdle()
+
+        val currentUser = homeViewModel.uiState.value.currentUser
+
+        assertTrue(currentUser == null)
+    }
+
+    @Test
+    fun viewModelGetShowStatistics_getShowStatistics() = runTest {
+        dataStoreRepository.setShowStatistics(true)
+        homeViewModel.getShowStatistics()
+
+        advanceUntilIdle()
+
+        val showStatistics = homeViewModel.uiState.value.showStatistics
+
+        assertTrue(showStatistics)
+    }
+
+    @Test
+    fun viewModelNewTask_insertNewTask() = runTest {
         homeViewModel.newTask(Task(title = "Clean my room up"))
+        homeViewModel.observeTasks()
 
         advanceUntilIdle()
 
@@ -53,14 +108,11 @@ class HomeViewModelTest {
 
     @Test
     fun viewModelDeleteTask_deleteTask() = runTest {
-        val taskRepository: TaskRepository = FakeTaskRepository()
-        val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
-        val homeViewModel = HomeViewModel(taskRepository, taskReminderRepository)
-
         val task = Task(id = "0", title = "Clean my room up")
 
         homeViewModel.newTask(task)
         homeViewModel.deleteTask(task)
+        homeViewModel.observeTasks()
 
         advanceUntilIdle()
 
@@ -69,12 +121,9 @@ class HomeViewModelTest {
 
     @Test
     fun viewModelToggleDone_toggleDone() = runTest {
-        val taskRepository: TaskRepository = FakeTaskRepository()
-        val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
-        val homeViewModel = HomeViewModel(taskRepository, taskReminderRepository)
-
         homeViewModel.newTask(Task(id = "0", title = "Clean my room up"))
         homeViewModel.toggleDone(Task(id = "0", title = "Clean my room up"))
+        homeViewModel.observeTasks()
 
         advanceUntilIdle()
 
@@ -85,12 +134,9 @@ class HomeViewModelTest {
 
     @Test
     fun viewModelUpdateTask_updateTask() = runTest {
-        val taskRepository: TaskRepository = FakeTaskRepository()
-        val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
-        val homeViewModel = HomeViewModel(taskRepository, taskReminderRepository)
-
         homeViewModel.newTask(Task(id = "0", title = "Clean my room up"))
         homeViewModel.updateTask(Task(id = "0", title = "Walk my dog"))
+        homeViewModel.observeTasks()
 
         advanceUntilIdle()
 
@@ -101,11 +147,8 @@ class HomeViewModelTest {
 
     @Test
     fun viewModelGetNotDoneTasksCount_getNotDoneTasksCount() = runTest {
-        val taskRepository: TaskRepository = FakeTaskRepository()
-        val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
-        val homeViewModel = HomeViewModel(taskRepository, taskReminderRepository)
-
         homeViewModel.newTask(Task(title = "Clean my room up"))
+        homeViewModel.observeTasks()
 
         advanceUntilIdle()
 
@@ -116,13 +159,10 @@ class HomeViewModelTest {
 
     @Test
     fun viewModelSearchForTasks_searchForTasks() = runTest {
-        val taskRepository: TaskRepository = FakeTaskRepository()
-        val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
-        val homeViewModel = HomeViewModel(taskRepository, taskReminderRepository)
-
         homeViewModel.newTask(Task(title = "Clean my room up"))
         homeViewModel.newTask(Task(title = "Do homework"))
         homeViewModel.searchForTasks("Do")
+        homeViewModel.observeTasks()
 
         advanceUntilIdle()
 

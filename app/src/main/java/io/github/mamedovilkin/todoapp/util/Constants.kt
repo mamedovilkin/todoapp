@@ -10,3 +10,4 @@ const val TEN_MINUTES_IN_MILLISECONDS = 600_000
 const val APP_LINK = "http://rustore.ru/catalog/app/io.github.mamedovilkin.todoapp"
 const val FEEDBACK_EMAIL = "ilkinmamedov0208@gmail.com"
 const val MARK_TASK_COMPLETED_ACTION = "io.github.mamedovilkin.todoapp.MARK_TASK_COMPLETED_ACTION"
+const val WEBSITE_LINK = "https://mamedovilkin.github.io/"
