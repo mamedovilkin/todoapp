@@ -34,5 +34,4 @@ class DataStoreRepositoryTest {
 
         assertTrue(showStatistics)
     }
-
 }

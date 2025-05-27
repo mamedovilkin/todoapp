@@ -1,6 +1,5 @@
 @file:Suppress("UnstableApiUsage")
 
-include(":auth")
 include(":database")
 
 pluginManagement {

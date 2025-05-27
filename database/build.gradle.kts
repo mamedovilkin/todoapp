@@ -41,6 +41,8 @@ dependencies {
     implementation(platform(libs.firebase.bom))
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.firestore)
+    implementation(libs.firebase.auth)
 
     // Room
     implementation(libs.androidx.room.runtime)

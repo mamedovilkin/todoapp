@@ -1,5 +1,6 @@
 package io.github.mamedovilkin.database
 
+import io.github.mamedovilkin.database.mock.FakeTaskRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
 import junit.framework.TestCase.assertEquals
@@ -20,7 +21,9 @@ class TaskRepositoryTest {
     @Test
     fun repositoryInsert_insertsTaskIntoRepository() = runBlocking {
         taskRepository.insert(task1)
+
         val allTasks = taskRepository.tasks.first()
+
         assertEquals(allTasks[0], task1)
     }
 
@@ -30,6 +33,7 @@ class TaskRepositoryTest {
         taskRepository.insert(task2)
 
         val allTasks = taskRepository.tasks.first()
+
         assertEquals(allTasks[0], task1)
         assertEquals(allTasks[1], task2)
     }
@@ -43,6 +47,7 @@ class TaskRepositoryTest {
         taskRepository.update(Task("2", "Call mom"))
 
         val allTasks = taskRepository.tasks.first()
+
         assertEquals(allTasks[0], Task("1", "Walk my dog", true))
         assertEquals(allTasks[1], Task("2", "Call mom"))
     }
@@ -56,6 +61,7 @@ class TaskRepositoryTest {
         taskRepository.delete(task2)
 
         val allTasks = taskRepository.tasks.first()
+
         assertTrue(allTasks.isEmpty())
     }
 
@@ -65,6 +71,7 @@ class TaskRepositoryTest {
         taskRepository.insert(task2)
 
         val tasks = taskRepository.searchForTasks("Do").first()
+
         assertTrue(tasks.size == 1)
         assertEquals(task2, tasks.first())
     }

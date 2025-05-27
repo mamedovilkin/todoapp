@@ -1,7 +1,5 @@
 package io.github.mamedovilkin.todoapp.ui.screen.settings
 
-import android.content.Context
-import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,6 +7,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -56,9 +55,10 @@ import org.koin.androidx.compose.koinViewModel
 @Composable
 fun SettingsScreen(
     windowWidthSizeClass: WindowWidthSizeClass,
-    context: Context,
     version: String,
     onBack: () -> Unit,
+    onSignIn: () -> Unit,
+    onSignOut: () -> Unit,
     onFeedback: () -> Unit,
     onRateUs: () -> Unit,
     onTellFriend: () -> Unit,
@@ -67,15 +67,10 @@ fun SettingsScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val currentUser = uiState.currentUser
-    val exception = uiState.exception
 
     LaunchedEffect(Unit) {
         viewModel.isSignedIn()
         viewModel.getShowStatistics()
-
-        if (exception != null) {
-            Toast.makeText(context, exception.message.toString(), Toast.LENGTH_LONG).show()
-        }
     }
 
     if (uiState.showDialog) {
@@ -95,7 +90,7 @@ fun SettingsScreen(
             },
             confirmButton = {
                 TextButton(onClick = {
-                    viewModel.signOut()
+                    onSignOut()
                     viewModel.setShowDialog(false)
                 }) {
                     Text(stringResource(R.string.sign_out))
@@ -130,6 +125,7 @@ fun SettingsScreen(
                         .width(600.dp)
                         .padding(innerPadding)
                 },
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 contentPadding = PaddingValues(16.dp)
             ) {
                 item {
@@ -143,17 +139,15 @@ fun SettingsScreen(
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = 16.dp)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Column(
                             verticalArrangement = Arrangement.Center,
                             modifier = Modifier
-                                .fillMaxSize()
+                                .fillMaxWidth()
                                 .clickable {
                                     if (currentUser == null) {
-                                        viewModel.signInWithGoogle()
+                                        onSignIn()
                                     } else {
                                         viewModel.setShowDialog(true)
                                     }
@@ -164,7 +158,7 @@ fun SettingsScreen(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 modifier = Modifier
-                                    .fillMaxSize()
+                                    .fillMaxWidth()
                                     .padding(16.dp)
                             ) {
                                 if (currentUser == null || currentUser.photoUrl == null) {
@@ -208,22 +202,19 @@ fun SettingsScreen(
                         colors = CardDefaults.cardColors(
                             containerColor = MaterialTheme.colorScheme.primaryContainer
                         ),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(bottom = 16.dp)
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier
-                                .fillMaxSize()
+                                .fillMaxWidth()
                                 .clickable {}
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                modifier = Modifier
-                                    .padding(16.dp)
+                                modifier = Modifier.padding(16.dp)
                             ) {
                                 Icon(
                                     painter = painterResource(R.drawable.ic_statistics),
@@ -299,8 +290,8 @@ fun SettingsScreen(
                     Setting(
                         imageVector = Icons.Outlined.Info,
                         title = stringResource(R.string.version, version),
-                        onClick = {},
-                        showArrow = false
+                        showEndIcon = false,
+                        onClick = {}
                     )
                 }
             }

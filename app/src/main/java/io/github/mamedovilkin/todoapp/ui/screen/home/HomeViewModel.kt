@@ -3,12 +3,15 @@ package io.github.mamedovilkin.todoapp.ui.screen.home
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
-import io.github.mamedovilkin.auth.repository.AuthRepository
 import io.github.mamedovilkin.database.repository.DataStoreRepository
+import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
+import io.github.mamedovilkin.todoapp.util.isInternetAvailable
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -30,24 +33,30 @@ data class HomeUiState(
     val query: String = "",
     val notDoneTasksCount: Int = 0,
     val showStatistics: Boolean = false,
-    val result: Result = Result.Loading
+    val result: Result = Result.Loading,
+    val exception: Exception? = null,
+    val task: Task? = null,
+    val showNewTaskBottomSheet: Boolean = false,
+    val showEditTaskBottomSheet: Boolean = false
 )
 
 class HomeViewModel(
-    private val authRepository: AuthRepository,
+    private val auth: FirebaseAuth,
     private val taskRepository: TaskRepository,
     private val taskReminderRepository: TaskReminderRepository,
-    private val dataStoreRepository: DataStoreRepository
+    private val dataStoreRepository: DataStoreRepository,
+    private val firestoreRepository: FirestoreRepository,
+    private val syncWorkerRepository: SyncWorkerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
     fun isSignedIn() = viewModelScope.launch {
-        authRepository.addAuthStateListener { currentUser ->
+        auth.addAuthStateListener {
             _uiState.update { currentState ->
                 currentState.copy(
-                    currentUser = currentUser
+                    currentUser = it.currentUser
                 )
             }
         }
@@ -98,6 +107,7 @@ class HomeViewModel(
 
     fun newTask(task: Task) = viewModelScope.launch {
         var newTask = task
+        val currentUser = _uiState.value.currentUser
 
         if (newTask.id.isEmpty()) {
             val id = UUID.randomUUID().toString()
@@ -106,15 +116,35 @@ class HomeViewModel(
 
         taskReminderRepository.scheduleReminder(newTask)
         taskRepository.insert(newTask)
+
+        if (currentUser != null && isInternetAvailable()) {
+            firestoreRepository.insert(newTask.copy(isSynced = true)) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        exception =  it
+                    )
+                }
+            }
+            taskRepository.insert(newTask.copy(isSynced = true))
+        } else {
+            syncWorkerRepository.scheduleUnSyncTasksWork()
+        }
     }
 
     fun deleteTask(task: Task) = viewModelScope.launch {
         taskReminderRepository.cancelReminder(task)
         taskRepository.delete(task)
+        syncWorkerRepository.scheduleSyncDeleteTaskWork(task.id)
     }
 
     fun toggleDone(task: Task) = viewModelScope.launch {
-        val updatedTask = task.copy(isDone = !task.isDone)
+        val currentUser = _uiState.value.currentUser
+
+        val updatedTask = task.copy(
+            isDone = !task.isDone,
+            isSynced = false
+        )
+
         if (updatedTask.isDone) {
             taskReminderRepository.cancelReminder(task)
         } else {
@@ -122,17 +152,48 @@ class HomeViewModel(
         }
 
         taskRepository.update(updatedTask)
+
+        if (currentUser != null && isInternetAvailable()) {
+            firestoreRepository.insert(updatedTask.copy(isSynced = true)) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        exception =  it
+                    )
+                }
+            }
+            taskRepository.update(updatedTask.copy(isSynced = true))
+        } else {
+            syncWorkerRepository.scheduleUnSyncTasksWork()
+        }
     }
 
     fun updateTask(task: Task) = viewModelScope.launch {
-        var updatedTask = task
+        val currentUser = _uiState.value.currentUser
+
+        var updatedTask = task.copy(isSynced = false)
 
         if (task.datetime > System.currentTimeMillis() && task.isDone) {
-            updatedTask = task.copy(isDone = false)
+            updatedTask = task.copy(
+                isDone = false,
+                isSynced = false
+            )
         }
 
         taskReminderRepository.scheduleReminder(updatedTask)
         taskRepository.update(updatedTask)
+
+        if (currentUser != null && isInternetAvailable()) {
+            firestoreRepository.insert(updatedTask.copy(isSynced = true)) {
+                _uiState.update { currentState ->
+                    currentState.copy(
+                        exception =  it
+                    )
+                }
+            }
+            taskRepository.update(updatedTask.copy(isSynced = true))
+        } else {
+            syncWorkerRepository.scheduleUnSyncTasksWork()
+        }
     }
 
     fun searchForTasks(query: String) {
@@ -162,6 +223,30 @@ class HomeViewModel(
                         }
                     }
             }
+        }
+    }
+
+    fun setTaskToEdit(task: Task) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                task = task
+            )
+        }
+    }
+
+    fun setShowNewTaskBottomSheet(showNewTaskBottomSheet: Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                showNewTaskBottomSheet = showNewTaskBottomSheet
+            )
+        }
+    }
+
+    fun setShowEditTaskBottomSheet(showEditTaskBottomSheet: Boolean) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                showEditTaskBottomSheet = showEditTaskBottomSheet
+            )
         }
     }
 }

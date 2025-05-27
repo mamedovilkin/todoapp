@@ -1,5 +1,6 @@
 package io.github.mamedovilkin.todoapp.ui.screen.home
 
+import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -26,18 +27,14 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import io.github.mamedovilkin.todoapp.R
-import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.ui.common.EditTaskBottomSheet
 import io.github.mamedovilkin.todoapp.ui.common.NewTaskBottomSheet
 import io.github.mamedovilkin.todoapp.ui.common.NewTaskFloatingActionButton
@@ -63,11 +60,8 @@ fun HomeScreen(
     val context = LocalContext.current
     val lazyListState = rememberLazyListState()
     val newTaskSheetState = rememberModalBottomSheetState()
-    var showNewTaskBottomSheet by rememberSaveable { mutableStateOf(false) }
     val editTaskSheetState = rememberModalBottomSheetState()
-    var showEditTaskBottomSheet by rememberSaveable { mutableStateOf(false) }
     val uiState by viewModel.uiState.collectAsState()
-    var task: Task? = null
     val coroutineScope = rememberCoroutineScope()
     val showUpFloatingActionButton by remember {
         derivedStateOf {
@@ -75,13 +69,17 @@ fun HomeScreen(
         }
     }
     val snackbarHostState = remember { SnackbarHostState() }
+    val exception = uiState.exception
 
     LaunchedEffect(Unit) {
-        showNewTaskBottomSheet = shouldOpenNewTaskDialog
-
+        viewModel.setShowNewTaskBottomSheet(shouldOpenNewTaskDialog)
         viewModel.observeTasks()
         viewModel.isSignedIn()
         viewModel.getShowStatistics()
+
+        if (exception != null) {
+            Toast.makeText(context, exception.message.toString(), Toast.LENGTH_LONG).show()
+        }
     }
 
     Scaffold(
@@ -110,7 +108,7 @@ fun HomeScreen(
             NewTaskFloatingActionButton(
                 expanded = lazyListState.isScrollingUp(),
                 onNewTaskClick = {
-                    showNewTaskBottomSheet = true
+                    viewModel.setShowNewTaskBottomSheet(true)
                 },
             )
         },
@@ -133,8 +131,8 @@ fun HomeScreen(
                         count = uiState.notDoneTasksCount,
                         query = uiState.query,
                         onEdit = {
-                            task = it
-                            showEditTaskBottomSheet = true
+                            viewModel.setTaskToEdit(it)
+                            viewModel.setShowEditTaskBottomSheet(true)
                         },
                         onSearch = {
                             viewModel.searchForTasks(it)
@@ -194,31 +192,31 @@ fun HomeScreen(
             }
         }
 
-        if (showNewTaskBottomSheet) {
+        if (uiState.showNewTaskBottomSheet) {
             NewTaskBottomSheet(
                 sheetState = newTaskSheetState,
                 onSave = {
                     viewModel.newTask(it)
-                    showNewTaskBottomSheet = false
+                    viewModel.setShowNewTaskBottomSheet(false)
                 },
                 onCancel = {
-                    showNewTaskBottomSheet = false
+                    viewModel.setShowNewTaskBottomSheet(false)
                 },
                 windowHeightSizeClass = windowHeightSizeClass
             )
         }
 
-        if (showEditTaskBottomSheet && task != null) {
+        if (uiState.showEditTaskBottomSheet && uiState.task != null) {
             EditTaskBottomSheet(
-                task = task!!,
+                task = uiState.task!!,
                 sheetState = editTaskSheetState,
                 onSave = {
                     viewModel.updateTask(it)
-                    showEditTaskBottomSheet = false
+                    viewModel.setShowEditTaskBottomSheet(false)
                 },
                 onDelete = { viewModel.deleteTask(it) },
                 onCancel = {
-                    showEditTaskBottomSheet = false
+                    viewModel.setShowEditTaskBottomSheet(false)
                 },
                 windowHeightSizeClass = windowHeightSizeClass
             )

@@ -49,7 +49,6 @@ android {
 
 dependencies {
     // Modules
-    implementation(project(":auth"))
     implementation(project(":database"))
 
     // Android Jetpack
@@ -58,6 +57,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.glance.appwidget)
+    implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.glance.material)
     implementation(libs.androidx.security.crypto)
     implementation(libs.androidx.ui.graphics)
@@ -75,6 +75,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
 
     // Coroutines
+    implementation(libs.kotlinx.coroutines.play.services)
     implementation(libs.kotlinx.coroutines.android)
     implementation(libs.kotlinx.coroutines.core)
 
@@ -92,9 +93,16 @@ dependencies {
 
     // Firebase
     implementation(platform(libs.firebase.bom))
+    implementation(libs.androidx.credentials.play.services.auth)
+    implementation(libs.androidx.credentials)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
+    implementation(libs.firebase.firestore)
     implementation(libs.firebase.auth)
+    implementation(libs.googleid)
+
+    // OkHttp
+    implementation(libs.okhttp)
 
     // Lottie
     implementation(libs.lottie.compose)

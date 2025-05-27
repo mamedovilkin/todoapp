@@ -4,10 +4,18 @@ import android.content.Context
 import android.text.format.DateFormat
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.database.room.isTaskThisYear
+import io.github.mamedovilkin.database.room.isTodayTask
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 fun convertMillisToDate(millis: Long, context: Context): String {
     val formatter = SimpleDateFormat(context.resources.getString(R.string.date_pattern), Locale.getDefault())
@@ -29,30 +37,30 @@ fun convertToTime(hour: Int, minute: Int, context: Context): String {
     return formatter.format(Date(calendar.timeInMillis))
 }
 
-fun convertMillisToDatetime(millis: Long, context: Context): String {
-    val pattern = getPattern(millis, context)
+fun convertMillisToDatetime(task: Task, context: Context): String {
+    val pattern = getPattern(task, context)
 
     val formatter = SimpleDateFormat(pattern, Locale.getDefault())
-    return formatter.format(Date(millis)).replaceFirstChar {
+    return formatter.format(Date(task.datetime)).replaceFirstChar {
         if (it.isLowerCase()) it.titlecase(
             Locale.getDefault()
         ) else it.toString()
     }
 }
 
-private fun getPattern(millis: Long, context: Context): String {
+private fun getPattern(task: Task, context: Context): String {
     if (DateFormat.is24HourFormat(context)) {
-        return if (isTodayTask(millis)) {
+        return if (task.isTodayTask()) {
             context.resources.getString(R.string.datetime_today_24hour_pattern)
-        } else if (!isTaskThisYear(millis)) {
+        } else if (!task.isTaskThisYear()) {
             context.resources.getString(R.string.datetime_year_24hour_pattern)
         } else {
             context.resources.getString(R.string.datetime_24hour_pattern)
         }
     } else {
-        return if (isTodayTask(millis)) {
+        return if (task.isTodayTask()) {
             context.resources.getString(R.string.datetime_today_pattern)
-        } else if (!isTaskThisYear(millis)) {
+        } else if (!task.isTaskThisYear()) {
             context.resources.getString(R.string.datetime_year_pattern)
         } else {
             context.resources.getString(R.string.datetime_pattern)
@@ -60,32 +68,21 @@ private fun getPattern(millis: Long, context: Context): String {
     }
 }
 
-fun isTodayTask(millis: Long): Boolean {
-    val taskCalendar = Calendar.getInstance()
-    taskCalendar.timeInMillis = millis
-    val taskDayOfYear = taskCalendar.get(Calendar.DAY_OF_YEAR)
-    val taskYear = taskCalendar.get(Calendar.YEAR)
+suspend fun isInternetAvailable(): Boolean = withContext(Dispatchers.IO) {
+    try {
+        val client = OkHttpClient.Builder()
+            .connectTimeout(1, TimeUnit.SECONDS)
+            .readTimeout(1, TimeUnit.SECONDS)
+            .writeTimeout(1, TimeUnit.SECONDS)
+            .build()
 
-    val currentCalendar = Calendar.getInstance()
-    currentCalendar.timeInMillis = System.currentTimeMillis()
-    val currentDayOfYear = currentCalendar.get(Calendar.DAY_OF_YEAR)
-    val currentYear = currentCalendar.get(Calendar.YEAR)
+        val request = Request.Builder()
+            .url("https://clients3.google.com/generate_204")
+            .build()
 
-    return taskDayOfYear == currentDayOfYear && taskYear == currentYear
-}
-
-fun isTaskThisYear(millis: Long): Boolean {
-    val taskCalendar = Calendar.getInstance()
-    taskCalendar.timeInMillis = millis
-    val taskYear = taskCalendar.get(Calendar.YEAR)
-
-    val currentCalendar = Calendar.getInstance()
-    currentCalendar.timeInMillis = System.currentTimeMillis()
-    val currentYear = currentCalendar.get(Calendar.YEAR)
-
-    return taskYear == currentYear
-}
-
-fun Task.isExpired(): Boolean {
-    return Calendar.getInstance().timeInMillis > datetime
+        val response = client.newCall(request).execute()
+        response.code == 204
+    } catch (_: IOException) {
+        false
+    }
 }

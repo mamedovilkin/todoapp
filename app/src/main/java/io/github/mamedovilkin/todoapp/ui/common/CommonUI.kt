@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.IntrinsicSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
@@ -35,7 +34,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.outlined.ArrowForwardIos
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
@@ -45,6 +43,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.material.icons.outlined.AccessTime
+import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.Button
@@ -115,12 +114,12 @@ import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import com.google.firebase.auth.FirebaseUser
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.database.room.isExpired
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.util.convertMillisToDate
 import io.github.mamedovilkin.todoapp.util.convertMillisToDatetime
 import io.github.mamedovilkin.todoapp.util.convertToTime
-import io.github.mamedovilkin.todoapp.util.isExpired
 import java.util.Calendar
 import io.github.mamedovilkin.todoapp.ui.activity.SettingsActivity
 
@@ -468,7 +467,11 @@ fun StickySearchBar(
                 .height(16.dp)
                 .background(
                     brush = Brush.verticalGradient(
-                        colors = listOf(MaterialTheme.colorScheme.background, MaterialTheme.colorScheme.background, Color.Transparent),
+                        colors = listOf(
+                            MaterialTheme.colorScheme.background,
+                            MaterialTheme.colorScheme.background,
+                            Color.Transparent
+                        ),
                         startY = 0.5F
                     ),
                 )
@@ -537,7 +540,7 @@ fun TaskList(
                 Column {
                     AnimatedVisibility(!task.isDone) {
                         Text(
-                            text = convertMillisToDatetime(task.datetime, LocalContext.current),
+                            text = convertMillisToDatetime(task, LocalContext.current),
                             style = MaterialTheme.typography.titleMedium,
                             color = if (task.isExpired()) Color.Red else Color.Unspecified,
                             modifier = Modifier
@@ -977,33 +980,39 @@ fun SettingsTopBar(
     )
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun SettingsTopBarPreview() {
+    ToDoAppTheme {
+        SettingsTopBar({})
+    }
+}
+
 @Composable
 fun Setting(
     imageVector: ImageVector,
     title: String,
+    showEndIcon: Boolean = true,
     onClick: () -> Unit,
-    showArrow: Boolean = true,
 ) {
     Card(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
         modifier = Modifier
-            .fillMaxSize()
-            .padding(bottom = 16.dp)
+            .fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier
-                .fillMaxSize()
+                .fillMaxWidth()
                 .clickable { onClick() }
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier
-                    .padding(16.dp)
+                modifier = Modifier.padding(16.dp)
             ) {
                 Icon(
                     imageVector = imageVector,
@@ -1021,9 +1030,9 @@ fun Setting(
                     )
                 }
             }
-            AnimatedVisibility(showArrow) {
+            AnimatedVisibility(showEndIcon) {
                 Icon(
-                    imageVector = Icons.AutoMirrored.Outlined.ArrowForwardIos,
+                    painter = painterResource(R.drawable.ic_open_in_new),
                     tint = MaterialTheme.colorScheme.onPrimaryContainer,
                     contentDescription = null,
                     modifier = Modifier
@@ -1035,6 +1044,19 @@ fun Setting(
     }
 }
 
+@Preview(showBackground = true)
+@Composable
+private fun SettingPreview() {
+    ToDoAppTheme {
+        Setting(
+            imageVector = Icons.Outlined.Feedback,
+            title = stringResource(R.string.feedback),
+            showEndIcon = true,
+            onClick = {}
+        )
+    }
+}
+
 @Composable
 fun SettingsCategory(
     category: String
@@ -1043,8 +1065,14 @@ fun SettingsCategory(
         text = category,
         color = MaterialTheme.colorScheme.onPrimaryContainer,
         style = MaterialTheme.typography.headlineMedium,
-        modifier = Modifier
-            .padding(horizontal = 16.dp)
-            .padding(bottom = 16.dp)
+        modifier = Modifier.padding(horizontal = 16.dp)
     )
+}
+
+@Preview(showBackground = true)
+@Composable
+private fun SettingsCategoryPreview() {
+    ToDoAppTheme {
+        SettingsCategory(stringResource(R.string.settings))
+    }
 }

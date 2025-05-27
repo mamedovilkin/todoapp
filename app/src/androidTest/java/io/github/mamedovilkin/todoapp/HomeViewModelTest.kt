@@ -1,16 +1,18 @@
 package io.github.mamedovilkin.todoapp
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import io.github.mamedovilkin.auth.repository.AuthRepository
+import com.google.firebase.auth.FirebaseAuth
 import io.github.mamedovilkin.database.repository.DataStoreRepository
+import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.mock.FakeDataStoreRepository
-import io.github.mamedovilkin.todoapp.mock.FakeFailureAuthRepository
-import io.github.mamedovilkin.todoapp.mock.FakeSuccessAuthRepository
+import io.github.mamedovilkin.todoapp.mock.FakeFirestoreRepository
+import io.github.mamedovilkin.todoapp.mock.FakeSyncWorkerRepository
 import io.github.mamedovilkin.todoapp.mock.FakeTaskReminderRepository
 import io.github.mamedovilkin.todoapp.mock.FakeTaskRepository
+import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeViewModel
 import io.github.mamedovilkin.todoapp.ui.screen.home.Result
 import junit.framework.TestCase.assertEquals
@@ -26,21 +28,25 @@ import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mockito.mock
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
 class HomeViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private val authRepository: AuthRepository = FakeSuccessAuthRepository()
     private val taskRepository: TaskRepository = FakeTaskRepository()
     private val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
     private val dataStoreRepository: DataStoreRepository = FakeDataStoreRepository()
+    private val firestoreRepository: FirestoreRepository = FakeFirestoreRepository()
+    private val syncWorkerRepository: SyncWorkerRepository = FakeSyncWorkerRepository()
     private val homeViewModel = HomeViewModel(
-        authRepository,
+        mock<FirebaseAuth>(),
         taskRepository,
         taskReminderRepository,
-        dataStoreRepository
+        dataStoreRepository,
+        firestoreRepository,
+        syncWorkerRepository
     )
 
     @Before
@@ -51,35 +57,6 @@ class HomeViewModelTest {
     @After
     fun tearDown() {
         Dispatchers.resetMain()
-    }
-
-    @Test
-    fun viewModelIsSignedIn_currentUser() = runTest {
-        homeViewModel.isSignedIn()
-
-        advanceUntilIdle()
-
-        val currentUser = homeViewModel.uiState.value.currentUser
-
-        assertTrue(currentUser != null)
-    }
-
-    @Test
-    fun viewModelIsSignedIn_null() = runTest {
-        val authRepository: AuthRepository = FakeFailureAuthRepository()
-        val homeViewModel = HomeViewModel(
-            authRepository,
-            taskRepository,
-            taskReminderRepository,
-            dataStoreRepository
-        )
-        homeViewModel.isSignedIn()
-
-        advanceUntilIdle()
-
-        val currentUser = homeViewModel.uiState.value.currentUser
-
-        assertTrue(currentUser == null)
     }
 
     @Test
@@ -170,5 +147,38 @@ class HomeViewModelTest {
 
         assertEquals(1, allTasks.size)
         assertEquals("Do homework", allTasks.first().title)
+    }
+
+    @Test
+    fun viewModelSetTaskToEdit_taskToEdit() = runTest {
+        homeViewModel.setTaskToEdit(Task(title = "Do homework"))
+
+        advanceUntilIdle()
+
+        val task = homeViewModel.uiState.value.task
+
+        assertTrue(task != null)
+    }
+
+    @Test
+    fun viewModelSetShowNewTaskBottomSheet_showNewTaskBottomSheet() = runTest {
+        homeViewModel.setShowNewTaskBottomSheet(true)
+
+        advanceUntilIdle()
+
+        val showNewTaskBottomSheet = homeViewModel.uiState.value.showNewTaskBottomSheet
+
+        assertTrue(showNewTaskBottomSheet)
+    }
+
+    @Test
+    fun viewModelSetShowEditTaskBottomSheet_showEditTaskBottomSheet() = runTest {
+        homeViewModel.setShowEditTaskBottomSheet(true)
+
+        advanceUntilIdle()
+
+        val showEditTaskBottomSheet = homeViewModel.uiState.value.showEditTaskBottomSheet
+
+        assertTrue(showEditTaskBottomSheet)
     }
 }

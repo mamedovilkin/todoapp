@@ -9,14 +9,18 @@ import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.auth
-import io.github.mamedovilkin.auth.repository.AuthRepository
-import io.github.mamedovilkin.auth.repository.AuthRepositoryImpl
+import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.firestore
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.DataStoreRepositoryImpl
+import io.github.mamedovilkin.database.repository.FirestoreRepository
+import io.github.mamedovilkin.database.repository.FirestoreRepositoryImpl
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.repository.TaskRepositoryImpl
 import io.github.mamedovilkin.database.room.TaskDao
 import io.github.mamedovilkin.database.room.TaskDatabase
+import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
+import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepositoryImpl
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepositoryImpl
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeViewModel
@@ -36,36 +40,15 @@ class ToDoApp : Application() {
         startKoin {
             androidContext(this@ToDoApp)
             modules(
-                // App
                 module {
-                    single<TaskReminderRepository> {
-                        val context = androidContext()
-                        TaskReminderRepositoryImpl(context)
-                    }
-                    viewModel { HomeViewModel(get(), get(), get(), get()) }
-                    viewModel { SettingsViewModel(get(), get()) }
-                },
-                // Auth
-                module {
+                    // Firebase
                     single<FirebaseAuth> { Firebase.auth }
-                    single<AuthRepository> {
-                        val context = androidContext()
-                        val serverClientId = context.getString(R.string.default_web_client_id)
+                    single<FirebaseFirestore> { Firebase.firestore }
 
-                        AuthRepositoryImpl(
-                            context = context,
-                            serverClientId = serverClientId,
-                            auth = get()
-                        )
-                    }
-                },
-                // Database
-                module {
-                    single<TaskDao> {
-                        val context = androidContext()
-                        TaskDatabase.getDatabase(context).taskDao()
-                    }
-                    single<TaskRepository> { TaskRepositoryImpl(get()) }
+                    // Room
+                    single<TaskDao> { TaskDatabase.getDatabase(androidContext()).taskDao() }
+
+                    // DataStore
                     single<DataStore<Preferences>> {
                         val context = androidContext()
 
@@ -73,7 +56,17 @@ class ToDoApp : Application() {
                             context.preferencesDataStoreFile("todoapp_preferences")
                         }
                     }
+
+                    // Repository
+                    single<TaskReminderRepository> { TaskReminderRepositoryImpl(androidContext()) }
+                    single<SyncWorkerRepository> { SyncWorkerRepositoryImpl(androidContext()) }
+                    single<TaskRepository> { TaskRepositoryImpl(get()) }
                     single<DataStoreRepository> { DataStoreRepositoryImpl(get()) }
+                    single<FirestoreRepository> { FirestoreRepositoryImpl(get(), get()) }
+
+                    // ViewModel
+                    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get()) }
+                    viewModel { SettingsViewModel(get(), get()) }
                 }
             )
         }
