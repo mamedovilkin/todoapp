@@ -28,9 +28,11 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -57,6 +59,7 @@ import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -122,6 +125,7 @@ import io.github.mamedovilkin.todoapp.util.convertMillisToDatetime
 import io.github.mamedovilkin.todoapp.util.convertToTime
 import java.util.Calendar
 import io.github.mamedovilkin.todoapp.ui.activity.SettingsActivity
+import kotlin.collections.filter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
@@ -265,20 +269,51 @@ fun TaskItem(
             modifier = Modifier
                 .testTag("Toggle")
         )
-        Text(
-            text = task.title,
-            maxLines = 3,
-            overflow = TextOverflow.Ellipsis,
+        Column(
             modifier = Modifier
                 .weight(1f)
-                .testTag("Title"),
-            style = if (task.isDone) {
-                MaterialTheme.typography.headlineMedium.copy(textDecoration = TextDecoration.LineThrough)
-            } else {
-                MaterialTheme.typography.headlineMedium
-            },
-            color = if (task.isDone) Color.Gray else MaterialTheme.colorScheme.onPrimaryContainer
-        )
+                .padding(vertical = 8.dp)
+                .padding(end = 8.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            AnimatedVisibility(task.category.isNotEmpty() && !task.isDone) {
+                Text(
+                    text = task.category,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(4.dp)
+                        )
+                        .padding(horizontal = 8.dp)
+                        .testTag(stringResource(R.string.category)),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                )
+            }
+            Text(
+                text = task.title,
+                maxLines = 3,
+                overflow = TextOverflow.Ellipsis,
+                modifier = Modifier.testTag("Title"),
+                style = if (task.isDone) {
+                    MaterialTheme.typography.headlineMedium.copy(textDecoration = TextDecoration.LineThrough)
+                } else {
+                    MaterialTheme.typography.headlineMedium
+                },
+                color = if (task.isDone) Color.Gray else MaterialTheme.colorScheme.onPrimaryContainer
+            )
+            AnimatedVisibility(task.description.isNotEmpty() && !task.isDone) {
+                Text(
+                    text = task.description,
+                    maxLines = 3,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.testTag(stringResource(R.string.description)),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.Gray
+                )
+            }
+        }
         AnimatedVisibility(task.isDone) {
             IconButton(
                 onClick = onDelete,
@@ -499,6 +534,9 @@ fun TaskList(
     tasks: List<Task>,
     count: Int,
     query: String,
+    selectedCategory: String,
+    categories: Set<String>,
+    onSelection: (String) -> Unit,
     onSearch: (String) -> Unit,
     onClear: () -> Unit,
     onEdit: (Task) -> Unit,
@@ -531,7 +569,26 @@ fun TaskList(
             )
         }
 
-        items(tasks, key = { it.id }) { task ->
+        item {
+            AnimatedVisibility(categories.isNotEmpty()) {
+                CategoryChips(
+                    selectedCategory = selectedCategory,
+                    categories = categories,
+                    onSelection = onSelection,
+                    modifier = Modifier.fillMaxWidth()
+                )
+            }
+        }
+
+        items(
+            items = if (query.isNotEmpty()) {
+                tasks.filter { it.title.contains(query, ignoreCase = true) }
+            } else if (selectedCategory.isNotEmpty()) {
+                tasks.filter { it.category == selectedCategory }
+            } else {
+                tasks
+            },
+            key = { it.id }) { task ->
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -570,6 +627,8 @@ fun NewTaskBottomSheet(
     windowHeightSizeClass: WindowHeightSizeClass
 ) {
     var title by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
+    var category by remember { mutableStateOf("") }
     var date by remember { mutableLongStateOf(Calendar.getInstance().timeInMillis) }
     var hour by remember { mutableIntStateOf(Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) }
     var minute by remember { mutableIntStateOf(Calendar.getInstance().get(Calendar.MINUTE)) }
@@ -604,6 +663,51 @@ fun NewTaskBottomSheet(
                     .fillMaxWidth()
                     .testTag(stringResource(R.string.new_task))
             )
+            OutlinedTextField(
+                value = description,
+                onValueChange = { description = it },
+                maxLines = 3,
+                label = { Text(text = stringResource(R.string.description)) },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_description),
+                        contentDescription = stringResource(R.string.description)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(stringResource(R.string.description))
+            )
+            OutlinedTextField(
+                value = category,
+                onValueChange = { category = it },
+                singleLine = true,
+                label = { Text(text = stringResource(R.string.category)) },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_category),
+                        contentDescription = stringResource(R.string.category)
+                    )
+                },
+                trailingIcon = {
+                    if (category.length > 25) {
+                        Text(
+                            text = "${category.length}/25",
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(end = 16.dp)
+                        )
+                    } else {
+                        Text(
+                            text = "${category.length}/25",
+                            modifier = Modifier.padding(end = 16.dp)
+                        )
+                    }
+                },
+                isError = category.length > 25,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(stringResource(R.string.category))
+            )
             DateTimePickerTextFields(
                 date = date,
                 hour = hour,
@@ -629,13 +733,18 @@ fun NewTaskBottomSheet(
                         calendar.timeInMillis = date
                         calendar.set(Calendar.HOUR_OF_DAY, hour)
                         calendar.set(Calendar.MINUTE, minute)
-                        onSave(Task(title = title, datetime = calendar.timeInMillis))
+                        onSave(Task(
+                            title = title,
+                            description = description,
+                            category = category.lowercase(),
+                            datetime = calendar.timeInMillis
+                        ))
                         title = ""
                         date = 0L
                         hour = 0
                         minute = 0
                     },
-                    enabled = title.isNotEmpty(),
+                    enabled = title.isNotEmpty() && category.length <= 25,
                     modifier = Modifier.weight(1F)
                 ) { Text(stringResource(R.string.save)) }
             }
@@ -654,6 +763,8 @@ fun EditTaskBottomSheet(
     windowHeightSizeClass: WindowHeightSizeClass
 ) {
     var title by remember { mutableStateOf(task.title) }
+    var description by remember { mutableStateOf(task.description) }
+    var category by remember { mutableStateOf(task.category) }
     val calendar = Calendar.getInstance()
     calendar.timeInMillis = task.datetime
     var date by remember { mutableLongStateOf(calendar.timeInMillis) }
@@ -691,6 +802,51 @@ fun EditTaskBottomSheet(
                     .fillMaxWidth()
                     .testTag(stringResource(R.string.edit_task))
             )
+            OutlinedTextField(
+                value = description,
+                onValueChange = { description = it },
+                maxLines = 3,
+                label = { Text(text = stringResource(R.string.description)) },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_description),
+                        contentDescription = stringResource(R.string.description)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(stringResource(R.string.description))
+            )
+            OutlinedTextField(
+                value = category,
+                onValueChange = { category = it },
+                singleLine = true,
+                label = { Text(text = stringResource(R.string.category)) },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_category),
+                        contentDescription = stringResource(R.string.category)
+                    )
+                },
+                trailingIcon = {
+                    if (category.length > 25) {
+                        Text(
+                            text = "${category.length}/25",
+                            color = MaterialTheme.colorScheme.error,
+                            modifier = Modifier.padding(end = 16.dp)
+                        )
+                    } else {
+                        Text(
+                            text = "${category.length}/25",
+                            modifier = Modifier.padding(end = 16.dp)
+                        )
+                    }
+                },
+                isError = category.length > 25,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(stringResource(R.string.category))
+            )
             DateTimePickerTextFields(
                 date = task.datetime,
                 hour = calendar.get(Calendar.HOUR_OF_DAY),
@@ -708,9 +864,14 @@ fun EditTaskBottomSheet(
                     calendar.timeInMillis = date
                     calendar.set(Calendar.HOUR_OF_DAY, hour)
                     calendar.set(Calendar.MINUTE, minute)
-                    onSave(task.copy(title = title, datetime = calendar.timeInMillis))
+                    onSave(task.copy(
+                        title = title,
+                        description = description,
+                        category = category.lowercase(),
+                        datetime = calendar.timeInMillis
+                    ))
                 },
-                enabled = title.isNotEmpty(),
+                enabled = title.isNotEmpty() && category.length <= 25,
                 modifier = Modifier.fillMaxWidth()
             ) { Text(stringResource(R.string.save)) }
             FilledTonalButton(
@@ -959,10 +1120,13 @@ fun SettingsTopBar(
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier.fillMaxWidth()
             ) {
-                IconButton(onClick = onBack) {
+                IconButton(
+                    onClick = onBack,
+                    modifier = Modifier.testTag(stringResource(R.string.back))
+                ) {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.settings),
+                        contentDescription = stringResource(R.string.back),
                         tint = MaterialTheme.colorScheme.background,
                     )
                 }
@@ -1074,5 +1238,27 @@ fun SettingsCategory(
 private fun SettingsCategoryPreview() {
     ToDoAppTheme {
         SettingsCategory(stringResource(R.string.settings))
+    }
+}
+
+@Composable
+fun CategoryChips(
+    selectedCategory: String,
+    categories: Set<String>,
+    onSelection: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    LazyRow(
+        modifier = modifier.size(48.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        contentPadding = PaddingValues(horizontal = 16.dp)
+    ) {
+        items(categories.toList()) { category ->
+            FilterChip(
+                selected = selectedCategory == category,
+                onClick = { onSelection(category) },
+                label = { Text(category) }
+            )
+        }
     }
 }

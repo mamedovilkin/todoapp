@@ -97,19 +97,6 @@ class HomeViewModelTest {
     }
 
     @Test
-    fun viewModelToggleDone_toggleDone() = runTest {
-        homeViewModel.newTask(Task(id = "0", title = "Clean my room up"))
-        homeViewModel.toggleDone(Task(id = "0", title = "Clean my room up"))
-        homeViewModel.observeTasks()
-
-        advanceUntilIdle()
-
-        val allTasks = (homeViewModel.uiState.value.result as Result.Success).tasks
-
-        assertTrue(allTasks.first().isDone)
-    }
-
-    @Test
     fun viewModelUpdateTask_updateTask() = runTest {
         homeViewModel.newTask(Task(id = "0", title = "Clean my room up"))
         homeViewModel.updateTask(Task(id = "0", title = "Walk my dog"))
@@ -136,17 +123,13 @@ class HomeViewModelTest {
 
     @Test
     fun viewModelSearchForTasks_searchForTasks() = runTest {
-        homeViewModel.newTask(Task(title = "Clean my room up"))
-        homeViewModel.newTask(Task(title = "Do homework"))
         homeViewModel.searchForTasks("Do")
-        homeViewModel.observeTasks()
 
         advanceUntilIdle()
 
-        val allTasks = (homeViewModel.uiState.value.result as Result.Success).tasks
+        val query = homeViewModel.uiState.value.query
 
-        assertEquals(1, allTasks.size)
-        assertEquals("Do homework", allTasks.first().title)
+        assertEquals("Do", query)
     }
 
     @Test

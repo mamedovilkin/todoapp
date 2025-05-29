@@ -48,6 +48,9 @@
     <string name="tell_a_friend_text">
         Привет! 👋\n\nХочу порекомендовать тебе классное приложение, которое помогает мне не забывать важные дела — ToDoApp.\n\nПростое, удобное и без лишнего — самое то для ежедневных задач ✅\n\nСкачай и попробуй:\n📲https://www.rustore.ru/catalog/app/io.github.mamedovilkin.todoapp
     </string>
+    <string name="description">Описание</string>
+    <string name="category">Категория</string>
+    <string name="back">Назад</string>
     <plurals name="you_have_tasks_to_do">
         <item quantity="one">У Вас есть %d задача!</item>
         <item quantity="few">У Вас есть %d задачи!</item>

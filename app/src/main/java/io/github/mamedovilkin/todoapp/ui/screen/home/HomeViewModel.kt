@@ -22,7 +22,10 @@ import java.util.UUID
 
 sealed class Result {
     data class Failure(val error: Throwable): Result()
-    data class Success(val tasks: List<Task>): Result()
+    data class Success(
+        val tasks: List<Task>,
+        val categories: Set<String>
+    ): Result()
     data object Loading : Result()
     data object NoTasks : Result()
 }
@@ -31,6 +34,7 @@ sealed class Result {
 data class HomeUiState(
     val currentUser: FirebaseUser? = null,
     val query: String = "",
+    val selectedCategory: String = "",
     val notDoneTasksCount: Int = 0,
     val showStatistics: Boolean = false,
     val result: Result = Result.Loading,
@@ -88,16 +92,21 @@ class HomeViewModel(
                 }
             }
             .collect { tasks ->
-                if (tasks.isEmpty()) {
-                    _uiState.update { currentState ->
+                _uiState.update { currentState ->
+                    if (tasks.isEmpty()) {
                         currentState.copy(result = Result.NoTasks)
-                    }
-                } else {
-                    _uiState.update { currentState ->
+                    } else {
                         val notDoneTasksCount = tasks.filter { !it.isDone }.size
+                        val categories = tasks
+                            .filter { it.category.isNotEmpty() }
+                            .map { it.category }
+                            .toSet()
 
                         currentState.copy(
-                            result = Result.Success(tasks = tasks),
+                            result = Result.Success(
+                                tasks = tasks,
+                                categories = categories
+                            ),
                             notDoneTasksCount = notDoneTasksCount
                         )
                     }
@@ -137,13 +146,17 @@ class HomeViewModel(
         syncWorkerRepository.scheduleSyncDeleteTaskWork(task.id)
     }
 
-    fun toggleDone(task: Task) = viewModelScope.launch {
+    fun updateTask(task: Task) = viewModelScope.launch {
         val currentUser = _uiState.value.currentUser
 
-        val updatedTask = task.copy(
-            isDone = !task.isDone,
-            isSynced = false
-        )
+        var updatedTask = task.copy(isSynced = false)
+
+        if (task.datetime > System.currentTimeMillis() && task.isDone) {
+            updatedTask = task.copy(
+                isDone = false,
+                isSynced = false
+            )
+        }
 
         if (updatedTask.isDone) {
             taskReminderRepository.cancelReminder(task)
@@ -167,62 +180,11 @@ class HomeViewModel(
         }
     }
 
-    fun updateTask(task: Task) = viewModelScope.launch {
-        val currentUser = _uiState.value.currentUser
-
-        var updatedTask = task.copy(isSynced = false)
-
-        if (task.datetime > System.currentTimeMillis() && task.isDone) {
-            updatedTask = task.copy(
-                isDone = false,
-                isSynced = false
-            )
-        }
-
-        taskReminderRepository.scheduleReminder(updatedTask)
-        taskRepository.update(updatedTask)
-
-        if (currentUser != null && isInternetAvailable()) {
-            firestoreRepository.insert(updatedTask.copy(isSynced = true)) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        exception =  it
-                    )
-                }
-            }
-            taskRepository.update(updatedTask.copy(isSynced = true))
-        } else {
-            syncWorkerRepository.scheduleUnSyncTasksWork()
-        }
-    }
-
     fun searchForTasks(query: String) {
         _uiState.update { currentState ->
             currentState.copy(
                 query = query
             )
-        }
-
-        if (query.isEmpty()) {
-            observeTasks()
-        } else {
-            viewModelScope.launch {
-                taskRepository.searchForTasks("%${query.trim()}%")
-                    .catch { error ->
-                        _uiState.update { currentState ->
-                            currentState.copy(
-                                result = Result.Failure(error = error)
-                            )
-                        }
-                    }
-                    .collect { tasks ->
-                        _uiState.update { currentState ->
-                            currentState.copy(
-                                result = Result.Success(tasks = tasks)
-                            )
-                        }
-                    }
-            }
         }
     }
 
@@ -246,6 +208,14 @@ class HomeViewModel(
         _uiState.update { currentState ->
             currentState.copy(
                 showEditTaskBottomSheet = showEditTaskBottomSheet
+            )
+        }
+    }
+
+    fun setSelectedCategory(selectedCategory: String) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                selectedCategory = if (currentState.selectedCategory == selectedCategory) "" else selectedCategory
             )
         }
     }

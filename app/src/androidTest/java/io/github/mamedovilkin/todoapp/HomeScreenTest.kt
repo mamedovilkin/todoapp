@@ -18,6 +18,7 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
@@ -49,7 +50,8 @@ class HomeScreenTest {
 
         composeTestRule.waitUntil {
             composeTestRule
-                .onNodeWithText("Settings")
+                .onAllNodesWithText("Settings")
+                .onFirst()
                 .isDisplayed()
         }
     }
@@ -182,6 +184,18 @@ class HomeScreenTest {
     @Test
     fun homeScreen_statisticsCardDisplayed() {
         composeTestRule
+            .onNodeWithTag("Settings")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Show Statistics")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Back")
+            .performClick()
+
+        composeTestRule
             .onNodeWithText("New task")
             .performClick()
 
@@ -200,6 +214,18 @@ class HomeScreenTest {
 
     @Test
     fun homeScreen_statisticsCardAllTasksCompletedDisplayed() {
+        composeTestRule
+            .onNodeWithTag("Settings")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Show Statistics")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Back")
+            .performClick()
+
         composeTestRule
             .onNodeWithText("New task")
             .performClick()
@@ -440,6 +466,87 @@ class HomeScreenTest {
 
         composeTestRule
             .onNodeWithText("Delete")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Walk my dog")
+            .assertIsNotDisplayed()
+    }
+
+    @Test
+    fun homeScreen_taskWithDescriptionDescriptionDisplayed() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Walk my dog")
+
+        composeTestRule
+            .onNodeWithTag("Description")
+            .performTextInput("Walk with my dog tonight")
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Walk with my dog tonight")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onAllNodesWithTag("Toggle")
+            .onFirst()
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Walk with my dog tonight")
+            .assertIsNotDisplayed()
+    }
+
+    @Test
+    fun homeScreen_taskWithCategorySelectCategory() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Walk my dog")
+
+        composeTestRule
+            .onNodeWithTag("Description")
+            .performTextInput("Walk with my dog tonight")
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Clean my room up")
+
+        composeTestRule
+            .onNodeWithTag("Category")
+            .performTextInput("Home")
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onAllNodesWithText("home")
+            .onLast()
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onAllNodesWithText("home")
+            .onFirst()
             .performClick()
 
         composeTestRule

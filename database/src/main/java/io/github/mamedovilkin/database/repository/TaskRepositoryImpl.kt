@@ -14,8 +14,4 @@ class TaskRepositoryImpl(
     override suspend fun update(task: Task) = taskDao.update(task)
 
     override val tasks: Flow<List<Task>> = taskDao.getTasks()
-
-    override fun searchForTasks(query: String): Flow<List<Task>> {
-        return taskDao.searchForTasks(query)
-    }
 }

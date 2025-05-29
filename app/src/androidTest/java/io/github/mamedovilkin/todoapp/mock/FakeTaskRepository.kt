@@ -28,10 +28,4 @@ class FakeTaskRepository : TaskRepository {
             _tasksFlow.value = tasksList.toList()
         }
     }
-
-    override fun searchForTasks(query: String): Flow<List<Task>> {
-        tasksList = tasksList.filter { it.title.contains(query.replace("%", "")) }.toMutableList()
-        _tasksFlow.value = tasksList.toList()
-        return _tasksFlow
-    }
 }

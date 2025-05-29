@@ -25,9 +25,6 @@ interface TaskDao {
     @Query("SELECT * FROM tasks ORDER BY isDone, datetime ASC")
     fun getTasks(): Flow<List<Task>>
 
-    @Query("SELECT * FROM tasks WHERE title LIKE :query ORDER BY isDone, datetime ASC")
-    fun searchForTasks(query: String): Flow<List<Task>>
-
     @Query("SELECT * FROM tasks WHERE isSynced = 0")
     fun getUnSyncedTasks(): Flow<List<Task>>
 }

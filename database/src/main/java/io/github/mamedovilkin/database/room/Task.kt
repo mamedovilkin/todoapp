@@ -11,6 +11,8 @@ import java.util.Calendar
 data class Task(
     @PrimaryKey val id: String = "",
     val title: String = "",
+    val description: String = "",
+    val category: String = "",
     val isDone: Boolean = false,
     val datetime: Long = 0L,
     val isSynced: Boolean = false
@@ -20,6 +22,8 @@ fun Task.toHashMap(): HashMap<String, Any> {
     return hashMapOf(
         "id" to id,
         "title" to title,
+        "description" to description,
+        "category" to category,
         "isDone" to isDone,
         "datetime" to datetime,
         "isSynced" to isSynced,

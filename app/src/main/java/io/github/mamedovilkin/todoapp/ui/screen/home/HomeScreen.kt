@@ -73,9 +73,9 @@ fun HomeScreen(
 
     LaunchedEffect(Unit) {
         viewModel.setShowNewTaskBottomSheet(shouldOpenNewTaskDialog)
-        viewModel.observeTasks()
         viewModel.isSignedIn()
         viewModel.getShowStatistics()
+        viewModel.observeTasks()
 
         if (exception != null) {
             Toast.makeText(context, exception.message.toString(), Toast.LENGTH_LONG).show()
@@ -130,6 +130,9 @@ fun HomeScreen(
                         tasks = result.tasks,
                         count = uiState.notDoneTasksCount,
                         query = uiState.query,
+                        selectedCategory = uiState.selectedCategory,
+                        categories = result.categories,
+                        onSelection = { viewModel.setSelectedCategory(it) },
                         onEdit = {
                             viewModel.setTaskToEdit(it)
                             viewModel.setShowEditTaskBottomSheet(true)
@@ -138,7 +141,7 @@ fun HomeScreen(
                             viewModel.searchForTasks(it)
                         },
                         onClear = { viewModel.searchForTasks("") },
-                        onToggle = { viewModel.toggleDone(it) },
+                        onToggle = { viewModel.updateTask(it.copy(isDone = !it.isDone)) },
                         onDelete = {
                             viewModel.deleteTask(it)
 
@@ -167,12 +170,8 @@ fun HomeScreen(
                     )
                     AnimatedVisibility(
                         showUpFloatingActionButton,
-                        enter = slideInVertically {
-                            it
-                        },
-                        exit = slideOutVertically {
-                            it
-                        }
+                        enter = slideInVertically { it },
+                        exit = slideOutVertically { it }
                     ) {
                         UpFloatingActionButton(
                             onUpClick = {

@@ -16,7 +16,7 @@ class TaskRepositoryTest {
 
     private val taskRepository: TaskRepository = FakeTaskRepository()
     private var task1 = Task("1", "Clean my room up")
-    private var task2 = Task("2", "Do homework", true)
+    private var task2 = Task("2", "Do homework", isDone = true)
 
     @Test
     fun repositoryInsert_insertsTaskIntoRepository() = runBlocking {
@@ -43,12 +43,12 @@ class TaskRepositoryTest {
         taskRepository.insert(task1)
         taskRepository.insert(task2)
 
-        taskRepository.update(Task("1", "Walk my dog", true))
+        taskRepository.update(Task("1", "Walk my dog", isDone = true))
         taskRepository.update(Task("2", "Call mom"))
 
         val allTasks = taskRepository.tasks.first()
 
-        assertEquals(allTasks[0], Task("1", "Walk my dog", true))
+        assertEquals(allTasks[0], Task("1", "Walk my dog", isDone = true))
         assertEquals(allTasks[1], Task("2", "Call mom"))
     }
 
@@ -63,16 +63,5 @@ class TaskRepositoryTest {
         val allTasks = taskRepository.tasks.first()
 
         assertTrue(allTasks.isEmpty())
-    }
-
-    @Test
-    fun repositorySearchForTasks_searchForTasksInRepository() = runBlocking {
-        taskRepository.insert(task1)
-        taskRepository.insert(task2)
-
-        val tasks = taskRepository.searchForTasks("Do").first()
-
-        assertTrue(tasks.size == 1)
-        assertEquals(task2, tasks.first())
     }
 }

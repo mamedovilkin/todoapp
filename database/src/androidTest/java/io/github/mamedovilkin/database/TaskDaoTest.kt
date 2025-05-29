@@ -23,7 +23,7 @@ class TaskDaoTest {
     private lateinit var taskDao: TaskDao
     private lateinit var taskDatabase: TaskDatabase
     private var task1 = Task("1", "Clean my room up", isSynced = true)
-    private var task2 = Task("2", "Do homework", true)
+    private var task2 = Task("2", "Do homework", isDone = true)
 
     @Before
     fun createDatabase() {
@@ -78,7 +78,7 @@ class TaskDaoTest {
     fun daoUpdateTasks_updatesTasksInDatabase() = runBlocking {
         addTwoTaskToDatabase()
 
-        taskDao.update(Task("1", "Walk my dog", true))
+        taskDao.update(Task("1", "Walk my dog", isDone = true))
         taskDao.update(Task("2", "Call mom"))
 
         val allTasks = taskDao.getTasks().first()
