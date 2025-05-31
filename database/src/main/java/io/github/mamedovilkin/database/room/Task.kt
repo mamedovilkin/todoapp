@@ -6,6 +6,10 @@ import androidx.room.PrimaryKey
 import kotlinx.parcelize.Parcelize
 import java.util.Calendar
 
+enum class RepeatType {
+    ONE_TIME, DAILY, WEEKLY, MONTHLY, YEARLY
+}
+
 @Entity(tableName = "tasks")
 @Parcelize
 data class Task(
@@ -15,7 +19,9 @@ data class Task(
     val category: String = "",
     val isDone: Boolean = false,
     val datetime: Long = 0L,
-    val isSynced: Boolean = false
+    val isSynced: Boolean = false,
+    val repeatType: RepeatType = RepeatType.ONE_TIME,
+    val repeatDaysOfWeek: List<Int> = emptyList<Int>(),
 ) : Parcelable
 
 fun Task.toHashMap(): HashMap<String, Any> {
@@ -27,6 +33,8 @@ fun Task.toHashMap(): HashMap<String, Any> {
         "isDone" to isDone,
         "datetime" to datetime,
         "isSynced" to isSynced,
+        "repeatType" to repeatType,
+        "repeatDaysOfWeek" to repeatDaysOfWeek,
     )
 }
 

@@ -115,27 +115,27 @@ class HomeViewModel(
     }
 
     fun newTask(task: Task) = viewModelScope.launch {
-        var newTask = task
+        var newTask = task.copy(id = UUID.randomUUID().toString())
         val currentUser = _uiState.value.currentUser
 
-        if (newTask.id.isEmpty()) {
-            val id = UUID.randomUUID().toString()
-            newTask = task.copy(id = id)
-        }
-
-        taskReminderRepository.scheduleReminder(newTask)
+        newTask = taskReminderRepository.scheduleReminder(newTask)
         taskRepository.insert(newTask)
 
         if (currentUser != null && isInternetAvailable()) {
-            firestoreRepository.insert(newTask.copy(isSynced = true)) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        exception =  it
-                    )
+            firestoreRepository.insert(newTask.copy(isSynced = true)) { e ->
+                if (e == null) {
+                    viewModelScope.launch {
+                        taskRepository.insert(newTask.copy(isSynced = true))
+                    }
+                } else {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            exception = e
+                        )
+                    }
                 }
             }
-            taskRepository.insert(newTask.copy(isSynced = true))
-        } else {
+        } else if (currentUser != null) {
             syncWorkerRepository.scheduleUnSyncTasksWork()
         }
     }
@@ -149,17 +149,9 @@ class HomeViewModel(
     fun updateTask(task: Task) = viewModelScope.launch {
         val currentUser = _uiState.value.currentUser
 
-        var updatedTask = task.copy(isSynced = false)
-
-        if (task.datetime > System.currentTimeMillis() && task.isDone) {
-            updatedTask = task.copy(
-                isDone = false,
-                isSynced = false
-            )
-        }
-
-        if (updatedTask.isDone) {
+        var updatedTask = if (task.isDone) {
             taskReminderRepository.cancelReminder(task)
+            task
         } else {
             taskReminderRepository.scheduleReminder(task)
         }
@@ -167,15 +159,20 @@ class HomeViewModel(
         taskRepository.update(updatedTask)
 
         if (currentUser != null && isInternetAvailable()) {
-            firestoreRepository.insert(updatedTask.copy(isSynced = true)) {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        exception =  it
-                    )
+            firestoreRepository.insert(updatedTask.copy(isSynced = true)) { e ->
+                if (e == null) {
+                    viewModelScope.launch {
+                        taskRepository.update(updatedTask.copy(isSynced = true))
+                    }
+                } else {
+                    _uiState.update { currentState ->
+                        currentState.copy(
+                            exception = e
+                        )
+                    }
                 }
             }
-            taskRepository.update(updatedTask.copy(isSynced = true))
-        } else {
+        } else if (currentUser != null) {
             syncWorkerRepository.scheduleUnSyncTasksWork()
         }
     }

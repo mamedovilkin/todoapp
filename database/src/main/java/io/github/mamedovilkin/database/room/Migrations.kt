@@ -15,3 +15,10 @@ val MIGRATION_2_3 = object : Migration(2, 3) {
         database.execSQL("ALTER TABLE `tasks` ADD COLUMN `category` TEXT NOT NULL DEFAULT ''")
     }
 }
+
+val MIGRATION_3_4 = object : Migration(3, 4) {
+    override fun migrate(database: SupportSQLiteDatabase) {
+        database.execSQL("ALTER TABLE `tasks` ADD COLUMN `repeatType` TEXT NOT NULL DEFAULT 'ONE_TIME'")
+        database.execSQL("ALTER TABLE `tasks` ADD COLUMN `repeatDaysOfWeek` TEXT NOT NULL DEFAULT '[]'")
+    }
+}

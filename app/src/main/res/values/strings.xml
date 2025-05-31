@@ -51,6 +51,23 @@
     <string name="description">Description</string>
     <string name="category">Category</string>
     <string name="back">Back</string>
+    <string name="repeat">Repeat</string>
+    <string-array name="repeat_types">
+        <item>One time</item>
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+        <item>Yearly</item>
+    </string-array>
+    <string-array name="repeat_days_of_week">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
     <plurals name="you_have_tasks_to_do">
         <item quantity="one">You have task to do!</item>
         <item quantity="other">You have %d tasks to do!</item>

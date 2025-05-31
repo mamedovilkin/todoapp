@@ -51,6 +51,23 @@
     <string name="description">Описание</string>
     <string name="category">Категория</string>
     <string name="back">Назад</string>
+    <string name="repeat">Повтор</string>
+    <string-array name="repeat_types">
+        <item>Один раз</item>
+        <item>Ежедневно</item>
+        <item>Еженедельно</item>
+        <item>Ежемесячно</item>
+        <item>Ежегодно</item>
+    </string-array>
+    <string-array name="repeat_days_of_week">
+        <item>Пн</item>
+        <item>Вт</item>
+        <item>Ср</item>
+        <item>Чт</item>
+        <item>Пт</item>
+        <item>Сб</item>
+        <item>Вс</item>
+    </string-array>
     <plurals name="you_have_tasks_to_do">
         <item quantity="one">У Вас есть %d задача!</item>
         <item quantity="few">У Вас есть %d задачи!</item>

@@ -62,24 +62,27 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
                     onToggle = {
                         coroutineScope.launch {
                             val currentUser = auth.currentUser
-                            val task = it.copy(
-                                isDone = !it.isDone,
-                                isSynced = false
-                            )
+                            var task = it.copy(isDone = !it.isDone)
 
-                            taskRepository.update(task)
-
-                            if (currentUser != null && isInternetAvailable()) {
-                                firestoreRepository.insert(task.copy(isSynced = true)) {}
-                                taskRepository.update(task.copy(isSynced = true))
-                            } else {
-                                syncWorkerRepository.scheduleUnSyncTasksWork()
-                            }
-
-                            if (task.isDone) {
+                            val updatedTask = if (task.isDone) {
                                 taskReminderRepository.cancelReminder(task)
+                                task
                             } else {
                                 taskReminderRepository.scheduleReminder(task)
+                            }
+
+                            taskRepository.update(updatedTask)
+
+                            if (currentUser != null && isInternetAvailable()) {
+                                firestoreRepository.insert(updatedTask.copy(isSynced = true)) { e ->
+                                    if (e == null) {
+                                        coroutineScope.launch {
+                                            taskRepository.update(updatedTask.copy(isSynced = true))
+                                        }
+                                    }
+                                }
+                            } else if (currentUser != null) {
+                                syncWorkerRepository.scheduleUnSyncTasksWork()
                             }
                         }
                     }

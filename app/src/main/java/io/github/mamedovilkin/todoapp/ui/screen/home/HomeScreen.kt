@@ -210,7 +210,7 @@ fun HomeScreen(
                 task = uiState.task!!,
                 sheetState = editTaskSheetState,
                 onSave = {
-                    viewModel.updateTask(it)
+                    viewModel.updateTask(it.copy(isDone = if (System.currentTimeMillis() > it.datetime) it.isDone else false))
                     viewModel.setShowEditTaskBottomSheet(false)
                 },
                 onDelete = { viewModel.deleteTask(it) },
