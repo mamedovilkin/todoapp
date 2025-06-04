@@ -1,3 +1,5 @@
+@file:Suppress("DEPRECATION")
+
 package io.github.mamedovilkin.todoapp.ui.theme
 
 import android.app.Activity

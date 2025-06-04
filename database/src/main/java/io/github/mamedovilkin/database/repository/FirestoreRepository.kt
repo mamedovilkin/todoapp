@@ -3,6 +3,10 @@ package io.github.mamedovilkin.database.repository
 import io.github.mamedovilkin.database.room.Task
 
 interface FirestoreRepository {
-    fun insert(task: Task, callback: (Exception?) -> Unit)
-    fun delete(task: Task, callback: (Exception?) -> Unit)
+    suspend fun setLastSignIn(uid: String)
+    suspend fun setPremium(uid: String, isPremium: Boolean)
+    suspend fun deleteAllData(uid: String)
+    suspend fun insert(uid: String, task: Task)
+    suspend fun delete(uid: String, taskId: String)
+    suspend fun get(uid: String): List<Task>
 }

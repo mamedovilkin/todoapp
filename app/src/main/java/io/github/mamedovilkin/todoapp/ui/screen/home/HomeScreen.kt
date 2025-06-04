@@ -1,6 +1,5 @@
 package io.github.mamedovilkin.todoapp.ui.screen.home
 
-import android.widget.Toast
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -59,8 +58,12 @@ fun HomeScreen(
 ) {
     val context = LocalContext.current
     val lazyListState = rememberLazyListState()
-    val newTaskSheetState = rememberModalBottomSheetState()
-    val editTaskSheetState = rememberModalBottomSheetState()
+    val newTaskSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    val editTaskSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
     val uiState by viewModel.uiState.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     val showUpFloatingActionButton by remember {
@@ -70,22 +73,29 @@ fun HomeScreen(
     }
     val snackbarHostState = remember { SnackbarHostState() }
     val exception = uiState.exception
+    val userID by viewModel.userID.collectAsState()
+    val photoURL by viewModel.photoURL.collectAsState()
+    val showStatistics by viewModel.showStatistics.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.setShowNewTaskBottomSheet(shouldOpenNewTaskDialog)
-        viewModel.isSignedIn()
-        viewModel.getShowStatistics()
         viewModel.observeTasks()
 
-        if (exception != null) {
-            Toast.makeText(context, exception.message.toString(), Toast.LENGTH_LONG).show()
+        exception?.let {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = it.message.toString(),
+                    duration = SnackbarDuration.Short
+                )
+            }
         }
     }
 
     Scaffold(
         topBar = {
             ToDoAppTopBar(
-                firebaseUser = uiState.currentUser
+                userID = userID,
+                photoURL = photoURL
             )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) { snackbarData ->
@@ -124,7 +134,7 @@ fun HomeScreen(
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     TaskList(
-                        showStatistics = uiState.showStatistics,
+                        showStatistics = showStatistics,
                         innerPadding = innerPadding,
                         lazyListState = lazyListState,
                         tasks = result.tasks,
@@ -154,7 +164,10 @@ fun HomeScreen(
 
                                 when (snackBar) {
                                     SnackbarResult.ActionPerformed -> {
-                                        viewModel.newTask(it)
+                                        viewModel.newTask(it.copy(
+                                            isSynced = false,
+                                            updatedAt = System.currentTimeMillis()
+                                        ))
                                     }
                                     SnackbarResult.Dismissed -> {}
                                 }
@@ -163,9 +176,7 @@ fun HomeScreen(
                         modifier = if (windowWidthSizeClass == WindowWidthSizeClass.Compact) {
                             Modifier.fillMaxSize()
                         } else {
-                            Modifier
-                                .width(600.dp)
-                                .fillMaxHeight()
+                            Modifier.width(600.dp).fillMaxHeight()
                         },
                     )
                     AnimatedVisibility(

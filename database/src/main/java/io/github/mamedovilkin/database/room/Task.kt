@@ -22,6 +22,7 @@ data class Task(
     val isSynced: Boolean = false,
     val repeatType: RepeatType = RepeatType.ONE_TIME,
     val repeatDaysOfWeek: List<Int> = emptyList<Int>(),
+    val updatedAt: Long = System.currentTimeMillis(),
 ) : Parcelable
 
 fun Task.toHashMap(): HashMap<String, Any> {
@@ -33,8 +34,9 @@ fun Task.toHashMap(): HashMap<String, Any> {
         "isDone" to isDone,
         "datetime" to datetime,
         "isSynced" to isSynced,
-        "repeatType" to repeatType,
+        "repeatType" to repeatType.name,
         "repeatDaysOfWeek" to repeatDaysOfWeek,
+        "updatedAt" to updatedAt,
     )
 }
 

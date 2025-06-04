@@ -9,9 +9,11 @@ import androidx.annotation.RequiresPermission
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.receiver.TaskReminderReceiver
-import io.github.mamedovilkin.todoapp.util.FIVE_MINUTES_IN_MILLISECONDS
+import io.github.mamedovilkin.todoapp.util.FIFTEEN_MINUTES_OFFSET
+import io.github.mamedovilkin.todoapp.util.FIVE_MINUTES_OFFSET
 import io.github.mamedovilkin.todoapp.util.TASK_KEY
-import io.github.mamedovilkin.todoapp.util.TEN_MINUTES_IN_MILLISECONDS
+import io.github.mamedovilkin.todoapp.util.TEN_MINUTES_OFFSET
+import io.github.mamedovilkin.todoapp.util.TWENTY_MINUTES_OFFSET
 import java.util.Calendar
 
 class TaskReminderRepositoryImpl(
@@ -27,9 +29,10 @@ class TaskReminderRepositoryImpl(
         val pendingIntents = getPendingIntents(updatedTask)
 
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime, pendingIntents[0])
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + FIVE_MINUTES_IN_MILLISECONDS, pendingIntents[1])
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TEN_MINUTES_IN_MILLISECONDS, pendingIntents[2])
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TEN_MINUTES_IN_MILLISECONDS, pendingIntents[3])
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + FIVE_MINUTES_OFFSET, pendingIntents[1])
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TEN_MINUTES_OFFSET, pendingIntents[2])
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + FIFTEEN_MINUTES_OFFSET, pendingIntents[3])
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TWENTY_MINUTES_OFFSET, pendingIntents[4])
 
         return updatedTask
     }
@@ -103,7 +106,10 @@ class TaskReminderRepositoryImpl(
 
         val todayDayOfWeek = now.get(Calendar.DAY_OF_WEEK)
 
-        val difference = days.minOf { (7 - todayDayOfWeek) + it % 7 }
+        val difference = days.minOf {
+            val diff = it - todayDayOfWeek
+            if (diff <= 0) diff + 7 else diff
+        }
 
         now.add(Calendar.DAY_OF_MONTH, difference)
 
@@ -117,18 +123,24 @@ class TaskReminderRepositoryImpl(
         alarmManager.cancel(pendingIntents[1])
         alarmManager.cancel(pendingIntents[2])
         alarmManager.cancel(pendingIntents[3])
+        alarmManager.cancel(pendingIntents[4])
     }
 
     override fun getPendingIntents(task: Task): List<PendingIntent> {
-        val offsets = listOf(0, FIVE_MINUTES_IN_MILLISECONDS, TEN_MINUTES_IN_MILLISECONDS, -1)
+        val offsets = listOf(
+            0,
+            FIVE_MINUTES_OFFSET,
+            TEN_MINUTES_OFFSET,
+            FIFTEEN_MINUTES_OFFSET,
+            TWENTY_MINUTES_OFFSET
+        )
 
         return offsets.map { offset ->
             val intent = Intent(context, TaskReminderReceiver::class.java).apply {
                 putExtra(TASK_KEY, task)
-                putExtra("OFFSET", offset)
             }
 
-            val requestCode = task.id.hashCode() + offset.hashCode()
+            val requestCode = 31 * task.id.hashCode() + offset.hashCode()
 
             PendingIntent.getBroadcast(
                 context,

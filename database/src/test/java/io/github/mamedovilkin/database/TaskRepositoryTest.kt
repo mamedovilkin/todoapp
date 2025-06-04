@@ -1,6 +1,5 @@
 package io.github.mamedovilkin.database
 
-import io.github.mamedovilkin.database.mock.FakeTaskRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
 import junit.framework.TestCase.assertEquals
@@ -15,8 +14,29 @@ import org.junit.runners.JUnit4
 class TaskRepositoryTest {
 
     private val taskRepository: TaskRepository = FakeTaskRepository()
-    private var task1 = Task("1", "Clean my room up")
+    private var task1 = Task("1", "Clean my room up", isSynced = true)
     private var task2 = Task("2", "Do homework", isDone = true)
+
+    @Test
+    fun repositoryGetTasks_returnsAllTasksFromRepository() = runBlocking {
+        taskRepository.insert(task1)
+        taskRepository.insert(task2)
+
+        val allTasks = taskRepository.tasks.first()
+
+        assertEquals(allTasks[0], task1)
+        assertEquals(allTasks[1], task2)
+    }
+
+    @Test
+    fun repositoryUnSyncedTasks_returnsAllUnSyncedTasksFromRepository() = runBlocking {
+        taskRepository.insert(task1)
+        taskRepository.insert(task2)
+
+        val allTasks = taskRepository.unSyncedTasks.first()
+
+        assertEquals(allTasks.size, 1)
+    }
 
     @Test
     fun repositoryInsert_insertsTaskIntoRepository() = runBlocking {
@@ -28,14 +48,34 @@ class TaskRepositoryTest {
     }
 
     @Test
-    fun repositoryGetTasks_returnsAllTasksFromRepository() = runBlocking {
-        taskRepository.insert(task1)
-        taskRepository.insert(task2)
+    fun repositoryInsert_insertsAllTasksIntoRepository() = runBlocking {
+        taskRepository.insertAll(listOf(task1, task2))
 
         val allTasks = taskRepository.tasks.first()
 
-        assertEquals(allTasks[0], task1)
-        assertEquals(allTasks[1], task2)
+        assertEquals(allTasks.size, 2)
+    }
+
+    @Test
+    fun repositoryDeleteTask_deleteTaskFromRepository() = runBlocking {
+        taskRepository.insert(task1)
+
+        taskRepository.delete(task1)
+
+        val allTasks = taskRepository.tasks.first()
+
+        assertTrue(allTasks.isEmpty())
+    }
+
+    @Test
+    fun repositoryDeleteAllTasks_deleteAllTasksFromRepository() = runBlocking {
+        taskRepository.insert(task1)
+
+        taskRepository.deleteAll()
+
+        val allTasks = taskRepository.tasks.first()
+
+        assertTrue(allTasks.isEmpty())
     }
 
     @Test
@@ -50,18 +90,5 @@ class TaskRepositoryTest {
 
         assertEquals(allTasks[0], Task("1", "Walk my dog", isDone = true))
         assertEquals(allTasks[1], Task("2", "Call mom"))
-    }
-
-    @Test
-    fun repositoryDeleteTasks_deletesAllTasksFromRepository() = runBlocking {
-        taskRepository.insert(task1)
-        taskRepository.insert(task2)
-
-        taskRepository.delete(task1)
-        taskRepository.delete(task2)
-
-        val allTasks = taskRepository.tasks.first()
-
-        assertTrue(allTasks.isEmpty())
     }
 }

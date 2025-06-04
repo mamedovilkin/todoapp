@@ -9,20 +9,15 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.net.toUri
-import androidx.credentials.ClearCredentialStateRequest
-import androidx.credentials.Credential
-import androidx.credentials.CredentialManager
-import androidx.credentials.CustomCredential
-import androidx.credentials.GetCredentialRequest
-import androidx.credentials.exceptions.ClearCredentialException
-import androidx.credentials.exceptions.GetCredentialException
-import androidx.credentials.exceptions.NoCredentialException
 import androidx.lifecycle.lifecycleScope
-import com.google.android.libraries.identity.googleid.GetGoogleIdOption
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
-import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential.Companion.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.GoogleAuthProvider
+import com.vk.id.AccessToken
+import com.vk.id.VKID
+import com.vk.id.VKIDAuthFail
+import com.vk.id.auth.VKIDAuthCallback
+import com.vk.id.logout.VKIDLogoutCallback
+import com.vk.id.logout.VKIDLogoutFail
+import io.github.mamedovilkin.database.repository.DataStoreRepository
+import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.ui.screen.settings.SettingsScreen
@@ -30,20 +25,56 @@ import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.util.APP_LINK
 import io.github.mamedovilkin.todoapp.util.FEEDBACK_EMAIL
 import io.github.mamedovilkin.todoapp.util.WEBSITE_LINK
-import kotlinx.coroutines.Dispatchers
+import io.github.mamedovilkin.todoapp.util.isInternetAvailable
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import org.koin.android.ext.android.inject
 import org.koin.core.component.KoinComponent
+import java.lang.ref.WeakReference
 
 class SettingsActivity : ComponentActivity(), KoinComponent {
 
-    private val auth: FirebaseAuth by inject()
+    private val dataStoreRepository: DataStoreRepository by inject()
+    private val firestoreRepository: FirestoreRepository by inject()
     private val syncWorkerRepository: SyncWorkerRepository by inject()
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        val activityRef = WeakReference(this)
+
+        val vkidAuthCallback = object : VKIDAuthCallback {
+            override fun onAuth(accessToken: AccessToken) {
+                val userID = accessToken.userID
+                val user = accessToken.userData
+
+                activityRef.get()?.lifecycleScope?.launch {
+                    dataStoreRepository.setUserID(userID.toString())
+                    dataStoreRepository.setPhotoURL(user.photo200.toString())
+                    dataStoreRepository.setDisplayName(user.firstName)
+                    firestoreRepository.setLastSignIn(userID.toString())
+                    syncWorkerRepository.scheduleSyncTasksWork()
+                }
+            }
+
+            override fun onFail(fail: VKIDAuthFail) {
+                activityRef.get()?.toast(fail.description)
+            }
+        }
+
+        val vkidLogoutCallback = object : VKIDLogoutCallback {
+            override fun onSuccess() {
+                activityRef.get()?.lifecycleScope?.launch {
+                    dataStoreRepository.setUserID("")
+                    dataStoreRepository.setPhotoURL("")
+                    dataStoreRepository.setDisplayName("")
+                }
+            }
+
+            override fun onFail(fail: VKIDLogoutFail) {
+                activityRef.get()?.toast(fail.description)
+            }
+        }
 
         enableEdgeToEdge()
         setContent {
@@ -55,85 +86,29 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     windowWidthSizeClass = windowSizeClass.widthSizeClass,
                     version = packageInfo.versionName.toString(),
                     onBack = { onBackPressedDispatcher.onBackPressed() },
-                    onSignIn = { launchCredentialManager() },
-                    onSignOut = { signOut() },
+                    onSignIn = {
+                        lifecycleScope.launch {
+                            if (isInternetAvailable()) {
+                                VKID.instance.authorize(vkidAuthCallback)
+                            } else {
+                                toast(getString(R.string.no_internet_connection))
+                            }
+                        }
+                    },
+                    onSignOut = {
+                        lifecycleScope.launch {
+                            if (isInternetAvailable()) {
+                                VKID.instance.logout(vkidLogoutCallback)
+                            } else {
+                                toast(getString(R.string.no_internet_connection))
+                            }
+                        }
+                    },
                     onFeedback = { sendFeedback() },
                     onRateUs = { rateUs() },
                     onTellFriend = { tellFriend() },
                     onAboutDeveloper = { openDeveloperWebsite() }
                 )
-            }
-        }
-    }
-
-    private fun launchCredentialManager() {
-        val googleIdOption = GetGoogleIdOption.Builder()
-            .setServerClientId(getString(R.string.default_web_client_id))
-            .setFilterByAuthorizedAccounts(false)
-            .build()
-
-        val request = GetCredentialRequest.Builder()
-            .addCredentialOption(googleIdOption)
-            .build()
-
-        lifecycleScope.launch {
-            val result = withContext(Dispatchers.IO) {
-                val localManager = CredentialManager.create(applicationContext)
-                try {
-                    localManager.getCredential(
-                        context = applicationContext,
-                        request = request
-                    )
-                } catch (e: GetCredentialException) {
-                    withContext(Dispatchers.Main) {
-                        toast(e.localizedMessage)
-                    }
-                    null
-                } catch (e: NoCredentialException) {
-                    withContext(Dispatchers.Main) {
-                        toast(e.localizedMessage)
-                    }
-                    null
-                }
-            }
-
-            result?.credential?.let { handleSignIn(it) }
-        }
-    }
-
-    private fun handleSignIn(credential: Credential) {
-        if (credential is CustomCredential && credential.type == TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-            firebaseAuthWithGoogle(googleIdTokenCredential.idToken)
-        } else {
-            toast("Credential is not of type Google ID!")
-        }
-    }
-
-    private fun firebaseAuthWithGoogle(idToken: String) {
-        val credential = GoogleAuthProvider.getCredential(idToken, null)
-        auth.signInWithCredential(credential)
-            .addOnCompleteListener(this) { task ->
-                if (task.isSuccessful) {
-                    syncWorkerRepository.scheduleSyncTasksWork()
-                } else {
-                    toast(task.exception?.localizedMessage)
-                }
-            }
-    }
-
-    private fun signOut() {
-        auth.signOut()
-
-        lifecycleScope.launch {
-            try {
-                val clearRequest = ClearCredentialStateRequest()
-                val credentialManager = CredentialManager.create(applicationContext)
-                credentialManager.clearCredentialState(clearRequest)
-            } catch (e: ClearCredentialException) {
-               withContext(Dispatchers.Main) {
-                   toast(e.localizedMessage)
-               }
             }
         }
     }

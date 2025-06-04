@@ -4,13 +4,15 @@ import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.database.room.Task
 
 class FakeFirestoreRepository : FirestoreRepository {
-    override fun insert(
-        task: Task,
-        callback: (Exception?) -> Unit
-    ) {}
+    override suspend fun setLastSignIn(uid: String) {}
 
-    override fun delete(
-        task: Task,
-        callback: (Exception?) -> Unit
-    ) {}
+    override suspend fun setPremium(uid: String, isPremium: Boolean) {}
+
+    override suspend fun deleteAllData(uid: String) {}
+
+    override suspend fun insert(uid: String, task: Task) {}
+
+    override suspend fun delete(uid: String, taskId: String) {}
+
+    override suspend fun get(uid: String): List<Task> = emptyList()
 }

@@ -3,58 +3,78 @@ package io.github.mamedovilkin.todoapp.worker
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import io.github.mamedovilkin.database.room.Task
-import io.github.mamedovilkin.database.room.TaskDao
-import io.github.mamedovilkin.database.room.toHashMap
+import io.github.mamedovilkin.database.repository.DataStoreRepository
+import io.github.mamedovilkin.database.repository.FirestoreRepository
+import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
+import io.github.mamedovilkin.todoapp.util.isInternetAvailable
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.tasks.await
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import kotlin.getValue
 
 class SyncTasksWorker(
     context: Context,
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams), KoinComponent {
 
-    private val taskDao: TaskDao by inject()
-    private val auth: FirebaseAuth by inject()
-    private val firestore: FirebaseFirestore by inject()
+    private val dataStoreRepository: DataStoreRepository by inject()
+    private val taskRepository: TaskRepository by inject()
+    private val firestoreRepository: FirestoreRepository by inject()
+    private val taskReminderRepository: TaskReminderRepository by inject()
 
     override suspend fun doWork(): Result {
-        val currentUser = auth.currentUser
+        val userID = dataStoreRepository.userID.first()
 
-        if (currentUser != null) {
+        if (userID.isNotEmpty() && isInternetAvailable()) {
             try {
-                val localTasks = taskDao.getTasks().first()
+                val uid = userID.toString()
+                val remoteTasks = firestoreRepository.get(uid)
+                val localTasks = taskRepository.tasks.first()
+                val localTasksMap = localTasks.associateBy { it.id }
+                val remoteTaskIds = remoteTasks.map { it.id }.toSet()
 
-                val remoteTasks = firestore
-                    .collection("users")
-                    .document(currentUser.uid)
-                    .collection("tasks")
-                    .get()
-                    .await()
-                    .toObjects(Task::class.java)
+                for (remoteTask in remoteTasks) {
+                    val localTask = localTasksMap[remoteTask.id]
+                    val localUpdatedAt = localTask?.updatedAt ?: 0L
+                    val remoteUpdatedAt = remoteTask.updatedAt
 
-                taskDao.insertAll(remoteTasks)
+                    when {
+                        localTask == null -> {
+                            taskRepository.insert(remoteTask)
 
-                val batch = firestore.batch()
+                            if (System.currentTimeMillis() < remoteTask.datetime) {
+                                taskReminderRepository.scheduleReminder(remoteTask)
+                            }
+                        }
 
-                localTasks.forEach { task ->
-                    val docRef = firestore
-                        .collection("users")
-                        .document(currentUser.uid)
-                        .collection("tasks")
-                        .document(task.id)
+                        remoteUpdatedAt > localUpdatedAt -> {
+                            taskRepository.update(remoteTask)
 
-                    batch.set(docRef, task.copy(isSynced = true).toHashMap())
+                            if (System.currentTimeMillis() < remoteTask.datetime) {
+                                taskReminderRepository.scheduleReminder(remoteTask)
+                            }
+                        }
+
+                        localUpdatedAt > remoteUpdatedAt -> {
+                            val synced = localTask.copy(isSynced = true)
+                            firestoreRepository.insert(uid, synced)
+                            taskRepository.update(synced)
+                        }
+                    }
                 }
 
-                batch.commit().await()
+                for (localTask in localTasks) {
+                    if (localTask.id !in remoteTaskIds && !localTask.isSynced) {
+                        val synced = localTask.copy(isSynced = true)
+                        firestoreRepository.insert(uid, synced)
+                        taskRepository.update(synced)
+                    }
+                }
 
                 return Result.success()
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                e.printStackTrace()
                 return Result.retry()
             }
         } else {

@@ -49,6 +49,7 @@ import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -121,7 +122,6 @@ import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
-import com.google.firebase.auth.FirebaseUser
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.isExpired
@@ -138,7 +138,8 @@ import kotlin.collections.filter
 @Composable
 fun ToDoAppTopBar(
     modifier: Modifier = Modifier,
-    firebaseUser: FirebaseUser? = null
+    userID: String,
+    photoURL: String,
 ) {
     val context = LocalContext.current
 
@@ -159,8 +160,7 @@ fun ToDoAppTopBar(
                 },
                 modifier = Modifier.testTag(stringResource(R.string.settings))
             ) {
-                val currentUser = firebaseUser
-                if (currentUser == null || currentUser.photoUrl == null) {
+                if (userID.isEmpty() || photoURL.toString().isEmpty()) {
                     Icon(
                         imageVector = Icons.Outlined.Settings,
                         contentDescription = stringResource(R.string.settings),
@@ -168,7 +168,7 @@ fun ToDoAppTopBar(
                     )
                 } else {
                     GlideImage(
-                        model = currentUser.photoUrl.toString(),
+                        model = photoURL.toString(),
                         contentDescription = stringResource(R.string.settings),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -189,7 +189,7 @@ fun ToDoAppTopBar(
 @Composable
 private fun ToDoAppTopBarPreview() {
     ToDoAppTheme {
-        ToDoAppTopBar()
+        ToDoAppTopBar(userID = "", photoURL = "")
     }
 }
 
@@ -622,7 +622,9 @@ fun TaskList(
                                     imageVector = Icons.Default.Repeat,
                                     contentDescription = stringResource(R.string.repeat),
                                     tint = if (task.isExpired()) Color.Red else LocalContentColor.current,
-                                    modifier = Modifier.size(16.dp)
+                                    modifier = Modifier
+                                        .size(16.dp)
+                                        .testTag(stringResource(R.string.repeat))
                                 )
                             }
                         }
@@ -635,7 +637,6 @@ fun TaskList(
                     )
                 }
             }
-
         }
     }
 }
@@ -1439,4 +1440,42 @@ fun CategoryChips(
             )
         }
     }
+}
+
+@Composable
+fun ToDoAppDialog(
+    title: String,
+    text: String,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = { onDismiss() },
+        title = {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.displayMedium
+            )
+        },
+        text = {
+            Text(
+                text = text,
+                style = MaterialTheme.typography.headlineSmall
+            )
+        },
+        confirmButton = {
+            TextButton(onClick = {
+                onConfirm()
+                onDismiss()
+            }) {
+                Text(title)
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = { onDismiss() }) {
+                Text(stringResource(R.string.cancel))
+            }
+        },
+        containerColor = MaterialTheme.colorScheme.surfaceVariant
+    )
 }

@@ -7,10 +7,9 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.preferencesDataStoreFile
 import com.google.firebase.Firebase
 import com.google.firebase.FirebaseApp
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.auth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.firestore
+import com.vk.id.VKID
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.DataStoreRepositoryImpl
 import io.github.mamedovilkin.database.repository.FirestoreRepository
@@ -36,13 +35,13 @@ class ToDoApp : Application() {
         super.onCreate()
 
         FirebaseApp.initializeApp(this)
+        VKID.init(this)
 
         startKoin {
             androidContext(this@ToDoApp)
             modules(
                 module {
                     // Firebase
-                    single<FirebaseAuth> { Firebase.auth }
                     single<FirebaseFirestore> { Firebase.firestore }
 
                     // Room
@@ -50,10 +49,8 @@ class ToDoApp : Application() {
 
                     // DataStore
                     single<DataStore<Preferences>> {
-                        val context = androidContext()
-
                         PreferenceDataStoreFactory.create {
-                            context.preferencesDataStoreFile("todoapp_preferences")
+                            androidContext().preferencesDataStoreFile("todoapp_preferences")
                         }
                     }
 
@@ -62,11 +59,11 @@ class ToDoApp : Application() {
                     single<SyncWorkerRepository> { SyncWorkerRepositoryImpl(androidContext()) }
                     single<TaskRepository> { TaskRepositoryImpl(get()) }
                     single<DataStoreRepository> { DataStoreRepositoryImpl(get()) }
-                    single<FirestoreRepository> { FirestoreRepositoryImpl(get(), get()) }
+                    single<FirestoreRepository> { FirestoreRepositoryImpl(get()) }
 
                     // ViewModel
-                    viewModel { HomeViewModel(get(), get(), get(), get(), get(), get()) }
-                    viewModel { SettingsViewModel(get(), get()) }
+                    viewModel { HomeViewModel(get(), get(), get(), get()) }
+                    viewModel { SettingsViewModel(get(), get(), get()) }
                 }
             )
         }

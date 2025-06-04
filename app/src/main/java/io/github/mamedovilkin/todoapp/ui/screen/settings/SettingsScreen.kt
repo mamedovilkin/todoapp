@@ -1,5 +1,6 @@
 package io.github.mamedovilkin.todoapp.ui.screen.settings
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,11 +17,12 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Code
+import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -29,16 +31,16 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -49,6 +51,9 @@ import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.common.Setting
 import io.github.mamedovilkin.todoapp.ui.common.SettingsCategory
 import io.github.mamedovilkin.todoapp.ui.common.SettingsTopBar
+import io.github.mamedovilkin.todoapp.ui.common.ToDoAppDialog
+import io.github.mamedovilkin.todoapp.util.isInternetAvailable
+import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
 @OptIn(ExperimentalGlideComposeApi::class)
@@ -65,43 +70,37 @@ fun SettingsScreen(
     onAboutDeveloper: () -> Unit,
     viewModel: SettingsViewModel = koinViewModel()
 ) {
+    val coroutineScope = rememberCoroutineScope()
+    val context = LocalContext.current
     val uiState by viewModel.uiState.collectAsState()
-    val currentUser = uiState.currentUser
+    val userID by viewModel.userID.collectAsState()
+    val photoURL by viewModel.photoURL.collectAsState()
+    val displayName by viewModel.displayName.collectAsState()
+    val showStatistics by viewModel.showStatistics.collectAsState()
 
-    LaunchedEffect(Unit) {
-        viewModel.isSignedIn()
-        viewModel.getShowStatistics()
+    if (uiState.showSignOutDialog) {
+        ToDoAppDialog(
+            title = stringResource(R.string.sign_out),
+            text = stringResource(R.string.do_you_really_want_to_sign_out),
+            onDismiss = { viewModel.setShowSignOutDialog(false) },
+            onConfirm = onSignOut
+        )
     }
 
-    if (uiState.showDialog) {
-        AlertDialog(
-            onDismissRequest = { viewModel.setShowDialog(false) },
-            title = {
-                Text(
-                    text = stringResource(R.string.sign_out),
-                    style = MaterialTheme.typography.displayMedium
-                )
-            },
-            text = {
-                Text(
-                    text = stringResource(R.string.do_you_really_want_to_sign_out),
-                    style = MaterialTheme.typography.headlineSmall
-                )
-            },
-            confirmButton = {
-                TextButton(onClick = {
-                    onSignOut()
-                    viewModel.setShowDialog(false)
-                }) {
-                    Text(stringResource(R.string.sign_out))
+    if (uiState.showDeleteAllDataDialog) {
+        ToDoAppDialog(
+            title = stringResource(R.string.delete_all_data),
+            text = stringResource(R.string.do_you_really_want_to_delete_all_data),
+            onDismiss = { viewModel.setShowDeleteAllDataDialog(false) },
+            onConfirm = {
+                coroutineScope.launch {
+                    if (isInternetAvailable()) {
+                        viewModel.deleteAllData()
+                    } else {
+                        Toast.makeText(context, context.getString(R.string.no_internet_connection), Toast.LENGTH_LONG).show()
+                    }
                 }
-            },
-            dismissButton = {
-                TextButton(onClick = { viewModel.setShowDialog(false) }) {
-                    Text(stringResource(R.string.cancel))
-                }
-            },
-            containerColor = MaterialTheme.colorScheme.surfaceVariant
+            }
         )
     }
 
@@ -146,13 +145,13 @@ fun SettingsScreen(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .clickable {
-                                    if (currentUser == null) {
+                                    if (userID.isEmpty()) {
                                         onSignIn()
                                     } else {
-                                        viewModel.setShowDialog(true)
+                                        viewModel.setShowSignOutDialog(true)
                                     }
                                 }
-                                .testTag(stringResource(R.string.google_account))
+                                .testTag(stringResource(R.string.vk_id))
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
@@ -161,17 +160,17 @@ fun SettingsScreen(
                                     .fillMaxWidth()
                                     .padding(16.dp)
                             ) {
-                                if (currentUser == null || currentUser.photoUrl == null) {
+                                if (userID.isEmpty() || photoURL.isEmpty()) {
                                     Icon(
                                         imageVector = Icons.Outlined.AccountCircle,
-                                        contentDescription = stringResource(R.string.google_account),
+                                        contentDescription = stringResource(R.string.vk_id),
                                         tint = MaterialTheme.colorScheme.onPrimaryContainer,
                                         modifier = Modifier.size(48.dp)
                                     )
                                 } else {
                                     GlideImage(
-                                        model = currentUser.photoUrl.toString(),
-                                        contentDescription = stringResource(R.string.google_account),
+                                        model = photoURL.toString(),
+                                        contentDescription = stringResource(R.string.vk_id),
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
                                             .size(48.dp)
@@ -182,14 +181,78 @@ fun SettingsScreen(
                                     verticalArrangement = Arrangement.Center
                                 ) {
                                     Text(
-                                        text = currentUser?.displayName ?: stringResource(R.string.google_account),
+                                        text = if (displayName.isEmpty()) stringResource(R.string.vk_id) else displayName,
                                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         style = MaterialTheme.typography.displayMedium
                                     )
                                     Text(
-                                        text = currentUser?.email ?: stringResource(R.string.sign_in_to_your_google_account),
+                                        text = if (userID.isEmpty()) stringResource(R.string.sign_in_with_your_vk_id) else "ID: $userID",
                                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         style = MaterialTheme.typography.headlineSmall
+                                    )
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.free),
+                                style = MaterialTheme.typography.displayMedium
+                            )
+                            Button(onClick = {}) {
+                                Text(stringResource(R.string.go_premium))
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.setShowDeleteAllDataDialog(true) }
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier.padding(16.dp)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = stringResource(R.string.delete_all_data),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Column(
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.delete_all_data),
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        style = MaterialTheme.typography.headlineMedium
                                     )
                                 }
                             }
@@ -233,7 +296,7 @@ fun SettingsScreen(
                                 }
                             }
                             Switch(
-                                checked = uiState.showStatistics,
+                                checked = showStatistics,
                                 onCheckedChange = {
                                     viewModel.setShowStatistics(it)
                                 },

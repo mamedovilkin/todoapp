@@ -3,9 +3,10 @@ package io.github.mamedovilkin.todoapp.worker
 import android.content.Context
 import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.firestore.FirebaseFirestore
-import kotlinx.coroutines.tasks.await
+import io.github.mamedovilkin.database.repository.DataStoreRepository
+import io.github.mamedovilkin.database.repository.FirestoreRepository
+import io.github.mamedovilkin.todoapp.util.isInternetAvailable
+import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -14,22 +15,17 @@ class SyncDeleteWorker(
     workerParams: WorkerParameters
 ) : CoroutineWorker(context, workerParams), KoinComponent {
 
-    private val auth: FirebaseAuth by inject()
-    private val firestore: FirebaseFirestore by inject()
+    private val dataStoreRepository: DataStoreRepository by inject()
+    private val firestoreRepository: FirestoreRepository by inject()
 
     override suspend fun doWork(): Result {
-        val currentUser = auth.currentUser
+        val userID = dataStoreRepository.userID.first()
 
-        if (currentUser != null) {
+        if (userID.isNotEmpty() && isInternetAvailable()) {
             try {
                 val taskId = inputData.getString("taskId") ?: return Result.failure()
 
-                firestore.collection("users")
-                    .document(currentUser.uid)
-                    .collection("tasks")
-                    .document(taskId)
-                    .delete()
-                    .await()
+                firestoreRepository.delete(userID.toString(), taskId)
 
                 return Result.success()
             } catch (_: Exception) {

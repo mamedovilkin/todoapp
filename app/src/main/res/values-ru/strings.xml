@@ -33,15 +33,15 @@
     <string name="there_are_no_tasks_for_today">Нет задач на сегодня</string>
     <string name="refresh">Обновить</string>
     <string name="settings">Настройки</string>
-    <string name="google_account">Google Аккаунт</string>
-    <string name="sign_in_to_your_google_account">Войдите в свой Google Аккаунт</string>
+    <string name="vk_id">VK ID</string>
+    <string name="sign_in_with_your_vk_id">Войдите используя свой VK ID</string>
     <string name="sign_out">Выйти</string>
     <string name="do_you_really_want_to_sign_out">Вы действительно хотите выйти?</string>
     <string name="show_statistics">Показывать статистику</string>
     <string name="about">О приложении</string>
     <string name="feedback">Обратная связь</string>
     <string name="rate_us">Оцените нас</string>
-    <string name="tell_a_friend">Расскажи другу</string>
+    <string name="tell_a_friend">Расскажите другу</string>
     <string name="about_developer">О разработчике</string>
     <string name="version">Версия %s</string>
     <string name="mark_as_completed">Отметить как выполнено</string>
@@ -52,6 +52,11 @@
     <string name="category">Категория</string>
     <string name="back">Назад</string>
     <string name="repeat">Повтор</string>
+    <string name="free">Бесплатный</string>
+    <string name="go_premium">Перейти на Premium</string>
+    <string name="no_internet_connection">Нет интернет соединения</string>
+    <string name="delete_all_data">Удалить все данные</string>
+    <string name="do_you_really_want_to_delete_all_data">Вы действительно хотите удалить все данные?</string>
     <string-array name="repeat_types">
         <item>Один раз</item>
         <item>Ежедневно</item>

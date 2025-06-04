@@ -37,7 +37,7 @@ class HomeScreenTest {
     val composeTestRule = createAndroidComposeRule<ToDoAppActivity>()
 
     @Test
-    fun homeScreen_settingsButtonClickedMenuDisplayed() {
+    fun homeScreen_settingsButtonClickedSettingsDisplayed() {
         composeTestRule.waitUntil {
             composeTestRule
                 .onNodeWithTag("Settings")
@@ -253,6 +253,12 @@ class HomeScreenTest {
             composeTestRule
                 .onNodeWithText("New task")
                 .performClick()
+
+            composeTestRule.waitUntil {
+                composeTestRule
+                    .onNodeWithText("Repeat")
+                    .isDisplayed()
+            }
 
             composeTestRule
                 .onNodeWithTag("New task")
@@ -552,5 +558,102 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Walk my dog")
             .assertIsNotDisplayed()
+    }
+
+    @Test
+    fun homeScreen_deleteAllDataClickedAllTasksDelete() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Walk my dog")
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Settings")
+            .performClick()
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithText("Settings")
+                .onFirst()
+                .isDisplayed()
+        }
+
+        composeTestRule
+            .onNodeWithText("Delete all data")
+            .performClick()
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithText("Do you really want to delete all data?")
+                .isDisplayed()
+        }
+
+        composeTestRule
+            .onAllNodesWithText("Delete all data")
+            .onLast()
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Back")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("No tasks yet")
+            .isDisplayed()
+    }
+
+    @Test
+    fun homeScreen_dailyRepeatSelectedRepeatIconDisplayed() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Repeat")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Daily")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Walk my dog")
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Repeat")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun homeScreen_weeklyRepeatSelectedWeekdaysDisplayed() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Repeat")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Weekly")
+            .performClick()
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithText("Mon")
+                .isDisplayed()
+        }
     }
 }

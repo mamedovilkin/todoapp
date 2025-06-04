@@ -3,22 +3,22 @@ package io.github.mamedovilkin.todoapp.ui.screen.home
 import androidx.compose.runtime.Immutable
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseUser
 import io.github.mamedovilkin.database.repository.DataStoreRepository
-import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
-import io.github.mamedovilkin.todoapp.util.isInternetAvailable
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import java.util.UUID
+import kotlin.text.isNotEmpty
 
 sealed class Result {
     data class Failure(val error: Throwable): Result()
@@ -26,17 +26,15 @@ sealed class Result {
         val tasks: List<Task>,
         val categories: Set<String>
     ): Result()
-    data object Loading : Result()
-    data object NoTasks : Result()
+    data object Loading: Result()
+    data object NoTasks: Result()
 }
 
 @Immutable
 data class HomeUiState(
-    val currentUser: FirebaseUser? = null,
     val query: String = "",
     val selectedCategory: String = "",
     val notDoneTasksCount: Int = 0,
-    val showStatistics: Boolean = false,
     val result: Result = Result.Loading,
     val exception: Exception? = null,
     val task: Task? = null,
@@ -45,136 +43,107 @@ data class HomeUiState(
 )
 
 class HomeViewModel(
-    private val auth: FirebaseAuth,
     private val taskRepository: TaskRepository,
     private val taskReminderRepository: TaskReminderRepository,
-    private val dataStoreRepository: DataStoreRepository,
-    private val firestoreRepository: FirestoreRepository,
-    private val syncWorkerRepository: SyncWorkerRepository
+    private val syncWorkerRepository: SyncWorkerRepository,
+    dataStoreRepository: DataStoreRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
 
-    fun isSignedIn() = viewModelScope.launch {
-        auth.addAuthStateListener {
-            _uiState.update { currentState ->
+    val userID = dataStoreRepository.userID
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            ""
+        )
+
+    val photoURL = dataStoreRepository.photoURL
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            ""
+        )
+
+    val showStatistics = dataStoreRepository.showStatistics
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            false
+        )
+
+    fun observeTasks() = viewModelScope.launch {
+        taskRepository.tasks
+            .catch { error ->
+                setFailureResult(error)
+            }
+            .collect { tasks ->
+                setSuccessResult(tasks)
+            }
+    }
+
+    private fun setFailureResult(error: Throwable) {
+        _uiState.update { currentState ->
+            currentState.copy(result = Result.Failure(error))
+        }
+    }
+
+    private fun setSuccessResult(tasks: List<Task>) {
+        _uiState.update { currentState ->
+            if (tasks.isEmpty()) {
+                currentState.copy(result = Result.NoTasks)
+            } else {
+                val notDoneTasksCount = tasks.filter { !it.isDone }.size
+                val categories = tasks
+                    .filter { it.category.isNotEmpty() }
+                    .map { it.category }
+                    .toSet()
+
                 currentState.copy(
-                    currentUser = it.currentUser
+                    result = Result.Success(
+                        tasks = tasks,
+                        categories = categories
+                    ),
+                    notDoneTasksCount = notDoneTasksCount
                 )
             }
         }
     }
 
-    fun getShowStatistics() = viewModelScope.launch {
-        dataStoreRepository.showStatistics
-            .catch {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        showStatistics = false
-                    )
-                }
-            }
-            .collect {
-                _uiState.update { currentState ->
-                    currentState.copy(
-                        showStatistics = it
-                    )
-                }
-            }
-    }
-
-    fun observeTasks() = viewModelScope.launch {
-        taskRepository.tasks
-            .catch { error ->
-                _uiState.update { currentState ->
-                    currentState.copy(result = Result.Failure(error))
-                }
-            }
-            .collect { tasks ->
-                _uiState.update { currentState ->
-                    if (tasks.isEmpty()) {
-                        currentState.copy(result = Result.NoTasks)
-                    } else {
-                        val notDoneTasksCount = tasks.filter { !it.isDone }.size
-                        val categories = tasks
-                            .filter { it.category.isNotEmpty() }
-                            .map { it.category }
-                            .toSet()
-
-                        currentState.copy(
-                            result = Result.Success(
-                                tasks = tasks,
-                                categories = categories
-                            ),
-                            notDoneTasksCount = notDoneTasksCount
-                        )
-                    }
-                }
-            }
-    }
-
     fun newTask(task: Task) = viewModelScope.launch {
         var newTask = task.copy(id = UUID.randomUUID().toString())
-        val currentUser = _uiState.value.currentUser
 
         newTask = taskReminderRepository.scheduleReminder(newTask)
-        taskRepository.insert(newTask)
 
-        if (currentUser != null && isInternetAvailable()) {
-            firestoreRepository.insert(newTask.copy(isSynced = true)) { e ->
-                if (e == null) {
-                    viewModelScope.launch {
-                        taskRepository.insert(newTask.copy(isSynced = true))
-                    }
-                } else {
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            exception = e
-                        )
-                    }
-                }
-            }
-        } else if (currentUser != null) {
-            syncWorkerRepository.scheduleUnSyncTasksWork()
-        }
+        taskRepository.insert(newTask)
+        syncWorkerRepository.scheduleSyncTasksWork()
     }
 
-    fun deleteTask(task: Task) = viewModelScope.launch {
-        taskReminderRepository.cancelReminder(task)
-        taskRepository.delete(task)
-        syncWorkerRepository.scheduleSyncDeleteTaskWork(task.id)
+    fun deleteTask(task: Task) {
+        viewModelScope.launch {
+            taskRepository.delete(task)
+        }.invokeOnCompletion {
+            taskReminderRepository.cancelReminder(task)
+            syncWorkerRepository.scheduleSyncDeleteTaskWork(task.id)
+        }
     }
 
     fun updateTask(task: Task) = viewModelScope.launch {
-        val currentUser = _uiState.value.currentUser
+        var updatedTask = task.copy(
+            isSynced = false,
+            updatedAt = System.currentTimeMillis()
+        )
 
-        var updatedTask = if (task.isDone) {
-            taskReminderRepository.cancelReminder(task)
-            task
+        updatedTask = if (updatedTask.isDone && updatedTask.repeatType == RepeatType.ONE_TIME) {
+            taskReminderRepository.cancelReminder(updatedTask)
+            updatedTask
         } else {
-            taskReminderRepository.scheduleReminder(task)
+            taskReminderRepository.scheduleReminder(updatedTask)
         }
 
         taskRepository.update(updatedTask)
-
-        if (currentUser != null && isInternetAvailable()) {
-            firestoreRepository.insert(updatedTask.copy(isSynced = true)) { e ->
-                if (e == null) {
-                    viewModelScope.launch {
-                        taskRepository.update(updatedTask.copy(isSynced = true))
-                    }
-                } else {
-                    _uiState.update { currentState ->
-                        currentState.copy(
-                            exception = e
-                        )
-                    }
-                }
-            }
-        } else if (currentUser != null) {
-            syncWorkerRepository.scheduleUnSyncTasksWork()
-        }
+        syncWorkerRepository.scheduleSyncTasksWork()
     }
 
     fun searchForTasks(query: String) {

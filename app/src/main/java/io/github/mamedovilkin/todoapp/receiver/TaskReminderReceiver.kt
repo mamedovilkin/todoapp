@@ -11,21 +11,17 @@ import android.os.Build
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import com.google.firebase.auth.FirebaseAuth
-import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
-import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity
 import io.github.mamedovilkin.todoapp.util.CHANNEL_ID
 import io.github.mamedovilkin.todoapp.util.MARK_TASK_COMPLETED_ACTION
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_ID
 import io.github.mamedovilkin.todoapp.util.REQUEST_CODE
 import io.github.mamedovilkin.todoapp.util.TASK_KEY
-import io.github.mamedovilkin.todoapp.util.isInternetAvailable
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -34,10 +30,7 @@ import org.koin.core.component.inject
 
 class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
 
-    private val taskReminderRepository: TaskReminderRepository by inject()
     private val taskRepository: TaskRepository by inject()
-    private val auth: FirebaseAuth by inject()
-    private val firestoreRepository: FirestoreRepository by inject()
     private val syncWorkerRepository: SyncWorkerRepository by inject()
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
@@ -51,33 +44,20 @@ class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
             intent.getParcelableExtra<Task>(TASK_KEY)
         } ?: return
 
-        val offset = intent.getIntExtra("OFFSET", 0)
+        if (task.repeatType != RepeatType.ONE_TIME) {
+            CoroutineScope(Dispatchers.IO).launch {
+                val updatedTask = task.copy(
+                    isDone = false,
+                    isSynced = false,
+                    updatedAt = System.currentTimeMillis()
+                )
+
+                taskRepository.update(updatedTask)
+                syncWorkerRepository.scheduleSyncTasksWork()
+            }
+        }
 
         createNotification(task, context)
-
-        if (offset == -1 && task.repeatType != RepeatType.ONE_TIME) {
-            CoroutineScope(Dispatchers.IO).launch {
-                handleRepeatableTask(task)
-            }
-        }
-    }
-
-    private suspend fun handleRepeatableTask(task: Task) {
-        val updatedTask = taskReminderRepository.scheduleReminder(task)
-
-        taskRepository.update(updatedTask)
-
-        if (auth.currentUser != null && isInternetAvailable()) {
-            firestoreRepository.insert(updatedTask.copy(isSynced = true)) { e ->
-                if (e == null) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        taskRepository.update(updatedTask.copy(isSynced = true))
-                    }
-                }
-            }
-        } else if (auth.currentUser != null) {
-            syncWorkerRepository.scheduleUnSyncTasksWork()
-        }
     }
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)

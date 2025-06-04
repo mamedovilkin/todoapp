@@ -23,8 +23,6 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
-import com.google.firebase.auth.FirebaseAuth
-import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.isTodayTask
@@ -35,7 +33,6 @@ import io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity
 import io.github.mamedovilkin.todoapp.ui.widget.action.RefreshAction
 import io.github.mamedovilkin.todoapp.ui.widget.state.NoTasksState
 import io.github.mamedovilkin.todoapp.ui.widget.state.TodayTasksState
-import io.github.mamedovilkin.todoapp.util.isInternetAvailable
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -46,8 +43,6 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val taskRepository: TaskRepository by inject()
-        val auth: FirebaseAuth by inject()
-        val firestoreRepository: FirestoreRepository by inject()
         val syncWorkerRepository: SyncWorkerRepository by inject()
         val taskReminderRepository: TaskReminderRepository by inject()
 
@@ -61,8 +56,11 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
                     tasks = filteredTasks,
                     onToggle = {
                         coroutineScope.launch {
-                            val currentUser = auth.currentUser
-                            var task = it.copy(isDone = !it.isDone)
+                            var task = it.copy(
+                                isDone = !it.isDone,
+                                isSynced = false,
+                                updatedAt = System.currentTimeMillis()
+                            )
 
                             val updatedTask = if (task.isDone) {
                                 taskReminderRepository.cancelReminder(task)
@@ -72,18 +70,7 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
                             }
 
                             taskRepository.update(updatedTask)
-
-                            if (currentUser != null && isInternetAvailable()) {
-                                firestoreRepository.insert(updatedTask.copy(isSynced = true)) { e ->
-                                    if (e == null) {
-                                        coroutineScope.launch {
-                                            taskRepository.update(updatedTask.copy(isSynced = true))
-                                        }
-                                    }
-                                }
-                            } else if (currentUser != null) {
-                                syncWorkerRepository.scheduleUnSyncTasksWork()
-                            }
+                            syncWorkerRepository.scheduleSyncTasksWork()
                         }
                     }
                 )

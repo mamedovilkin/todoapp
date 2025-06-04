@@ -1,3 +1,6 @@
+import java.io.FileInputStream
+import java.util.Properties
+
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.firebase.crashlytics)
@@ -6,6 +9,8 @@ plugins {
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
     alias(libs.plugins.ksp)
+
+    id("vkid.manifest.placeholders")
 }
 
 android {
@@ -20,6 +25,17 @@ android {
         versionName = "1.3"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        val localPropertiesFile = rootProject.file("local.properties")
+        val localProperties = Properties()
+        localProperties.load(FileInputStream(localPropertiesFile))
+
+        addManifestPlaceholders(mapOf(
+            "VKIDRedirectHost" to localProperties["VK_ID_REDIRECT_HOST"].toString(),
+            "VKIDRedirectScheme" to localProperties["VK_ID_REDIRECT_SCHEME"].toString(),
+            "VKIDClientID" to localProperties["VK_ID_CLIENT_ID"].toString(),
+            "VKIDClientSecret" to localProperties["VK_ID_CLIENT_SECRET"].toString()
+        ))
     }
 
     buildTypes {
@@ -36,6 +52,7 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -50,6 +67,12 @@ android {
 dependencies {
     // Modules
     implementation(project(":database"))
+
+    // VK ID
+    implementation(libs.vkid)
+
+    // Desugaring
+    coreLibraryDesugaring(libs.desugar.jdk.libs)
 
     // Android Jetpack
     implementation(libs.androidx.material3.window.size.class1)
@@ -93,13 +116,9 @@ dependencies {
 
     // Firebase
     implementation(platform(libs.firebase.bom))
-    implementation(libs.androidx.credentials.play.services.auth)
-    implementation(libs.androidx.credentials)
     implementation(libs.firebase.crashlytics)
     implementation(libs.firebase.analytics)
     implementation(libs.firebase.firestore)
-    implementation(libs.firebase.auth)
-    implementation(libs.googleid)
 
     // OkHttp
     implementation(libs.okhttp)
