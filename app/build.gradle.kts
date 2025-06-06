@@ -68,6 +68,10 @@ dependencies {
     // Modules
     implementation(project(":database"))
 
+    // RuStore BillingClient
+    implementation(platform("ru.rustore.sdk:bom:2025.05.02"))
+    implementation("ru.rustore.sdk:billingclient")
+
     // VK ID
     implementation(libs.vkid)
 

@@ -8,7 +8,7 @@
         <intent
             android:action="android.intent.action.VIEW"
             android:targetPackage="io.github.mamedovilkin.todoapp"
-            android:targetClass="io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity">
+            android:targetClass="io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity">
             <extra android:name="action" android:value="new_task" />
         </intent>
     </shortcut>

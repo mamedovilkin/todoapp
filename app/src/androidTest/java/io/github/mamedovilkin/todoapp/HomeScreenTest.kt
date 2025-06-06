@@ -27,14 +27,14 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity
+import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity
 import org.junit.Rule
 import org.junit.Test
 
 class HomeScreenTest {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ToDoAppActivity>()
+    val composeTestRule = createAndroidComposeRule<HomeActivity>()
 
     @Test
     fun homeScreen_settingsButtonClickedSettingsDisplayed() {

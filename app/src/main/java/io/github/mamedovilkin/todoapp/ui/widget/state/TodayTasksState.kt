@@ -24,7 +24,7 @@ import androidx.glance.text.Text
 import androidx.glance.text.TextDecoration
 import androidx.glance.text.TextStyle
 import io.github.mamedovilkin.database.room.Task
-import io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity
+import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity
 import io.github.mamedovilkin.todoapp.ui.theme.textColor
 import io.github.mamedovilkin.todoapp.util.convertMillisToTime
 
@@ -65,7 +65,7 @@ private fun TaskItem(
                 .padding(vertical = 4.dp)
                 .cornerRadius(4.dp)
                 .clickable(onClick = actionStartActivity(
-                    Intent(LocalContext.current, ToDoAppActivity::class.java)
+                    Intent(LocalContext.current, HomeActivity::class.java)
                 ))
         ) {
             CheckBox(

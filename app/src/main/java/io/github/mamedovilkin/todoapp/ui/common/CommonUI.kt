@@ -35,9 +35,9 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccessTime
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
@@ -131,7 +131,7 @@ import io.github.mamedovilkin.todoapp.util.convertMillisToDate
 import io.github.mamedovilkin.todoapp.util.convertMillisToDatetime
 import io.github.mamedovilkin.todoapp.util.convertToTime
 import java.util.Calendar
-import io.github.mamedovilkin.todoapp.ui.activity.SettingsActivity
+import io.github.mamedovilkin.todoapp.ui.activity.settings.SettingsActivity
 import kotlin.collections.filter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
@@ -1293,28 +1293,24 @@ fun SettingsTopBar(
     modifier: Modifier = Modifier
 ) {
     TopAppBar(
-        title = {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.fillMaxWidth()
+        navigationIcon = {
+            IconButton(
+                onClick = onBack,
+                modifier = Modifier.testTag(stringResource(R.string.back))
             ) {
-                IconButton(
-                    onClick = onBack,
-                    modifier = Modifier.testTag(stringResource(R.string.back))
-                ) {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                        contentDescription = stringResource(R.string.back),
-                        tint = MaterialTheme.colorScheme.background,
-                    )
-                }
-                Text(
-                    text = stringResource(R.string.settings),
-                    color = MaterialTheme.colorScheme.background,
-                    fontSize = 24.sp
+                Icon(
+                    imageVector = Icons.Default.ArrowBackIosNew,
+                    contentDescription = stringResource(R.string.back),
+                    tint = MaterialTheme.colorScheme.background,
                 )
             }
+        },
+        title = {
+            Text(
+                text = stringResource(R.string.settings),
+                color = MaterialTheme.colorScheme.background,
+                fontSize = 24.sp
+            )
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,

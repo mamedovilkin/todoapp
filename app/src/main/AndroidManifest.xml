@@ -36,7 +36,7 @@
         </receiver>
 
         <activity
-            android:name=".ui.activity.ToDoAppActivity"
+            android:name=".ui.activity.home.HomeActivity"
             android:exported="true"
             android:theme="@style/Theme.ToDoApp">
             <intent-filter>
@@ -51,10 +51,25 @@
         </activity>
 
         <activity
-            android:name=".ui.activity.SettingsActivity"
-            android:exported="false"
-            android:label="@string/settings"
+            android:name=".ui.activity.settings.SettingsActivity"
+            android:exported="true"
             android:theme="@style/Theme.ToDoApp" />
+
+        <activity
+            android:name=".ui.activity.premium.PremiumActivity"
+            android:exported="true"
+            android:launchMode="singleTask"
+            android:theme="@style/Theme.ToDoApp">
+
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="io.github.mamedovilkin.todoapp.scheme" />
+            </intent-filter>
+
+        </activity>
+
     </application>
 
 </manifest>

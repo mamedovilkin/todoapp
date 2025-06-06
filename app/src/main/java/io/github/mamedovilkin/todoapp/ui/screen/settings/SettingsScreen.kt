@@ -3,7 +3,6 @@ package io.github.mamedovilkin.todoapp.ui.screen.settings
 import android.widget.Toast
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
@@ -23,8 +22,10 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.StarOutline
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -64,6 +65,8 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onSignIn: () -> Unit,
     onSignOut: () -> Unit,
+    onPremium: () -> Unit,
+    onManageSubscription: () -> Unit,
     onFeedback: () -> Unit,
     onRateUs: () -> Unit,
     onTellFriend: () -> Unit,
@@ -110,9 +113,9 @@ fun SettingsScreen(
         },
         modifier = Modifier.fillMaxSize(),
     ) { innerPadding ->
-        Box(
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
         ) {
             LazyColumn(
                 modifier = if (windowWidthSizeClass == WindowWidthSizeClass.Compact) {
@@ -203,19 +206,46 @@ fun SettingsScreen(
                         ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(16.dp)
-                        ) {
-                            Text(
-                                text = stringResource(R.string.free),
-                                style = MaterialTheme.typography.displayMedium
-                            )
-                            Button(onClick = {}) {
-                                Text(stringResource(R.string.go_premium))
+                        if (false) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.premium),
+                                    style = MaterialTheme.typography.displayMedium
+                                )
+                                FilledTonalButton(
+                                    onClick = onManageSubscription,
+                                    colors = ButtonDefaults.buttonColors(
+                                        contentColor = MaterialTheme.colorScheme.primary,
+                                        containerColor = MaterialTheme.colorScheme.background
+                                    )
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.manage_subscription),
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        } else {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(16.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.free),
+                                    style = MaterialTheme.typography.displayMedium
+                                )
+                                Button(onClick = onPremium) {
+                                    Text(stringResource(R.string.go_premium))
+                                }
                             }
                         }
                     }

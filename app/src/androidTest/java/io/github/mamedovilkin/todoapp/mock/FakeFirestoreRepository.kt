@@ -6,8 +6,6 @@ import io.github.mamedovilkin.database.room.Task
 class FakeFirestoreRepository : FirestoreRepository {
     override suspend fun setLastSignIn(uid: String) {}
 
-    override suspend fun setPremium(uid: String, isPremium: Boolean) {}
-
     override suspend fun deleteAllData(uid: String) {}
 
     override suspend fun insert(uid: String, task: Task) {}

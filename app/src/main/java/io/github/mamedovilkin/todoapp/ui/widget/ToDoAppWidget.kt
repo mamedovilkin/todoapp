@@ -29,7 +29,7 @@ import io.github.mamedovilkin.database.room.isTodayTask
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
-import io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity
+import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity
 import io.github.mamedovilkin.todoapp.ui.widget.action.RefreshAction
 import io.github.mamedovilkin.todoapp.ui.widget.state.NoTasksState
 import io.github.mamedovilkin.todoapp.ui.widget.state.TodayTasksState
@@ -110,7 +110,7 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
         onToggle: (Task) -> Unit,
     ) {
         val context = LocalContext.current
-        val intent = Intent(context, ToDoAppActivity::class.java).apply {
+        val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
             putExtra("action", "new_task")
         }

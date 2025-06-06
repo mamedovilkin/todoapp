@@ -22,12 +22,16 @@ import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepositoryImpl
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepositoryImpl
+import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivityViewModel
+import io.github.mamedovilkin.todoapp.ui.activity.settings.SettingsActivityViewModel
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeViewModel
 import io.github.mamedovilkin.todoapp.ui.screen.settings.SettingsViewModel
 import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.startKoin
 import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
+import ru.rustore.sdk.billingclient.RuStoreBillingClient
+import ru.rustore.sdk.billingclient.RuStoreBillingClientFactory
 
 class ToDoApp : Application() {
 
@@ -41,6 +45,13 @@ class ToDoApp : Application() {
             androidContext(this@ToDoApp)
             modules(
                 module {
+                    // RuStore BillingClient
+                    single<RuStoreBillingClient> { RuStoreBillingClientFactory.create(
+                        context = androidContext(),
+                        consoleApplicationId = "2063629026",
+                        deeplinkScheme = "io.github.mamedovilkin.todoapp.scheme",
+                    ) }
+
                     // Firebase
                     single<FirebaseFirestore> { Firebase.firestore }
 
@@ -62,7 +73,9 @@ class ToDoApp : Application() {
                     single<FirestoreRepository> { FirestoreRepositoryImpl(get()) }
 
                     // ViewModel
+                    viewModel { HomeActivityViewModel(get(), get()) }
                     viewModel { HomeViewModel(get(), get(), get(), get()) }
+                    viewModel { SettingsActivityViewModel(get(), get(), get()) }
                     viewModel { SettingsViewModel(get(), get(), get()) }
                 }
             )

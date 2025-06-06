@@ -6,7 +6,7 @@ import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
 import androidx.compose.ui.test.performClick
-import io.github.mamedovilkin.todoapp.ui.activity.SettingsActivity
+import io.github.mamedovilkin.todoapp.ui.activity.settings.SettingsActivity
 import org.junit.Rule
 import org.junit.Test
 

@@ -16,7 +16,7 @@ import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
-import io.github.mamedovilkin.todoapp.ui.activity.ToDoAppActivity
+import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity
 import io.github.mamedovilkin.todoapp.util.CHANNEL_ID
 import io.github.mamedovilkin.todoapp.util.MARK_TASK_COMPLETED_ACTION
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_ID
@@ -99,7 +99,7 @@ class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
     }
 
     private fun createPendingIntent(context: Context): PendingIntent {
-        val intent = Intent(context, ToDoAppActivity::class.java).apply {
+        val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 

@@ -42,18 +42,12 @@ class SyncTasksWorker(
                     when {
                         localTask == null -> {
                             taskRepository.insert(remoteTask)
-
-                            if (System.currentTimeMillis() < remoteTask.datetime) {
-                                taskReminderRepository.scheduleReminder(remoteTask)
-                            }
+                            taskReminderRepository.scheduleReminder(remoteTask)
                         }
 
                         remoteUpdatedAt > localUpdatedAt -> {
                             taskRepository.update(remoteTask)
-
-                            if (System.currentTimeMillis() < remoteTask.datetime) {
-                                taskReminderRepository.scheduleReminder(remoteTask)
-                            }
+                            taskReminderRepository.scheduleReminder(remoteTask)
                         }
 
                         localUpdatedAt > remoteUpdatedAt -> {

@@ -57,6 +57,20 @@
     <string name="no_internet_connection">Нет интернет соединения</string>
     <string name="delete_all_data">Удалить все данные</string>
     <string name="do_you_really_want_to_delete_all_data">Вы действительно хотите удалить все данные?</string>
+    <string name="premium_summary">
+        Получите максимум от своего дня с ToDoApp Premium. Расширенные функции и удобные инструменты помогут Вам оставаться организованным и эффективным. Продуктивность — без компромиссов. Подписка помогает нам делать ToDoApp ещё лучше.
+    </string>
+    <string name="whats_in_subscription">Что в подписке?</string>
+    <string-array name="premium_features">
+        <item>Синхронизация между устройствами — оставайтесь организованными в любом месте.</item>
+        <item>Повтор задач — настраивайте ежедневные, еженедельные, ежемесячные и даже ежегодные повторы.</item>
+        <item>Описания к задачам — добавляйте заметки, важные детали и инструкции.</item>
+        <item>Категории задач — наводите порядок с помощью удобной группировки.</item>
+        <item>Расширенные уведомления — до 5 напоминаний для каждой задачи, чтобы точно ничего не упустить.</item>
+    </string-array>
+    <string name="try_it_free">Попробуйте бесплатно</string>
+    <string name="premium_terms">14 дней бесплатно, затем ₽99.00 в месяц. Отменить сможете в любое время. Применяются условия использования.</string>
+    <string name="manage_subscription">Управлять подпиской</string>
     <string-array name="repeat_types">
         <item>Один раз</item>
         <item>Ежедневно</item>

@@ -2,6 +2,7 @@ package io.github.mamedovilkin.todoapp.util
 
 import android.content.Context
 import android.text.format.DateFormat
+import android.widget.Toast
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.isTaskThisYear
@@ -85,4 +86,8 @@ suspend fun isInternetAvailable(): Boolean = withContext(Dispatchers.IO) {
     } catch (_: IOException) {
         false
     }
+}
+
+fun Context.toast(message: String?) {
+    Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
 }

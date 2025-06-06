@@ -1,4 +1,4 @@
-package io.github.mamedovilkin.todoapp.ui.activity
+package io.github.mamedovilkin.todoapp.ui.activity.home
 
 import android.Manifest
 import android.content.pm.PackageManager
@@ -16,16 +16,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_PERMISSION_REQUEST_CODE
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ToDoAppActivity : ComponentActivity(), KoinComponent {
+class HomeActivity : ComponentActivity(), KoinComponent {
 
-    private val syncWorkerRepository: SyncWorkerRepository by inject()
+    private val homeActivityViewModel: HomeActivityViewModel by inject()
 
     override fun onStart() {
         super.onStart()
@@ -44,7 +43,7 @@ class ToDoAppActivity : ComponentActivity(), KoinComponent {
             }
         }
 
-        syncWorkerRepository.scheduleSyncTasksWork()
+        homeActivityViewModel.refreshSignInWithVK()
     }
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)

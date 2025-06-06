@@ -20,20 +20,13 @@ class FirestoreRepositoryImpl(
             .await()
     }
 
-    override suspend fun setPremium(uid: String, isPremium: Boolean) {
-        firestore
-            .collection("users")
-            .document(uid)
-            .set(mapOf("isPremium" to isPremium))
-            .await()
-    }
-
     override suspend fun deleteAllData(uid: String) {
         val tasks = firestore
             .collection("users")
             .document(uid)
             .collection("tasks")
-            .get().await()
+            .get()
+            .await()
 
         val batch = firestore.batch()
 
