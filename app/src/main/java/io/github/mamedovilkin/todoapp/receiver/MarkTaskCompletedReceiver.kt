@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import androidx.core.app.NotificationManagerCompat
+import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
@@ -14,6 +15,7 @@ import io.github.mamedovilkin.todoapp.util.NOTIFICATION_ID
 import io.github.mamedovilkin.todoapp.util.TASK_KEY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.koin.core.component.KoinComponent
@@ -24,6 +26,7 @@ class MarkTaskCompletedReceiver : BroadcastReceiver(), KoinComponent {
     private val taskReminderRepository: TaskReminderRepository by inject()
     private val taskRepository: TaskRepository by inject()
     private val syncWorkerRepository: SyncWorkerRepository by inject()
+    private val dataStoreRepository: DataStoreRepository by inject()
 
     @Suppress("DEPRECATION")
     override fun onReceive(context: Context, intent: Intent) {
@@ -36,13 +39,15 @@ class MarkTaskCompletedReceiver : BroadcastReceiver(), KoinComponent {
 
             task?.let {
                 CoroutineScope(Dispatchers.IO).launch {
+                    val isPremium = dataStoreRepository.isPremium.first()
+
                     val updatedTask = it.copy(
                         isDone = true,
                         isSynced = false,
                         updatedAt = System.currentTimeMillis()
                     )
 
-                    taskReminderRepository.cancelReminder(updatedTask)
+                    taskReminderRepository.cancelReminder(updatedTask, isPremium)
                     taskRepository.update(updatedTask)
                     syncWorkerRepository.scheduleSyncTasksWork()
 

@@ -15,10 +15,19 @@ import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
+import androidx.lifecycle.lifecycleScope
+import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
+import io.github.mamedovilkin.todoapp.util.NOTIFICATION_ID
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_PERMISSION_REQUEST_CODE
+import io.github.mamedovilkin.todoapp.util.TASK_KEY
+import io.github.mamedovilkin.todoapp.util.isInternetAvailable
+import io.github.mamedovilkin.todoapp.util.toast
+import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
@@ -43,7 +52,18 @@ class HomeActivity : ComponentActivity(), KoinComponent {
             }
         }
 
-        homeActivityViewModel.refreshSignInWithVK()
+        lifecycleScope.launch {
+            if (isInternetAvailable()) {
+                homeActivityViewModel.refreshSignInWithVK()
+                homeActivityViewModel.checkPremiumAvailability { error ->
+                    if (error != null) {
+                        toast(error)
+                    }
+                }
+            } else {
+                toast(getString(R.string.no_internet_connection))
+            }
+        }
     }
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
@@ -52,13 +72,27 @@ class HomeActivity : ComponentActivity(), KoinComponent {
         enableEdgeToEdge()
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
-            val shouldOpenNewTaskDialog = intent?.getStringExtra("action") == "new_task"
+            val shouldOpenNewTaskDialog = intent?.getStringExtra("action") == "todoapp://new_task/"
+            val shouldOpenEditTaskDialog = intent?.getStringExtra("action") == "todoapp://reschedule/"
+            val task = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(TASK_KEY, Task::class.java)
+            } else {
+                @Suppress("DEPRECATION")
+                intent.getParcelableExtra<Task>(TASK_KEY)
+            }
+
+            if (shouldOpenEditTaskDialog) {
+                val notificationManager = NotificationManagerCompat.from(this)
+                notificationManager.cancel(NOTIFICATION_ID)
+            }
 
             ToDoAppTheme {
                 ToDoApp(
                     windowWidthSizeClass = windowSizeClass.widthSizeClass,
                     windowHeightSizeClass = windowSizeClass.heightSizeClass,
-                    shouldOpenNewTaskDialog
+                    shouldOpenNewTaskDialog = shouldOpenNewTaskDialog,
+                    shouldOpenEditTaskDialog = shouldOpenEditTaskDialog,
+                    task = task
                 )
             }
         }
@@ -69,13 +103,17 @@ class HomeActivity : ComponentActivity(), KoinComponent {
 fun ToDoApp(
     windowWidthSizeClass: WindowWidthSizeClass,
     windowHeightSizeClass: WindowHeightSizeClass,
-    shouldOpenNewTaskDialog: Boolean = false
+    shouldOpenNewTaskDialog: Boolean = false,
+    shouldOpenEditTaskDialog: Boolean = false,
+    task: Task? = null
 ) {
     Surface {
         HomeScreen(
             windowWidthSizeClass = windowWidthSizeClass,
             windowHeightSizeClass = windowHeightSizeClass,
-            shouldOpenNewTaskDialog = shouldOpenNewTaskDialog
+            shouldOpenNewTaskDialog = shouldOpenNewTaskDialog,
+            shouldOpenEditTaskDialog = shouldOpenEditTaskDialog,
+            task = task
         )
     }
 }

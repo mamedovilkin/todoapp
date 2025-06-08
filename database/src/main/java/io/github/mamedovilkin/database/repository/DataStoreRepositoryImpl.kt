@@ -26,6 +26,7 @@ class DataStoreRepositoryImpl(
         val USER_ID = stringPreferencesKey("userID")
         val PHOTO_URL = stringPreferencesKey("photoURL")
         val DISPLAY_NAME = stringPreferencesKey("displayName")
+        val PREMIUM = booleanPreferencesKey("premium")
     }
 
     override suspend fun setShowStatistics(showStatistics: Boolean) {
@@ -78,6 +79,19 @@ class DataStoreRepositoryImpl(
             emit(emptyPreferences())
         }.map { preferences ->
             preferences[DISPLAY_NAME] ?: ""
+        }
+
+    override suspend fun setPremium(isPremium: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PREMIUM] = isPremium
+        }
+    }
+
+    override val isPremium: Flow<Boolean> = dataStore.data
+        .catch {
+            emit(emptyPreferences())
+        }.map { preferences ->
+            preferences[PREMIUM] == true
         }
 }
 

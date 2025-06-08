@@ -62,4 +62,13 @@ class DataStoreRepositoryTest {
 
         assertEquals("John Doe", displayName)
     }
+
+    @Test
+    fun repositorySetPremium_isPremium() = runBlocking {
+        dataStoreRepository.setPremium(true)
+
+        val isPremium = dataStoreRepository.isPremium.first()
+
+        assertTrue(isPremium)
+    }
 }

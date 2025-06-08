@@ -57,6 +57,13 @@ class SettingsViewModel(
             false
         )
 
+    val isPremium = dataStoreRepository.isPremium
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            false
+        )
+
     fun setShowStatistics(showStatistics: Boolean) {
         viewModelScope.launch {
             dataStoreRepository.setShowStatistics(showStatistics)

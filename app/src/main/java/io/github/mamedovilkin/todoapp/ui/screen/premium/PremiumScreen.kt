@@ -4,15 +4,18 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBackIosNew
 import androidx.compose.material.icons.filled.CheckCircle
@@ -46,7 +49,8 @@ import io.github.mamedovilkin.todoapp.R
 fun PremiumScreen(
     windowWidthSizeClass: WindowWidthSizeClass,
     onBack: () -> Unit,
-    onTryItFree: () -> Unit
+    onTryItFree: () -> Unit,
+    isPremium: Boolean
 ) {
     Scaffold(
         topBar = {
@@ -101,6 +105,7 @@ fun PremiumScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .weight(1F)
+                    .clip(RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
                     .background(MaterialTheme.colorScheme.primary)
             ) {
                 Column(
@@ -116,6 +121,9 @@ fun PremiumScreen(
                     val features = stringArrayResource(R.array.premium_features)
 
                     LazyColumn {
+
+                        item { Spacer(modifier = Modifier.height(50.dp)) }
+
                         item {
                             Text(
                                 text = stringResource(R.string.premium_summary),
@@ -185,6 +193,7 @@ fun PremiumScreen(
                 ) {
                     Button(
                         onClick = onTryItFree,
+                        enabled = !isPremium,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(text = stringResource(R.string.try_it_free))
@@ -193,6 +202,7 @@ fun PremiumScreen(
                         text = stringResource(R.string.premium_terms),
                         color = Color.Gray,
                         textAlign = TextAlign.Center,
+                        lineHeight = 16.sp,
                         style = MaterialTheme.typography.headlineSmall,
                         modifier = Modifier.fillMaxWidth()
                     )

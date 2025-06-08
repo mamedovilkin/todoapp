@@ -73,6 +73,13 @@ class HomeViewModel(
             false
         )
 
+    val isPremium = dataStoreRepository.isPremium
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            false
+        )
+
     fun observeTasks() = viewModelScope.launch {
         taskRepository.tasks
             .catch { error ->
@@ -114,7 +121,7 @@ class HomeViewModel(
     fun newTask(task: Task) = viewModelScope.launch {
         var newTask = task.copy(id = UUID.randomUUID().toString())
 
-        newTask = taskReminderRepository.scheduleReminder(newTask)
+        newTask = taskReminderRepository.scheduleReminder(newTask, isPremium.value)
 
         taskRepository.insert(newTask)
         syncWorkerRepository.scheduleSyncTasksWork()
@@ -124,7 +131,7 @@ class HomeViewModel(
         viewModelScope.launch {
             taskRepository.delete(task)
         }.invokeOnCompletion {
-            taskReminderRepository.cancelReminder(task)
+            taskReminderRepository.cancelReminder(task, isPremium.value)
             syncWorkerRepository.scheduleSyncDeleteTaskWork(task.id)
         }
     }
@@ -136,10 +143,10 @@ class HomeViewModel(
         )
 
         updatedTask = if (updatedTask.isDone && updatedTask.repeatType == RepeatType.ONE_TIME) {
-            taskReminderRepository.cancelReminder(updatedTask)
+            taskReminderRepository.cancelReminder(updatedTask, isPremium.value)
             updatedTask
         } else {
-            taskReminderRepository.scheduleReminder(updatedTask)
+            taskReminderRepository.scheduleReminder(updatedTask, isPremium.value)
         }
 
         taskRepository.update(updatedTask)

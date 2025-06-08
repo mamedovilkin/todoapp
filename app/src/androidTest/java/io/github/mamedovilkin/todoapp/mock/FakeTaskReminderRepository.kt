@@ -7,13 +7,13 @@ import java.util.Calendar
 
 class FakeTaskReminderRepository : TaskReminderRepository {
 
-    override fun scheduleReminder(task: Task): Task = task
+    override fun scheduleReminder(task: Task, isPremium: Boolean): Task = task
 
     override fun getTaskWithUpdatedDatetime(task: Task): Task = task
 
     override fun getNextWeeklyReminder(task: Task, base: Calendar): Long = task.datetime
 
-    override fun cancelReminder(task: Task) {}
+    override fun cancelReminder(task: Task, isPremium: Boolean) {}
 
-    override fun getPendingIntents(task: Task): List<PendingIntent> = emptyList()
+    override fun getPendingIntents(task: Task, isPremium: Boolean): List<PendingIntent> = emptyList()
 }

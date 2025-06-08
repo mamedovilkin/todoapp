@@ -23,16 +23,19 @@ class TaskReminderRepositoryImpl(
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
 
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
-    override fun scheduleReminder(task: Task): Task {
+    override fun scheduleReminder(task: Task, isPremium: Boolean): Task {
         val updatedTask = getTaskWithUpdatedDatetime(task)
 
-        val pendingIntents = getPendingIntents(updatedTask)
+        val pendingIntents = getPendingIntents(updatedTask, isPremium)
 
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime, pendingIntents[0])
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + FIVE_MINUTES_OFFSET, pendingIntents[1])
         alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TEN_MINUTES_OFFSET, pendingIntents[2])
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + FIFTEEN_MINUTES_OFFSET, pendingIntents[3])
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TWENTY_MINUTES_OFFSET, pendingIntents[4])
+
+        if (isPremium) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + FIFTEEN_MINUTES_OFFSET, pendingIntents[3])
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TWENTY_MINUTES_OFFSET, pendingIntents[4])
+        }
 
         return updatedTask
     }
@@ -116,24 +119,29 @@ class TaskReminderRepositoryImpl(
         return now.timeInMillis
     }
 
-    override fun cancelReminder(task: Task) {
-        val pendingIntents = getPendingIntents(task)
+    override fun cancelReminder(task: Task, isPremium: Boolean) {
+        val pendingIntents = getPendingIntents(task, isPremium)
 
         alarmManager.cancel(pendingIntents[0])
         alarmManager.cancel(pendingIntents[1])
         alarmManager.cancel(pendingIntents[2])
-        alarmManager.cancel(pendingIntents[3])
-        alarmManager.cancel(pendingIntents[4])
+
+        if (isPremium) {
+            alarmManager.cancel(pendingIntents[3])
+            alarmManager.cancel(pendingIntents[4])
+        }
     }
 
-    override fun getPendingIntents(task: Task): List<PendingIntent> {
-        val offsets = listOf(
+    override fun getPendingIntents(task: Task, isPremium: Boolean): List<PendingIntent> {
+        val offsets = mutableListOf(
             0,
             FIVE_MINUTES_OFFSET,
-            TEN_MINUTES_OFFSET,
-            FIFTEEN_MINUTES_OFFSET,
-            TWENTY_MINUTES_OFFSET
+            TEN_MINUTES_OFFSET
         )
+
+        if (isPremium) {
+            offsets.addAll(listOf(FIFTEEN_MINUTES_OFFSET, TWENTY_MINUTES_OFFSET))
+        }
 
         return offsets.map { offset ->
             val intent = Intent(context, TaskReminderReceiver::class.java).apply {

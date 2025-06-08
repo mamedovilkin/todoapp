@@ -10,6 +10,7 @@ class FakeDataStoreRepository : DataStoreRepository {
     private val userIDFlow = MutableStateFlow("")
     private val photoURLFlow = MutableStateFlow("")
     private val displayNameFlow = MutableStateFlow("")
+    private val isPremiumFlow = MutableStateFlow(false)
 
     override suspend fun setShowStatistics(showStatistics: Boolean) {
         showStatisticsFlow.value = showStatistics
@@ -38,4 +39,11 @@ class FakeDataStoreRepository : DataStoreRepository {
 
     override val displayName: Flow<String>
         get() = displayNameFlow
+
+    override suspend fun setPremium(isPremium: Boolean) {
+        isPremiumFlow.value = isPremium
+    }
+
+    override val isPremium: Flow<Boolean>
+        get() = isPremiumFlow
 }

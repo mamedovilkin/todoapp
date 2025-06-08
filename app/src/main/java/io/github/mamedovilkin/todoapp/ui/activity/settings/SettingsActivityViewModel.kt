@@ -14,11 +14,16 @@ import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import ru.rustore.sdk.billingclient.RuStoreBillingClient
+import ru.rustore.sdk.billingclient.model.product.ProductType
+import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
+import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
 
 class SettingsActivityViewModel(
     private val dataStoreRepository: DataStoreRepository,
     private val firestoreRepository: FirestoreRepository,
-    private val syncWorkerRepository: SyncWorkerRepository
+    private val syncWorkerRepository: SyncWorkerRepository,
+    private val ruStoreBillingClient: RuStoreBillingClient
 ) : ViewModel() {
 
     val userID = dataStoreRepository.userID
@@ -36,6 +41,7 @@ class SettingsActivityViewModel(
                 val displayName = token.userData.firstName.toString()
 
                 saveUser(userID, photoURL, displayName)
+                checkPremiumAvailability(userID)
             }
 
             override fun onFail(fail: VKIDAuthFail) {
@@ -44,9 +50,35 @@ class SettingsActivityViewModel(
         })
     }
 
+    fun checkPremiumAvailability(userID: String) = viewModelScope.launch {
+        if (userID.isNotEmpty()) {
+            val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
+
+            purchasesUseCase.getPurchases()
+                .addOnSuccessListener { purchases ->
+                    viewModelScope.launch {
+                        val hasPremium = purchases.any { purchase ->
+                            purchase.productType == ProductType.SUBSCRIPTION &&
+                            purchase.productId == "premium_monthly" &&
+                            purchase.purchaseState == PurchaseState.CONFIRMED
+                        }
+                        dataStoreRepository.setPremium(hasPremium)
+                    }
+                }
+                .addOnFailureListener { error ->
+                    viewModelScope.launch {
+                        dataStoreRepository.setPremium(false)
+                    }
+                }
+        }
+    }
+
     fun signOut(onError: (String?) -> Unit) = viewModelScope.launch {
         VKID.instance.logout(object : VKIDLogoutCallback {
             override fun onSuccess() {
+                viewModelScope.launch {
+                    dataStoreRepository.setPremium(false)
+                }
                 clearUser()
             }
 

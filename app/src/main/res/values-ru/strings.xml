@@ -69,8 +69,13 @@
         <item>Расширенные уведомления — до 5 напоминаний для каждой задачи, чтобы точно ничего не упустить.</item>
     </string-array>
     <string name="try_it_free">Попробуйте бесплатно</string>
-    <string name="premium_terms">14 дней бесплатно, затем ₽99.00 в месяц. Отменить сможете в любое время. Применяются условия использования.</string>
+    <string name="premium_terms">14 дней бесплатно, затем 99.00₽ в месяц.\nОтменить сможете в любое время. Применяются условия использования.</string>
     <string name="manage_subscription">Управлять подпиской</string>
+    <string name="cancelled">Отменено</string>
+    <string name="failure">Ошибка</string>
+    <string name="invalid_payment_state">Неверное состояние платежа</string>
+    <string name="reschedule">Перенести</string>
+    <string name="your_plan">Ваш план</string>
     <string-array name="repeat_types">
         <item>Один раз</item>
         <item>Ежедневно</item>

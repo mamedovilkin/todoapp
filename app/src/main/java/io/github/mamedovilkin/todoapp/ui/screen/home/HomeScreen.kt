@@ -33,6 +33,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.common.EditTaskBottomSheet
 import io.github.mamedovilkin.todoapp.ui.common.NewTaskBottomSheet
@@ -54,6 +55,8 @@ fun HomeScreen(
     windowWidthSizeClass: WindowWidthSizeClass,
     windowHeightSizeClass: WindowHeightSizeClass,
     shouldOpenNewTaskDialog: Boolean = false,
+    shouldOpenEditTaskDialog: Boolean = false,
+    task: Task? = null,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
@@ -76,9 +79,12 @@ fun HomeScreen(
     val userID by viewModel.userID.collectAsState()
     val photoURL by viewModel.photoURL.collectAsState()
     val showStatistics by viewModel.showStatistics.collectAsState()
+    val isPremium by viewModel.isPremium.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.setShowNewTaskBottomSheet(shouldOpenNewTaskDialog)
+        viewModel.setShowEditTaskBottomSheet(shouldOpenEditTaskDialog)
+        task?.let { viewModel.setTaskToEdit(it) }
         viewModel.observeTasks()
 
         exception?.let {
@@ -135,6 +141,7 @@ fun HomeScreen(
                 ) {
                     TaskList(
                         showStatistics = showStatistics,
+                        isPremium = isPremium,
                         innerPadding = innerPadding,
                         lazyListState = lazyListState,
                         tasks = result.tasks,
@@ -205,6 +212,7 @@ fun HomeScreen(
         if (uiState.showNewTaskBottomSheet) {
             NewTaskBottomSheet(
                 sheetState = newTaskSheetState,
+                isPremium = isPremium,
                 onSave = {
                     viewModel.newTask(it)
                     viewModel.setShowNewTaskBottomSheet(false)
@@ -219,6 +227,7 @@ fun HomeScreen(
         if (uiState.showEditTaskBottomSheet && uiState.task != null) {
             EditTaskBottomSheet(
                 task = uiState.task!!,
+                isPremium = isPremium,
                 sheetState = editTaskSheetState,
                 onSave = {
                     viewModel.updateTask(it.copy(isDone = if (System.currentTimeMillis() > it.datetime) it.isDone else false))

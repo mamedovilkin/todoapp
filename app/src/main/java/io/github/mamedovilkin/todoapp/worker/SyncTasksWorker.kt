@@ -25,8 +25,9 @@ class SyncTasksWorker(
 
     override suspend fun doWork(): Result {
         val userID = dataStoreRepository.userID.first()
+        val isPremium = dataStoreRepository.isPremium.first()
 
-        if (userID.isNotEmpty() && isInternetAvailable()) {
+        if (userID.isNotEmpty() && isPremium && isInternetAvailable()) {
             try {
                 val uid = userID.toString()
                 val remoteTasks = firestoreRepository.get(uid)
@@ -42,12 +43,12 @@ class SyncTasksWorker(
                     when {
                         localTask == null -> {
                             taskRepository.insert(remoteTask)
-                            taskReminderRepository.scheduleReminder(remoteTask)
+                            taskReminderRepository.scheduleReminder(remoteTask, true)
                         }
 
                         remoteUpdatedAt > localUpdatedAt -> {
                             taskRepository.update(remoteTask)
-                            taskReminderRepository.scheduleReminder(remoteTask)
+                            taskReminderRepository.scheduleReminder(remoteTask, true)
                         }
 
                         localUpdatedAt > remoteUpdatedAt -> {

@@ -14,4 +14,7 @@ interface DataStoreRepository {
 
     suspend fun setDisplayName(displayName: String)
     val displayName: Flow<String>
+
+    suspend fun setPremium(isPremium: Boolean)
+    val isPremium: Flow<Boolean>
 }

@@ -21,8 +21,8 @@ android {
         applicationId = "io.github.mamedovilkin.todoapp"
         minSdk = 24
         targetSdk = 35
-        versionCode = 5
-        versionName = "1.3"
+        versionCode = 6
+        versionName = "2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -69,7 +69,9 @@ dependencies {
     implementation(project(":database"))
 
     // RuStore BillingClient
+    // noinspection UseTomlInstead
     implementation(platform("ru.rustore.sdk:bom:2025.05.02"))
+    // noinspection UseTomlInstead
     implementation("ru.rustore.sdk:billingclient")
 
     // VK ID

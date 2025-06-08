@@ -8,11 +8,17 @@ import com.vk.id.refresh.VKIDRefreshTokenCallback
 import com.vk.id.refresh.VKIDRefreshTokenFail
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import ru.rustore.sdk.billingclient.RuStoreBillingClient
+import ru.rustore.sdk.billingclient.model.product.ProductType
+import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
+import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
 
 class HomeActivityViewModel(
     private val dataStoreRepository: DataStoreRepository,
-    private val syncWorkerRepository: SyncWorkerRepository
+    private val syncWorkerRepository: SyncWorkerRepository,
+    private val ruStoreBillingClient: RuStoreBillingClient
 ) : ViewModel() {
 
     fun refreshSignInWithVK() = viewModelScope.launch {
@@ -31,6 +37,32 @@ class HomeActivityViewModel(
                 }
             }
         )
+    }
+
+    fun checkPremiumAvailability(onError: (String?) -> Unit) = viewModelScope.launch {
+        val userID = dataStoreRepository.userID.first()
+
+        if (userID.isNotEmpty()) {
+            val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
+
+            purchasesUseCase.getPurchases()
+                .addOnSuccessListener { purchases ->
+                    viewModelScope.launch {
+                        val hasPremium = purchases.any { purchase ->
+                            purchase.productType == ProductType.SUBSCRIPTION &&
+                            purchase.productId == "premium_monthly" &&
+                            purchase.purchaseState == PurchaseState.CONFIRMED
+                        }
+                        dataStoreRepository.setPremium(hasPremium)
+                    }
+                }
+                .addOnFailureListener { error ->
+                    viewModelScope.launch {
+                        dataStoreRepository.setPremium(false)
+                    }
+                    onError(error.message.toString())
+                }
+        }
     }
 
     private fun saveUser(

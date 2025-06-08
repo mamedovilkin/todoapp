@@ -1,5 +1,6 @@
 package io.github.mamedovilkin.todoapp.ui.activity.settings
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -23,14 +24,26 @@ import io.github.mamedovilkin.todoapp.util.toast
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import ru.rustore.sdk.billingclient.RuStoreBillingClient
 
 class SettingsActivity : ComponentActivity(), KoinComponent {
 
     private val settingsActivityViewModel: SettingsActivityViewModel by inject()
+    private val ruStoreBillingClient: RuStoreBillingClient by inject()
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        ruStoreBillingClient.onNewIntent(intent)
+    }
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        if (savedInstanceState == null) {
+            ruStoreBillingClient.onNewIntent(intent)
+        }
+
         enableEdgeToEdge()
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
@@ -94,9 +107,11 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
     }
 
     private fun manageSubscription() {
-        val intent = Intent(Intent.ACTION_VIEW)
-        intent.data = "rustore://profile/subscriptions".toUri()
-        startActivity(intent)
+        try {
+            startActivity(Intent(Intent.ACTION_VIEW, "rustore://profile/subscriptions".toUri()))
+        }  catch (_: ActivityNotFoundException) {
+            startActivity(Intent(Intent.ACTION_VIEW, "https://www.rustore.ru/".toUri()))
+        }
     }
 
     private fun sendFeedback() {

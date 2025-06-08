@@ -45,7 +45,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
 import io.github.mamedovilkin.todoapp.R
@@ -80,6 +82,7 @@ fun SettingsScreen(
     val photoURL by viewModel.photoURL.collectAsState()
     val displayName by viewModel.displayName.collectAsState()
     val showStatistics by viewModel.showStatistics.collectAsState()
+    val isPremium by viewModel.isPremium.collectAsState()
 
     if (uiState.showSignOutDialog) {
         ToDoAppDialog(
@@ -206,7 +209,7 @@ fun SettingsScreen(
                         ),
                         modifier = Modifier.fillMaxWidth()
                     ) {
-                        if (false) {
+                        if (isPremium) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -214,10 +217,17 @@ fun SettingsScreen(
                                     .fillMaxWidth()
                                     .padding(16.dp)
                             ) {
-                                Text(
-                                    text = stringResource(R.string.premium),
-                                    style = MaterialTheme.typography.displayMedium
-                                )
+                                Column {
+                                    Text(
+                                        text = stringResource(R.string.your_plan).uppercase(),
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Light,
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.premium).uppercase(),
+                                        style = MaterialTheme.typography.displayMedium
+                                    )
+                                }
                                 FilledTonalButton(
                                     onClick = onManageSubscription,
                                     colors = ButtonDefaults.buttonColors(
@@ -239,10 +249,17 @@ fun SettingsScreen(
                                     .fillMaxWidth()
                                     .padding(16.dp)
                             ) {
-                                Text(
-                                    text = stringResource(R.string.free),
-                                    style = MaterialTheme.typography.displayMedium
-                                )
+                                Column {
+                                    Text(
+                                        text = stringResource(R.string.your_plan).uppercase(),
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Light,
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.free).uppercase(),
+                                        style = MaterialTheme.typography.displayMedium
+                                    )
+                                }
                                 Button(onClick = onPremium) {
                                     Text(stringResource(R.string.go_premium))
                                 }

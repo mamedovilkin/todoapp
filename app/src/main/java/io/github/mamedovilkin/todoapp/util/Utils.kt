@@ -33,7 +33,7 @@ fun convertToTime(hour: Int, minute: Int, context: Context): String {
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.HOUR_OF_DAY, hour)
     calendar.set(Calendar.MINUTE, minute)
-    val pattern = if (DateFormat.is24HourFormat(context)) "HH:mm" else "hh:mm"
+    val pattern = if (DateFormat.is24HourFormat(context)) "HH:mm" else "hh:mm a"
     val formatter = SimpleDateFormat(pattern, Locale.getDefault())
     return formatter.format(Date(calendar.timeInMillis))
 }

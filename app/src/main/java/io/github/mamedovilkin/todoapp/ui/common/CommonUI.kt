@@ -83,7 +83,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.material3.TimeInput
 import androidx.compose.material3.TimePicker
-import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDatePickerState
 import androidx.compose.material3.rememberTimePickerState
@@ -160,7 +159,7 @@ fun ToDoAppTopBar(
                 },
                 modifier = Modifier.testTag(stringResource(R.string.settings))
             ) {
-                if (userID.isEmpty() || photoURL.toString().isEmpty()) {
+                if (userID.isEmpty() || photoURL.isEmpty()) {
                     Icon(
                         imageVector = Icons.Outlined.Settings,
                         contentDescription = stringResource(R.string.settings),
@@ -168,7 +167,7 @@ fun ToDoAppTopBar(
                     )
                 } else {
                     GlideImage(
-                        model = photoURL.toString(),
+                        model = photoURL,
                         contentDescription = stringResource(R.string.settings),
                         contentScale = ContentScale.Crop,
                         modifier = Modifier
@@ -256,6 +255,7 @@ fun NewTaskFloatingActionButtonPreview() {
 @Composable
 fun TaskItem(
     task: Task,
+    isPremium: Boolean,
     onEdit: (Task) -> Unit,
     onToggle: () -> Unit,
     onDelete: () -> Unit,
@@ -283,7 +283,7 @@ fun TaskItem(
                 .padding(end = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            AnimatedVisibility(task.category.isNotEmpty() && !task.isDone) {
+            AnimatedVisibility(task.category.isNotEmpty() && !task.isDone && isPremium) {
                 Text(
                     text = task.category,
                     maxLines = 1,
@@ -310,7 +310,7 @@ fun TaskItem(
                 },
                 color = if (task.isDone) Color.Gray else MaterialTheme.colorScheme.onPrimaryContainer
             )
-            AnimatedVisibility(task.description.isNotEmpty() && !task.isDone) {
+            AnimatedVisibility(task.description.isNotEmpty() && !task.isDone && isPremium) {
                 Text(
                     text = task.description,
                     maxLines = 3,
@@ -341,6 +341,7 @@ private fun TaskItemPreview() {
     ToDoAppTheme {
         TaskItem(
             task = Task(title = "Clean my room up"),
+            isPremium = false,
             onEdit = {},
             onToggle = {},
             onDelete = {}
@@ -354,6 +355,7 @@ private fun TaskItemDonePreview() {
     ToDoAppTheme {
         TaskItem(
             task = Task(title = "Clean my room up", isDone = true),
+            isPremium = false,
             onEdit = {},
             onToggle = {},
             onDelete = {}
@@ -499,22 +501,19 @@ fun StickySearchBar(
                 singleLine = true,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 8.dp)
-                    .padding(horizontal = 8.dp)
+                    .padding(8.dp)
             )
         }
         Spacer(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(16.dp)
+                .height(8.dp)
                 .background(
                     brush = Brush.verticalGradient(
                         colors = listOf(
                             MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.background,
-                            MaterialTheme.colorScheme.background.copy(alpha = 0.5F),
+                            Color.Transparent
                         ),
-                        startY = 0.5F
                     ),
                 )
         )
@@ -536,6 +535,7 @@ private fun StickySearchBarPreview() {
 @Composable
 fun TaskList(
     showStatistics: Boolean,
+    isPremium: Boolean,
     innerPadding: PaddingValues,
     lazyListState: LazyListState,
     tasks: List<Task>,
@@ -577,7 +577,7 @@ fun TaskList(
         }
 
         item {
-            AnimatedVisibility(categories.isNotEmpty()) {
+            AnimatedVisibility(categories.isNotEmpty() && isPremium) {
                 CategoryChips(
                     selectedCategory = selectedCategory,
                     categories = categories.sortedWith(compareBy<String> {
@@ -591,7 +591,7 @@ fun TaskList(
 
         items(
             items = if (query.isNotEmpty()) {
-                tasks.filter { it.title.contains(query, ignoreCase = true) }
+                tasks.filter { it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true) }
             } else if (selectedCategory.isNotEmpty()) {
                 tasks.filter { it.category == selectedCategory }
             } else {
@@ -617,7 +617,7 @@ fun TaskList(
                                 style = MaterialTheme.typography.titleMedium,
                                 color = if (task.isExpired()) Color.Red else Color.Unspecified,
                             )
-                            AnimatedVisibility(task.repeatType != RepeatType.ONE_TIME) {
+                            AnimatedVisibility(isPremium && task.repeatType != RepeatType.ONE_TIME) {
                                 Icon(
                                     imageVector = Icons.Default.Repeat,
                                     contentDescription = stringResource(R.string.repeat),
@@ -631,6 +631,7 @@ fun TaskList(
                     }
                     TaskItem(
                         task = task,
+                        isPremium = isPremium,
                         onEdit = { onEdit(it) },
                         onToggle = { onToggle(task) },
                         onDelete = { onDelete(task) },
@@ -645,6 +646,7 @@ fun TaskList(
 @Composable
 fun NewTaskBottomSheet(
     sheetState: SheetState,
+    isPremium: Boolean,
     onSave: (Task) -> Unit,
     onCancel: () -> Unit,
     windowHeightSizeClass: WindowHeightSizeClass
@@ -676,71 +678,73 @@ fun NewTaskBottomSheet(
                 )
                 .verticalScroll(rememberScrollState())
         ) {
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = selectedRepeat,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.repeat)) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Filled.Repeat,
-                            contentDescription = stringResource(R.string.repeat)
-                        )
-                    },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                    },
-                    modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
+            if (isPremium) {
+                ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    repeatTypes.forEach { selected ->
-                        DropdownMenuItem(
-                            text = { Text(selected) },
-                            onClick = {
-                                selectedRepeat = selected
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-            AnimatedVisibility(selectedRepeat == repeatTypes[2]) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    onExpandedChange = { expanded = !expanded },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(repeatDaysOfWeek) { dayOfWeek ->
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            var isChecked by remember { mutableStateOf(selectedRepeatDaysOfWeek.contains(repeatDaysOfWeek.indexOf(dayOfWeek))) }
-
-                            Checkbox(
-                                checked = isChecked,
-                                onCheckedChange = {
-                                    if (it) {
-                                        isChecked = true
-                                        selectedRepeatDaysOfWeek.add(repeatDaysOfWeek.indexOf(dayOfWeek))
-                                    } else {
-                                        if (selectedRepeatDaysOfWeek.size > 1) {
-                                            isChecked = false
-                                            selectedRepeatDaysOfWeek.remove(repeatDaysOfWeek.indexOf(dayOfWeek))
-                                        }
-                                    }
+                    OutlinedTextField(
+                        value = selectedRepeat,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.repeat)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Repeat,
+                                contentDescription = stringResource(R.string.repeat)
+                            )
+                        },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                        },
+                        modifier = Modifier
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        repeatTypes.forEach { selected ->
+                            DropdownMenuItem(
+                                text = { Text(selected) },
+                                onClick = {
+                                    selectedRepeat = selected
+                                    expanded = false
                                 }
                             )
-                            Text(dayOfWeek)
+                        }
+                    }
+                }
+                AnimatedVisibility(selectedRepeat == repeatTypes[2]) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(repeatDaysOfWeek) { dayOfWeek ->
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                var isChecked by remember { mutableStateOf(selectedRepeatDaysOfWeek.contains(repeatDaysOfWeek.indexOf(dayOfWeek))) }
+
+                                Checkbox(
+                                    checked = isChecked,
+                                    onCheckedChange = {
+                                        if (it) {
+                                            isChecked = true
+                                            selectedRepeatDaysOfWeek.add(repeatDaysOfWeek.indexOf(dayOfWeek))
+                                        } else {
+                                            if (selectedRepeatDaysOfWeek.size > 1) {
+                                                isChecked = false
+                                                selectedRepeatDaysOfWeek.remove(repeatDaysOfWeek.indexOf(dayOfWeek))
+                                            }
+                                        }
+                                    }
+                                )
+                                Text(dayOfWeek)
+                            }
                         }
                     }
                 }
@@ -760,51 +764,53 @@ fun NewTaskBottomSheet(
                     .fillMaxWidth()
                     .testTag(stringResource(R.string.new_task))
             )
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                maxLines = 3,
-                label = { Text(text = stringResource(R.string.description)) },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_description),
-                        contentDescription = stringResource(R.string.description)
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(stringResource(R.string.description))
-            )
-            OutlinedTextField(
-                value = category,
-                onValueChange = { category = it },
-                singleLine = true,
-                label = { Text(text = stringResource(R.string.category)) },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_category),
-                        contentDescription = stringResource(R.string.category)
-                    )
-                },
-                trailingIcon = {
-                    if (category.length > 25) {
-                        Text(
-                            text = "${category.length}/25",
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(end = 16.dp)
+            if (isPremium) {
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    maxLines = 3,
+                    label = { Text(text = stringResource(R.string.description)) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_description),
+                            contentDescription = stringResource(R.string.description)
                         )
-                    } else {
-                        Text(
-                            text = "${category.length}/25",
-                            modifier = Modifier.padding(end = 16.dp)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(stringResource(R.string.description))
+                )
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = { category = it },
+                    singleLine = true,
+                    label = { Text(text = stringResource(R.string.category)) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_category),
+                            contentDescription = stringResource(R.string.category)
                         )
-                    }
-                },
-                isError = category.length > 25,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(stringResource(R.string.category))
-            )
+                    },
+                    trailingIcon = {
+                        if (category.length > 25) {
+                            Text(
+                                text = "${category.length}/25",
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                        } else {
+                            Text(
+                                text = "${category.length}/25",
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                        }
+                    },
+                    isError = category.length > 25,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(stringResource(R.string.category))
+                )
+            }
             DateTimePickerTextFields(
                 date = date,
                 hour = hour,
@@ -832,9 +838,9 @@ fun NewTaskBottomSheet(
                         calendar.set(Calendar.HOUR_OF_DAY, hour)
                         calendar.set(Calendar.MINUTE, minute)
                         onSave(Task(
-                            title = title,
-                            description = description,
-                            category = category.lowercase(),
+                            title = title.trim(),
+                            description = description.trim(),
+                            category = category.lowercase().trim(),
                             datetime = calendar.timeInMillis,
                             repeatType = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size == repeatDaysOfWeek.size) RepeatType.DAILY else RepeatType.entries[repeatTypes.indexOf(selectedRepeat)],
                             repeatDaysOfWeek = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size != repeatDaysOfWeek.size) selectedRepeatDaysOfWeek.toList() else emptyList<Int>()
@@ -857,6 +863,7 @@ fun NewTaskBottomSheet(
 fun EditTaskBottomSheet(
     task: Task,
     sheetState: SheetState,
+    isPremium: Boolean,
     onSave: (Task) -> Unit,
     onDelete: (Task) -> Unit,
     onCancel: () -> Unit,
@@ -892,71 +899,73 @@ fun EditTaskBottomSheet(
                 )
                 .verticalScroll(rememberScrollState())
         ) {
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = !expanded },
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                OutlinedTextField(
-                    value = selectedRepeat,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.repeat)) },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Filled.Repeat,
-                            contentDescription = stringResource(R.string.repeat)
-                        )
-                    },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                    },
-                    modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
+            if (isPremium) {
+                ExposedDropdownMenuBox(
                     expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    repeatTypes.forEach { selected ->
-                        DropdownMenuItem(
-                            text = { Text(selected) },
-                            onClick = {
-                                selectedRepeat = selected
-                                expanded = false
-                            }
-                        )
-                    }
-                }
-            }
-            AnimatedVisibility(selectedRepeat == repeatTypes[2]) {
-                LazyRow(
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                    onExpandedChange = { expanded = !expanded },
                     modifier = Modifier.fillMaxWidth()
                 ) {
-                    items(repeatDaysOfWeek) { dayOfWeek ->
-                        Column(
-                            verticalArrangement = Arrangement.Center,
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            var isChecked by remember { mutableStateOf(selectedRepeatDaysOfWeek.contains(repeatDaysOfWeek.indexOf(dayOfWeek))) }
-
-                            Checkbox(
-                                checked = isChecked,
-                                onCheckedChange = {
-                                    if (it) {
-                                        isChecked = true
-                                        selectedRepeatDaysOfWeek.add(repeatDaysOfWeek.indexOf(dayOfWeek))
-                                    } else {
-                                        if (selectedRepeatDaysOfWeek.size > 1) {
-                                            isChecked = false
-                                            selectedRepeatDaysOfWeek.remove(repeatDaysOfWeek.indexOf(dayOfWeek))
-                                        }
-                                    }
+                    OutlinedTextField(
+                        value = selectedRepeat,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.repeat)) },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Filled.Repeat,
+                                contentDescription = stringResource(R.string.repeat)
+                            )
+                        },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
+                        },
+                        modifier = Modifier
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                            .fillMaxWidth()
+                    )
+                    ExposedDropdownMenu(
+                        expanded = expanded,
+                        onDismissRequest = { expanded = false }
+                    ) {
+                        repeatTypes.forEach { selected ->
+                            DropdownMenuItem(
+                                text = { Text(selected) },
+                                onClick = {
+                                    selectedRepeat = selected
+                                    expanded = false
                                 }
                             )
-                            Text(dayOfWeek)
+                        }
+                    }
+                }
+                AnimatedVisibility(selectedRepeat == repeatTypes[2]) {
+                    LazyRow(
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        items(repeatDaysOfWeek) { dayOfWeek ->
+                            Column(
+                                verticalArrangement = Arrangement.Center,
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                var isChecked by remember { mutableStateOf(selectedRepeatDaysOfWeek.contains(repeatDaysOfWeek.indexOf(dayOfWeek))) }
+
+                                Checkbox(
+                                    checked = isChecked,
+                                    onCheckedChange = {
+                                        if (it) {
+                                            isChecked = true
+                                            selectedRepeatDaysOfWeek.add(repeatDaysOfWeek.indexOf(dayOfWeek))
+                                        } else {
+                                            if (selectedRepeatDaysOfWeek.size > 1) {
+                                                isChecked = false
+                                                selectedRepeatDaysOfWeek.remove(repeatDaysOfWeek.indexOf(dayOfWeek))
+                                            }
+                                        }
+                                    }
+                                )
+                                Text(dayOfWeek)
+                            }
                         }
                     }
                 }
@@ -976,51 +985,53 @@ fun EditTaskBottomSheet(
                     .fillMaxWidth()
                     .testTag(stringResource(R.string.edit_task))
             )
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                maxLines = 3,
-                label = { Text(text = stringResource(R.string.description)) },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_description),
-                        contentDescription = stringResource(R.string.description)
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(stringResource(R.string.description))
-            )
-            OutlinedTextField(
-                value = category,
-                onValueChange = { category = it },
-                singleLine = true,
-                label = { Text(text = stringResource(R.string.category)) },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_category),
-                        contentDescription = stringResource(R.string.category)
-                    )
-                },
-                trailingIcon = {
-                    if (category.length > 25) {
-                        Text(
-                            text = "${category.length}/25",
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.padding(end = 16.dp)
+            if (isPremium) {
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { description = it },
+                    maxLines = 3,
+                    label = { Text(text = stringResource(R.string.description)) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_description),
+                            contentDescription = stringResource(R.string.description)
                         )
-                    } else {
-                        Text(
-                            text = "${category.length}/25",
-                            modifier = Modifier.padding(end = 16.dp)
+                    },
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(stringResource(R.string.description))
+                )
+                OutlinedTextField(
+                    value = category,
+                    onValueChange = { category = it },
+                    singleLine = true,
+                    label = { Text(text = stringResource(R.string.category)) },
+                    leadingIcon = {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_category),
+                            contentDescription = stringResource(R.string.category)
                         )
-                    }
-                },
-                isError = category.length > 25,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(stringResource(R.string.category))
-            )
+                    },
+                    trailingIcon = {
+                        if (category.length > 25) {
+                            Text(
+                                text = "${category.length}/25",
+                                color = MaterialTheme.colorScheme.error,
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                        } else {
+                            Text(
+                                text = "${category.length}/25",
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                        }
+                    },
+                    isError = category.length > 25,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .testTag(stringResource(R.string.category))
+                )
+            }
             DateTimePickerTextFields(
                 date = task.datetime,
                 hour = calendar.get(Calendar.HOUR_OF_DAY),
@@ -1040,9 +1051,9 @@ fun EditTaskBottomSheet(
                     calendar.set(Calendar.HOUR_OF_DAY, hour)
                     calendar.set(Calendar.MINUTE, minute)
                     onSave(task.copy(
-                        title = title,
-                        description = description,
-                        category = category.lowercase(),
+                        title = title.trim(),
+                        description = description.trim(),
+                        category = category.lowercase().trim(),
                         datetime = calendar.timeInMillis,
                         repeatType = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size == repeatDaysOfWeek.size) RepeatType.DAILY else RepeatType.entries[repeatTypes.indexOf(selectedRepeat)],
                         repeatDaysOfWeek = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size != repeatDaysOfWeek.size) selectedRepeatDaysOfWeek.toList() else emptyList<Int>()
@@ -1292,7 +1303,7 @@ fun SettingsTopBar(
     onBack: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    TopAppBar(
+    CenterAlignedTopAppBar(
         navigationIcon = {
             IconButton(
                 onClick = onBack,
