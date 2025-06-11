@@ -33,8 +33,8 @@ jobs:
           echo "VK_ID_CLIENT_ID=${{ secrets.VK_ID_CLIENT_ID }}" >> local.properties
           echo "VK_ID_CLIENT_SECRET=${{ secrets.VK_ID_CLIENT_SECRET }}" >> local.properties
 
-      - name: Create google-services.json
-        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" > app/google-services.json
+      - name: Create google-services.json from base64
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
 
       - name: Verify google-services.json content
         run: |
