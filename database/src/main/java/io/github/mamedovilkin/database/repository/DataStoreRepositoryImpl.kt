@@ -7,6 +7,7 @@ import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -27,6 +28,8 @@ class DataStoreRepositoryImpl(
         val PHOTO_URL = stringPreferencesKey("photoURL")
         val DISPLAY_NAME = stringPreferencesKey("displayName")
         val PREMIUM = booleanPreferencesKey("premium")
+        val RESCHEDULE_UNCOMPLETED_TASKS = booleanPreferencesKey("rescheduleUncompletedTasks")
+        val AUTO_DELETE = intPreferencesKey("autoDelete")
     }
 
     override suspend fun setShowStatistics(showStatistics: Boolean) {
@@ -92,6 +95,32 @@ class DataStoreRepositoryImpl(
             emit(emptyPreferences())
         }.map { preferences ->
             preferences[PREMIUM] == true
+        }
+
+    override suspend fun setRescheduleUncompletedTasks(rescheduleUncompletedTasks: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[RESCHEDULE_UNCOMPLETED_TASKS] = rescheduleUncompletedTasks
+        }
+    }
+
+    override val rescheduleUncompletedTasks: Flow<Boolean> = dataStore.data
+        .catch {
+            emit(emptyPreferences())
+        }.map { preferences ->
+            preferences[RESCHEDULE_UNCOMPLETED_TASKS] == true
+        }
+
+    override suspend fun setAutoDeleteIndex(autoDeleteIndex: Int) {
+        dataStore.edit { preferences ->
+            preferences[AUTO_DELETE] = autoDeleteIndex
+        }
+    }
+
+    override val autoDeleteIndex: Flow<Int> = dataStore.data
+        .catch {
+            emit(emptyPreferences())
+        }.map { preferences ->
+            preferences[AUTO_DELETE] ?: 0
         }
 }
 

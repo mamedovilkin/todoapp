@@ -54,9 +54,14 @@ class HomeActivity : ComponentActivity(), KoinComponent {
 
         lifecycleScope.launch {
             if (isInternetAvailable()) {
-                homeActivityViewModel.refreshSignInWithVK()
-                homeActivityViewModel.checkPremiumAvailability { error ->
-                    if (error != null) {
+                homeActivityViewModel.refreshSignInWithVK { error ->
+                    if (error == null) {
+                        homeActivityViewModel.checkPremiumAvailability { error ->
+                            if (error != null) {
+                                toast(error)
+                            }
+                        }
+                    } else {
                         toast(error)
                     }
                 }

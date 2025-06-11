@@ -91,3 +91,15 @@ suspend fun isInternetAvailable(): Boolean = withContext(Dispatchers.IO) {
 fun Context.toast(message: String?) {
     Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
 }
+
+fun getGreeting(context: Context, displayName: String): String {
+    val calendar = Calendar.getInstance()
+    val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+
+    return when (currentHour) {
+        in 4..11 -> context.getString(R.string.good_morning, displayName)
+        in 12..17 -> context.getString(R.string.good_afternoon, displayName)
+        in 18..21 -> context.getString(R.string.good_evening, displayName)
+        else -> context.getString(R.string.good_night, displayName)
+    }
+}

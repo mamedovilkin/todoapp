@@ -17,4 +17,10 @@ interface DataStoreRepository {
 
     suspend fun setPremium(isPremium: Boolean)
     val isPremium: Flow<Boolean>
+
+    suspend fun setRescheduleUncompletedTasks(rescheduleUncompletedTasks: Boolean)
+    val rescheduleUncompletedTasks: Flow<Boolean>
+
+    suspend fun setAutoDeleteIndex(autoDeleteIndex: Int)
+    val autoDeleteIndex: Flow<Int>
 }

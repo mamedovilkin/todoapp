@@ -21,7 +21,7 @@ class HomeActivityViewModel(
     private val ruStoreBillingClient: RuStoreBillingClient
 ) : ViewModel() {
 
-    fun refreshSignInWithVK() = viewModelScope.launch {
+    fun refreshSignInWithVK(onError: (String?) -> Unit) = viewModelScope.launch {
         VKID.instance.refreshToken(
             callback = object : VKIDRefreshTokenCallback {
                 override fun onSuccess(token: AccessToken) {
@@ -33,7 +33,7 @@ class HomeActivityViewModel(
                 }
 
                 override fun onFail(fail: VKIDRefreshTokenFail) {
-                    clearUser()
+                    onError(fail.description.toString())
                 }
             }
         )
@@ -74,11 +74,5 @@ class HomeActivityViewModel(
         dataStoreRepository.setPhotoURL(photoURL)
         dataStoreRepository.setDisplayName(displayName)
         syncWorkerRepository.scheduleSyncTasksWork()
-    }
-
-    private fun clearUser() = viewModelScope.launch {
-        dataStoreRepository.setUserID("")
-        dataStoreRepository.setPhotoURL("")
-        dataStoreRepository.setDisplayName("")
     }
 }

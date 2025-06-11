@@ -49,6 +49,8 @@ import androidx.compose.material.icons.outlined.AccessTime
 import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Keyboard
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.rounded.ArrowDropDown
+import androidx.compose.material.icons.rounded.ArrowDropUp
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -111,6 +113,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -131,6 +134,7 @@ import io.github.mamedovilkin.todoapp.util.convertMillisToDatetime
 import io.github.mamedovilkin.todoapp.util.convertToTime
 import java.util.Calendar
 import io.github.mamedovilkin.todoapp.ui.activity.settings.SettingsActivity
+import io.github.mamedovilkin.todoapp.util.getGreeting
 import kotlin.collections.filter
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
@@ -450,6 +454,7 @@ private fun StatisticsCardDonePreview() {
 @Composable
 fun StickySearchBar(
     query: String,
+    showVerticalGradient: Boolean,
     onSearch: (String) -> Unit,
     onClear: () -> Unit,
 ) {
@@ -504,19 +509,21 @@ fun StickySearchBar(
                     .padding(8.dp)
             )
         }
-        Spacer(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(8.dp)
-                .background(
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            MaterialTheme.colorScheme.background,
-                            Color.Transparent
+        if (showVerticalGradient) {
+            Spacer(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(8.dp)
+                    .background(
+                        brush = Brush.verticalGradient(
+                            colors = listOf(
+                                MaterialTheme.colorScheme.background,
+                                Color.Transparent
+                            ),
                         ),
-                    ),
-                )
-        )
+                    )
+            )
+        }
     }
 }
 
@@ -526,6 +533,7 @@ private fun StickySearchBarPreview() {
     ToDoAppTheme {
         StickySearchBar(
             query = "",
+            showVerticalGradient = false,
             onSearch = {},
             onClear = {}
         )
@@ -534,6 +542,7 @@ private fun StickySearchBarPreview() {
 
 @Composable
 fun TaskList(
+    displayName: String,
     showStatistics: Boolean,
     isPremium: Boolean,
     innerPadding: PaddingValues,
@@ -541,6 +550,7 @@ fun TaskList(
     tasks: List<Task>,
     count: Int,
     query: String,
+    showVerticalGradient: Boolean,
     selectedCategory: String,
     categories: Set<String>,
     onSelection: (String) -> Unit,
@@ -558,6 +568,19 @@ fun TaskList(
         state = lazyListState,
         contentPadding = PaddingValues(top = 0.dp, bottom = 72.dp)
     ) {
+        if (displayName.isNotEmpty()) {
+            item {
+                Text(
+                    text = getGreeting(LocalContext.current, displayName),
+                    style = MaterialTheme.typography.displayLarge,
+                    modifier = Modifier
+                        .padding(top = 16.dp)
+                        .padding(horizontal = 8.dp)
+                        .padding(bottom = 8.dp)
+                )
+            }
+        }
+
         if (showStatistics) {
             item {
                 AnimatedContent(
@@ -571,6 +594,7 @@ fun TaskList(
         stickyHeader {
             StickySearchBar(
                 query = query,
+                showVerticalGradient = showVerticalGradient,
                 onSearch = onSearch,
                 onClear = onClear,
             )
@@ -1320,7 +1344,8 @@ fun SettingsTopBar(
             Text(
                 text = stringResource(R.string.settings),
                 color = MaterialTheme.colorScheme.background,
-                fontSize = 24.sp
+                fontSize = 22.sp,
+                fontWeight = FontWeight.SemiBold
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
@@ -1485,4 +1510,62 @@ fun ToDoAppDialog(
         },
         containerColor = MaterialTheme.colorScheme.surfaceVariant
     )
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun Spinner(
+    items: Array<String>,
+    selectedItem: String,
+    onItemSelected: (String) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    var expanded by remember { mutableStateOf(false) }
+
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = !expanded },
+        modifier = modifier
+            .clip(RoundedCornerShape(8.dp))
+    ) {
+        Row(
+            modifier = modifier
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable, expanded)
+                .clickable(onClick = { expanded = !expanded })
+                .padding(16.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
+        ) {
+            Text(
+                text = selectedItem,
+                style = MaterialTheme.typography.headlineSmall
+            )
+            Icon(
+                imageVector = if (expanded) Icons.Rounded.ArrowDropUp else Icons.Rounded.ArrowDropDown,
+                contentDescription = null,
+                modifier = Modifier.size(24.dp)
+            )
+        }
+
+        ExposedDropdownMenu(
+            expanded = expanded,
+            onDismissRequest = { expanded = false }
+        ) {
+            items.forEach { item ->
+                DropdownMenuItem(
+                    text = {
+                        Text(
+                            text = item,
+                            maxLines = 1,
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    },
+                    onClick = {
+                        onItemSelected(item)
+                        expanded = false
+                    }
+                )
+            }
+        }
+    }
 }

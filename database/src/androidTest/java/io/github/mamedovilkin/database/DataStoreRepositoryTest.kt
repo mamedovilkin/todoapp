@@ -71,4 +71,22 @@ class DataStoreRepositoryTest {
 
         assertTrue(isPremium)
     }
+
+    @Test
+    fun repositorySetRescheduleUncompletedTasks_rescheduleUncompletedTasks() = runBlocking {
+        dataStoreRepository.setRescheduleUncompletedTasks(true)
+
+        val rescheduleUncompletedTasks = dataStoreRepository.rescheduleUncompletedTasks.first()
+
+        assertTrue(rescheduleUncompletedTasks)
+    }
+
+    @Test
+    fun repositorySetAutoDeleteIndex_autoDeleteIndex() = runBlocking {
+        dataStoreRepository.setAutoDeleteIndex(1)
+
+        val autoDeleteIndex = dataStoreRepository.autoDeleteIndex.first()
+
+        assertEquals(1, autoDeleteIndex)
+    }
 }

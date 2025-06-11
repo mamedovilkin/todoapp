@@ -67,6 +67,9 @@
         <item>Описания к задачам — добавляйте заметки, важные детали и инструкции.</item>
         <item>Категории задач — наводите порядок с помощью удобной группировки.</item>
         <item>Расширенные уведомления — до 5 напоминаний для каждой задачи, чтобы точно ничего не упустить.</item>
+        <item>Перенос из уведомления — откладывайте задачи прямо из уведомлений, не заходя в приложение.</item>
+        <item>Автоматический перенос на завтра — невыполненные задачи не исчезнут, а плавно перейдут на следующий день.</item>
+        <item>Автоудаление завершённых задач — сохраняйте список дел чистым и актуальным без лишних движений.</item>
     </string-array>
     <string name="try_it_free">Попробуйте бесплатно</string>
     <string name="premium_terms">14 дней бесплатно, затем 99.00₽ в месяц.\nОтменить сможете в любое время. Применяются условия использования.</string>
@@ -76,6 +79,19 @@
     <string name="invalid_payment_state">Неверное состояние платежа</string>
     <string name="reschedule">Перенести</string>
     <string name="your_plan">Ваш план</string>
+    <string name="delete_all_data_summary">Все данные будут удалены из локальной и удалённой базы данных</string>
+    <string name="reschedule_uncompleted_tasks_to_tomorrow">Переносить невыполненые задачи на завтра</string>
+    <string name="good_morning">Доброе утро, %1$s!</string>
+    <string name="good_afternoon">Добрый день, %1$s!</string>
+    <string name="good_evening">Добрый вечер, %1$s!</string>
+    <string name="good_night">Доброй ночи, %1$s!</string>
+    <string name="automatically_delete_completed_tasks">Автоматически удалять выполненные задачи</string>
+    <string-array name="auto_delete">
+        <item>Никогда</item>
+        <item>Ежедневно</item>
+        <item>Еженедельно</item>
+        <item>Ежемесячно</item>
+    </string-array>
     <string-array name="repeat_types">
         <item>Один раз</item>
         <item>Ежедневно</item>

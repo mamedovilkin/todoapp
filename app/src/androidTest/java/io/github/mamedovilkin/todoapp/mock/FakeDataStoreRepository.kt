@@ -11,39 +11,48 @@ class FakeDataStoreRepository : DataStoreRepository {
     private val photoURLFlow = MutableStateFlow("")
     private val displayNameFlow = MutableStateFlow("")
     private val isPremiumFlow = MutableStateFlow(false)
+    private val rescheduleUncompletedTasksFlow = MutableStateFlow(false)
+    private val autoDeleteIndexFlow = MutableStateFlow(0)
 
     override suspend fun setShowStatistics(showStatistics: Boolean) {
         showStatisticsFlow.value = showStatistics
     }
 
-    override val showStatistics: Flow<Boolean>
-        get() = showStatisticsFlow
+    override val showStatistics: Flow<Boolean> = showStatisticsFlow
 
     override suspend fun setUserID(userID: String) {
         userIDFlow.value = userID
     }
 
-    override val userID: Flow<String>
-        get() = userIDFlow
+    override val userID: Flow<String> = userIDFlow
 
     override suspend fun setPhotoURL(photoURL: String) {
         photoURLFlow.value = photoURL
     }
 
-    override val photoURL: Flow<String>
-        get() = photoURLFlow
+    override val photoURL: Flow<String> = photoURLFlow
 
     override suspend fun setDisplayName(displayName: String) {
         displayNameFlow.value = displayName
     }
 
-    override val displayName: Flow<String>
-        get() = displayNameFlow
+    override val displayName: Flow<String> = displayNameFlow
 
     override suspend fun setPremium(isPremium: Boolean) {
         isPremiumFlow.value = isPremium
     }
 
-    override val isPremium: Flow<Boolean>
-        get() = isPremiumFlow
+    override val isPremium: Flow<Boolean> = isPremiumFlow
+
+    override suspend fun setRescheduleUncompletedTasks(rescheduleUncompletedTasks: Boolean) {
+        rescheduleUncompletedTasksFlow.value = rescheduleUncompletedTasks
+    }
+
+    override val rescheduleUncompletedTasks: Flow<Boolean> = rescheduleUncompletedTasksFlow
+
+    override suspend fun setAutoDeleteIndex(autoDeleteIndex: Int) {
+        autoDeleteIndexFlow.value = autoDeleteIndex
+    }
+
+    override val autoDeleteIndex: Flow<Int> = autoDeleteIndexFlow
 }

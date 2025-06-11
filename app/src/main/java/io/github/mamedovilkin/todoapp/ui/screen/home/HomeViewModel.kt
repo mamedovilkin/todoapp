@@ -66,6 +66,13 @@ class HomeViewModel(
             ""
         )
 
+    val displayName = dataStoreRepository.displayName
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            ""
+        )
+
     val showStatistics = dataStoreRepository.showStatistics
         .stateIn(
             viewModelScope,

@@ -71,6 +71,9 @@
         <item>Task descriptions — add notes, important details, and instructions.</item>
         <item>Task categories — keep things tidy with smart grouping.</item>
         <item>Extended reminders — get up to 5 alerts per task so you never miss a thing.</item>
+        <item>Reschedule tasks from notification — reschedule tasks right from the notification without opening the app.</item>
+        <item>Reschedule uncompleted tasks to tomorrow — uncompleted tasks will automatically reschedule to the next day.</item>
+        <item>Auto-delete completed tasks — keep your to-do list clean and up-to-date effortlessly.</item>
     </string-array>
     <string name="try_it_free">Try It Free</string>
     <string name="premium_terms">14 days free, then 99.00₽ per month.\nCancel anytime. Terms &amp; Conditions apply.</string>
@@ -80,6 +83,19 @@
     <string name="invalid_payment_state">Invalid payment state</string>
     <string name="reschedule">Reschedule</string>
     <string name="your_plan">Your plan</string>
+    <string name="delete_all_data_summary">All data will be deleted from local and remote databases</string>
+    <string name="reschedule_uncompleted_tasks_to_tomorrow">Reschedule uncompleted tasks to tomorrow</string>
+    <string name="good_morning">Good morning, %1$s!</string>
+    <string name="good_afternoon">Good afternoon, %1$s!</string>
+    <string name="good_evening">Good evening, %1$s!</string>
+    <string name="good_night">Good night, %1$s!</string>
+    <string name="automatically_delete_completed_tasks">Automatically delete completed tasks</string>
+    <string-array name="auto_delete">
+        <item>Never</item>
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+    </string-array>
     <string-array name="repeat_types">
         <item>One time</item>
         <item>Daily</item>

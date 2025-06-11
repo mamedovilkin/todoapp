@@ -7,7 +7,9 @@ import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.mock.FakeDataStoreRepository
 import io.github.mamedovilkin.todoapp.mock.FakeFirestoreRepository
+import io.github.mamedovilkin.todoapp.mock.FakeSyncWorkerRepository
 import io.github.mamedovilkin.todoapp.mock.FakeTaskRepository
+import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.ui.screen.settings.SettingsViewModel
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
@@ -35,8 +37,12 @@ class SettingsViewModelTest {
     private val dataStoreRepository: DataStoreRepository = FakeDataStoreRepository()
     private val firestoreRepository: FirestoreRepository = FakeFirestoreRepository()
     private val taskRepository: TaskRepository = FakeTaskRepository()
+    private val syncWorkerRepository: SyncWorkerRepository = FakeSyncWorkerRepository()
     private var settingsViewModel: SettingsViewModel = SettingsViewModel(
-        dataStoreRepository, firestoreRepository, taskRepository
+        dataStoreRepository,
+        firestoreRepository,
+        taskRepository,
+        syncWorkerRepository
     )
 
     @Before
@@ -154,7 +160,10 @@ class SettingsViewModelTest {
         assertTrue(allTasks.isNotEmpty())
 
         settingsViewModel = SettingsViewModel(
-            dataStoreRepository, firestoreRepository, taskRepository
+            dataStoreRepository,
+            firestoreRepository,
+            taskRepository,
+            syncWorkerRepository
         )
 
         settingsViewModel.deleteAllData()

@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -23,7 +24,8 @@ data class SettingsUiState(
 class SettingsViewModel(
     private val dataStoreRepository: DataStoreRepository,
     private val firestoreRepository: FirestoreRepository,
-    private val taskRepository: TaskRepository
+    private val taskRepository: TaskRepository,
+    private val syncWorkerRepository: SyncWorkerRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -64,26 +66,54 @@ class SettingsViewModel(
             false
         )
 
-    fun setShowStatistics(showStatistics: Boolean) {
-        viewModelScope.launch {
-            dataStoreRepository.setShowStatistics(showStatistics)
+    val rescheduleUncompletedTasks = dataStoreRepository.rescheduleUncompletedTasks
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            false
+        )
+
+    val autoDeleteIndex = dataStoreRepository.autoDeleteIndex
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            0
+        )
+
+    fun setShowStatistics(showStatistics: Boolean) = viewModelScope.launch {
+        dataStoreRepository.setShowStatistics(showStatistics)
+    }
+
+    fun setRescheduleUncompletedTasks(rescheduleUncompletedTasks: Boolean) = viewModelScope.launch {
+        dataStoreRepository.setRescheduleUncompletedTasks(rescheduleUncompletedTasks)
+
+        if (rescheduleUncompletedTasks) {
+            syncWorkerRepository.rescheduleUncompletedTasksWork()
+        } else {
+            syncWorkerRepository.cancelRescheduleUncompletedTasksWork()
         }
     }
 
-    fun setShowSignOutDialog(showDialog: Boolean) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                showSignOutDialog = showDialog
-            )
+    fun setAutoDeleteIndex(autoDeleteIndex: Int) = viewModelScope.launch {
+        dataStoreRepository.setAutoDeleteIndex(autoDeleteIndex)
+
+        if (autoDeleteIndex == 0) {
+            syncWorkerRepository.cancelAutoDeleteTasksWork()
+        } else {
+            syncWorkerRepository.scheduleAutoDeleteTasksWork(autoDeleteIndex)
         }
     }
 
-    fun setShowDeleteAllDataDialog(showDeleteAllDataDialog: Boolean) {
-        _uiState.update { currentState ->
-            currentState.copy(
-                showDeleteAllDataDialog = showDeleteAllDataDialog
-            )
-        }
+    fun setShowSignOutDialog(showDialog: Boolean) = _uiState.update { currentState ->
+        currentState.copy(
+            showSignOutDialog = showDialog
+        )
+    }
+
+    fun setShowDeleteAllDataDialog(showDeleteAllDataDialog: Boolean) = _uiState.update { currentState ->
+        currentState.copy(
+            showDeleteAllDataDialog = showDeleteAllDataDialog
+        )
     }
 
     fun deleteAllData() {

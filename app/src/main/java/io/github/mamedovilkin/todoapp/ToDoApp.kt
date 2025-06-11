@@ -91,7 +91,7 @@ class ToDoApp : Application() {
                     viewModel { HomeViewModel(get(), get(), get(), get()) }
                     viewModel { PremiumActivityViewModel(this@ToDoApp, get(), get()) }
                     viewModel { SettingsActivityViewModel(get(), get(), get(), get()) }
-                    viewModel { SettingsViewModel(get(), get(), get()) }
+                    viewModel { SettingsViewModel(get(), get(), get(), get()) }
                 }
             )
         }

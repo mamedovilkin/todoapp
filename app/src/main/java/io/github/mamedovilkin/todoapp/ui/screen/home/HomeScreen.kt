@@ -78,6 +78,7 @@ fun HomeScreen(
     val exception = uiState.exception
     val userID by viewModel.userID.collectAsState()
     val photoURL by viewModel.photoURL.collectAsState()
+    val displayName by viewModel.displayName.collectAsState()
     val showStatistics by viewModel.showStatistics.collectAsState()
     val isPremium by viewModel.isPremium.collectAsState()
 
@@ -140,6 +141,7 @@ fun HomeScreen(
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     TaskList(
+                        displayName = displayName,
                         showStatistics = showStatistics,
                         isPremium = isPremium,
                         innerPadding = innerPadding,
@@ -147,6 +149,7 @@ fun HomeScreen(
                         tasks = result.tasks,
                         count = uiState.notDoneTasksCount,
                         query = uiState.query,
+                        showVerticalGradient = showUpFloatingActionButton,
                         selectedCategory = uiState.selectedCategory,
                         categories = result.categories,
                         onSelection = { viewModel.setSelectedCategory(it) },
