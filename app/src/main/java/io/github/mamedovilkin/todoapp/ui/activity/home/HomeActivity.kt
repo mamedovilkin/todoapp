@@ -30,6 +30,7 @@ import io.github.mamedovilkin.todoapp.util.toast
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
+import ru.rustore.sdk.core.util.RuStoreUtils
 
 class HomeActivity : ComponentActivity(), KoinComponent {
 
@@ -54,16 +55,14 @@ class HomeActivity : ComponentActivity(), KoinComponent {
 
         lifecycleScope.launch {
             if (isInternetAvailable()) {
-                homeActivityViewModel.refreshSignInWithVK { error ->
-                    if (error == null) {
-                        homeActivityViewModel.checkPremiumAvailability { error ->
-                            if (error != null) {
-                                toast(error)
-                            }
+                if (RuStoreUtils.isRuStoreInstalled(this@HomeActivity)) {
+                    homeActivityViewModel.checkPremiumAvailability { error ->
+                        if (error != null) {
+                            toast(error)
                         }
-                    } else {
-                        toast(error)
                     }
+                } else {
+                    toast(getString(R.string.rustore_is_not_installed_on_this_device))
                 }
             } else {
                 toast(getString(R.string.no_internet_connection))

@@ -30,50 +30,60 @@ class PremiumActivityViewModel(
         onSuccess: () -> Unit,
         onError: (String?) -> Unit
     ) = viewModelScope.launch {
-        val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
-        purchasesUseCase.purchaseProduct(
-            productId = "premium_monthly",
-            orderId = UUID.randomUUID().toString(),
-            quantity = 1,
-            developerPayload = null,
-        ).addOnSuccessListener { paymentResult ->
-            viewModelScope.launch {
-                when (paymentResult) {
-                    PaymentResult.InvalidPaymentState -> {
-                        dataStoreRepository.setPremium(false)
-                        onError(application.getString(R.string.invalid_payment_state))
-                    }
-                    is PaymentResult.Cancelled -> {
-                        dataStoreRepository.setPremium(false)
-                        onError(application.getString(R.string.cancelled))
-                    }
-                    is PaymentResult.Failure -> {
-                        dataStoreRepository.setPremium(false)
-                        onError(application.getString(R.string.failure))
-                    }
-                    is PaymentResult.Success -> {
-                        purchasesUseCase.getPurchases()
-                            .addOnSuccessListener { purchases ->
-                                viewModelScope.launch {
-                                    val hasPremium = purchases.any { it.productId == "premium_monthly" }
-                                    dataStoreRepository.setPremium(hasPremium)
-                                    onSuccess()
-                                }
-                            }
-                            .addOnFailureListener { error ->
-                                viewModelScope.launch {
+        ruStoreBillingClient.userInfo.getAuthorizationStatus()
+            .addOnSuccessListener {
+                if (it.authorized) {
+                    val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
+                    purchasesUseCase.purchaseProduct(
+                        productId = "premium_monthly",
+                        orderId = UUID.randomUUID().toString(),
+                        quantity = 1,
+                        developerPayload = null,
+                    ).addOnSuccessListener { paymentResult ->
+                        viewModelScope.launch {
+                            when (paymentResult) {
+                                PaymentResult.InvalidPaymentState -> {
                                     dataStoreRepository.setPremium(false)
+                                    onError(application.getString(R.string.invalid_payment_state))
                                 }
-                                onError(error.message.toString())
+                                is PaymentResult.Cancelled -> {
+                                    dataStoreRepository.setPremium(false)
+                                    onError(application.getString(R.string.cancelled))
+                                }
+                                is PaymentResult.Failure -> {
+                                    dataStoreRepository.setPremium(false)
+                                    onError(application.getString(R.string.failure))
+                                }
+                                is PaymentResult.Success -> {
+                                    purchasesUseCase.getPurchases()
+                                        .addOnSuccessListener { purchases ->
+                                            viewModelScope.launch {
+                                                val hasPremium = purchases.any { it.productId == "premium_monthly" }
+                                                dataStoreRepository.setPremium(hasPremium)
+                                                onSuccess()
+                                            }
+                                        }
+                                        .addOnFailureListener { error ->
+                                            viewModelScope.launch {
+                                                dataStoreRepository.setPremium(false)
+                                            }
+                                            onError(error.message.toString())
+                                        }
+                                }
                             }
+                        }
+                    }.addOnFailureListener { error ->
+                        viewModelScope.launch {
+                            dataStoreRepository.setPremium(false)
+                        }
+                        onError(error.message.toString())
                     }
+                } else {
+                    onError(application.getString(R.string.not_authorized_in_rustore))
                 }
             }
-        }.addOnFailureListener { error ->
-            viewModelScope.launch {
-                dataStoreRepository.setPremium(false)
+            .addOnFailureListener { error ->
+                onError(error.message)
             }
-            onError(error.message.toString())
-        }
     }
 }

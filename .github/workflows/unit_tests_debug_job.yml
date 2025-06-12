@@ -1,0 +1,52 @@
+name: Unit Tests Debug
+
+on:
+  push:
+    branches:
+      - dev
+  pull_request:
+    branches:
+      - dev
+  workflow_call:
+
+jobs:
+  lint:
+    name: Unit Tests Debug
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set Up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Create local.properties
+        run: |
+          echo "Creating local.properties in $(pwd)"
+          echo "sdk.dir=$ANDROID_HOME" > local.properties # Or $ANDROID_SDK_ROOT, setup-java should provide one
+          echo "VK_ID_REDIRECT_HOST=${{ secrets.VK_ID_REDIRECT_HOST_SECRET }}" >> local.properties
+          echo "VK_ID_REDIRECT_SCHEME=${{ secrets.VK_ID_REDIRECT_SCHEME_SECRET }}" >> local.properties
+          echo "VK_ID_CLIENT_ID=${{ secrets.VK_ID_CLIENT_ID }}" >> local.properties
+          echo "VK_ID_CLIENT_SECRET=${{ secrets.VK_ID_CLIENT_SECRET }}" >> local.properties
+
+      - name: Create google-services.json from base64
+        run: echo "${{ secrets.GOOGLE_SERVICES_JSON }}" | base64 --decode > app/google-services.json
+
+      - name: Verify google-services.json content
+        run: |
+          echo "--- Attempting to cat app/google-services.json ---"
+          cat app/google-services.json
+          echo "--- Finished catting app/google-services.json ---"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Make Gradlew Executable
+        run: chmod +x ./gradlew
+
+      - name: Execute Gradle Command - test
+        run: ./gradlew test

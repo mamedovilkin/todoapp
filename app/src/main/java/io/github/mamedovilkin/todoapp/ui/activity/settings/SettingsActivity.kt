@@ -25,6 +25,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
+import ru.rustore.sdk.core.util.RuStoreUtils
 
 class SettingsActivity : ComponentActivity(), KoinComponent {
 
@@ -58,7 +59,15 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     onSignIn = {
                         lifecycleScope.launch {
                             if (isInternetAvailable()) {
-                                settingsActivityViewModel.signInWithVK()
+                                if (RuStoreUtils.isRuStoreInstalled(this@SettingsActivity)) {
+                                    settingsActivityViewModel.signInWithVK { error ->
+                                        if (error != null) {
+                                            toast(error)
+                                        }
+                                    }
+                                } else {
+                                    toast(getString(R.string.rustore_is_not_installed_on_this_device))
+                                }
                             } else {
                                 toast(getString(R.string.no_internet_connection))
                             }
@@ -81,7 +90,15 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                         lifecycleScope.launch {
                             if (userID.isEmpty()) {
                                 if (isInternetAvailable()) {
-                                    settingsActivityViewModel.signInWithVK()
+                                    if (RuStoreUtils.isRuStoreInstalled(this@SettingsActivity)) {
+                                        settingsActivityViewModel.signInWithVK { error ->
+                                            if (error != null) {
+                                                toast(error)
+                                            }
+                                        }
+                                    } else {
+                                        toast(getString(R.string.rustore_is_not_installed_on_this_device))
+                                    }
                                 } else {
                                     toast(getString(R.string.no_internet_connection))
                                 }

@@ -1,6 +1,7 @@
 package io.github.mamedovilkin.todoapp.ui.activity.settings
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.vk.id.AccessToken
 import com.vk.id.VKID
@@ -10,6 +11,7 @@ import com.vk.id.logout.VKIDLogoutCallback
 import com.vk.id.logout.VKIDLogoutFail
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.FirestoreRepository
+import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
@@ -20,11 +22,12 @@ import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
 import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
 
 class SettingsActivityViewModel(
+    private val application: Application,
     private val dataStoreRepository: DataStoreRepository,
     private val firestoreRepository: FirestoreRepository,
     private val syncWorkerRepository: SyncWorkerRepository,
     private val ruStoreBillingClient: RuStoreBillingClient
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     val userID = dataStoreRepository.userID
         .stateIn(
@@ -33,7 +36,7 @@ class SettingsActivityViewModel(
             ""
         )
 
-    fun signInWithVK() = viewModelScope.launch {
+    fun signInWithVK(onError: (String?) -> Unit) = viewModelScope.launch {
         VKID.instance.authorize(object : VKIDAuthCallback {
             override fun onAuth(token: AccessToken) {
                 val userID = token.userID.toString()
@@ -41,34 +44,47 @@ class SettingsActivityViewModel(
                 val displayName = token.userData.firstName.toString()
 
                 saveUser(userID, photoURL, displayName)
-                checkPremiumAvailability(userID)
+                checkPremiumAvailability(userID, onError = {
+                    onError(it)
+                })
             }
 
             override fun onFail(fail: VKIDAuthFail) {
-                clearUser()
+                onError(fail.description)
             }
         })
     }
 
-    fun checkPremiumAvailability(userID: String) = viewModelScope.launch {
+    private fun checkPremiumAvailability(
+        userID: String,
+        onError: (String?) -> Unit
+    ) = viewModelScope.launch {
         if (userID.isNotEmpty()) {
-            val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
+            ruStoreBillingClient.userInfo.getAuthorizationStatus()
+                .addOnSuccessListener {
+                    if (it.authorized) {
+                        val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
 
-            purchasesUseCase.getPurchases()
-                .addOnSuccessListener { purchases ->
-                    viewModelScope.launch {
-                        val hasPremium = purchases.any { purchase ->
-                            purchase.productType == ProductType.SUBSCRIPTION &&
-                            purchase.productId == "premium_monthly" &&
-                            purchase.purchaseState == PurchaseState.CONFIRMED
-                        }
-                        dataStoreRepository.setPremium(hasPremium)
+                        purchasesUseCase.getPurchases()
+                            .addOnSuccessListener { purchases ->
+                                viewModelScope.launch {
+                                    val hasPremium = purchases.any { purchase ->
+                                        purchase.productType == ProductType.SUBSCRIPTION &&
+                                                purchase.productId == "premium_monthly" &&
+                                                purchase.purchaseState == PurchaseState.CONFIRMED
+                                    }
+                                    dataStoreRepository.setPremium(hasPremium)
+                                }
+                            }
+                            .addOnFailureListener { error ->
+                                onError(error.message)
+                            }
+                    } else {
+                        onError(application.getString(R.string.not_authorized_in_rustore))
                     }
                 }
                 .addOnFailureListener { error ->
-                    viewModelScope.launch {
-                        dataStoreRepository.setPremium(false)
-                    }
+                    onError(error.message)
                 }
         }
     }
@@ -76,9 +92,6 @@ class SettingsActivityViewModel(
     fun signOut(onError: (String?) -> Unit) = viewModelScope.launch {
         VKID.instance.logout(object : VKIDLogoutCallback {
             override fun onSuccess() {
-                viewModelScope.launch {
-                    dataStoreRepository.setPremium(false)
-                }
                 clearUser()
             }
 
@@ -104,5 +117,6 @@ class SettingsActivityViewModel(
         dataStoreRepository.setUserID("")
         dataStoreRepository.setPhotoURL("")
         dataStoreRepository.setDisplayName("")
+        dataStoreRepository.setPremium(false)
     }
 }

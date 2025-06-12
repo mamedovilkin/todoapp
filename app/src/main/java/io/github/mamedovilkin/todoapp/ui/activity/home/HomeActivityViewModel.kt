@@ -1,13 +1,10 @@
 package io.github.mamedovilkin.todoapp.ui.activity.home
 
-import androidx.lifecycle.ViewModel
+import android.app.Application
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
-import com.vk.id.AccessToken
-import com.vk.id.VKID
-import com.vk.id.refresh.VKIDRefreshTokenCallback
-import com.vk.id.refresh.VKIDRefreshTokenFail
 import io.github.mamedovilkin.database.repository.DataStoreRepository
-import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
+import io.github.mamedovilkin.todoapp.R
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
@@ -16,63 +13,41 @@ import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
 import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
 
 class HomeActivityViewModel(
+    private val application: Application,
     private val dataStoreRepository: DataStoreRepository,
-    private val syncWorkerRepository: SyncWorkerRepository,
     private val ruStoreBillingClient: RuStoreBillingClient
-) : ViewModel() {
-
-    fun refreshSignInWithVK(onError: (String?) -> Unit) = viewModelScope.launch {
-        VKID.instance.refreshToken(
-            callback = object : VKIDRefreshTokenCallback {
-                override fun onSuccess(token: AccessToken) {
-                    val userID = token.userID.toString()
-                    val photoURL = token.userData.photo200.toString()
-                    val displayName = token.userData.firstName.toString()
-
-                    saveUser(userID, photoURL, displayName)
-                }
-
-                override fun onFail(fail: VKIDRefreshTokenFail) {
-                    onError(fail.description.toString())
-                }
-            }
-        )
-    }
+) : AndroidViewModel(application) {
 
     fun checkPremiumAvailability(onError: (String?) -> Unit) = viewModelScope.launch {
         val userID = dataStoreRepository.userID.first()
 
         if (userID.isNotEmpty()) {
-            val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
+            ruStoreBillingClient.userInfo.getAuthorizationStatus()
+                .addOnSuccessListener {
+                    if (it.authorized) {
+                        val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
 
-            purchasesUseCase.getPurchases()
-                .addOnSuccessListener { purchases ->
-                    viewModelScope.launch {
-                        val hasPremium = purchases.any { purchase ->
-                            purchase.productType == ProductType.SUBSCRIPTION &&
-                            purchase.productId == "premium_monthly" &&
-                            purchase.purchaseState == PurchaseState.CONFIRMED
-                        }
-                        dataStoreRepository.setPremium(hasPremium)
+                        purchasesUseCase.getPurchases()
+                            .addOnSuccessListener { purchases ->
+                                viewModelScope.launch {
+                                    val hasPremium = purchases.any { purchase ->
+                                        purchase.productType == ProductType.SUBSCRIPTION &&
+                                                purchase.productId == "premium_monthly" &&
+                                                purchase.purchaseState == PurchaseState.CONFIRMED
+                                    }
+                                    dataStoreRepository.setPremium(hasPremium)
+                                }
+                            }
+                            .addOnFailureListener { error ->
+                                onError(error.message)
+                            }
+                    } else {
+                        onError(application.getString(R.string.not_authorized_in_rustore))
                     }
                 }
                 .addOnFailureListener { error ->
-                    viewModelScope.launch {
-                        dataStoreRepository.setPremium(false)
-                    }
-                    onError(error.message.toString())
+                    onError(error.message)
                 }
         }
-    }
-
-    private fun saveUser(
-        userID: String,
-        photoURL: String,
-        displayName: String,
-    ) = viewModelScope.launch {
-        dataStoreRepository.setUserID(userID)
-        dataStoreRepository.setPhotoURL(photoURL)
-        dataStoreRepository.setDisplayName(displayName)
-        syncWorkerRepository.scheduleSyncTasksWork()
     }
 }
