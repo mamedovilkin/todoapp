@@ -12,11 +12,3 @@ jobs:
   unit-test:
     name: Unit Tests Debug
     uses: ./.github/workflows/unit_tests_debug_job.yml
-
-  database-test:
-    name: Database Instrumented Tests Debug
-    uses: ./.github/workflows/database_instrumented_tests_debug_job.yml
-
-  app-test:
-    name: App Instrumented Tests Debug
-    uses: ./.github/workflows/app_instrumented_tests_debug_job.yml

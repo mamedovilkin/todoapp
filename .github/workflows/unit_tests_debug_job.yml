@@ -10,7 +10,7 @@ on:
   workflow_call:
 
 jobs:
-  lint:
+  unit-test:
     name: Unit Tests Debug
     runs-on: ubuntu-latest
 
