@@ -43,15 +43,15 @@ class PremiumActivityViewModel(
                         viewModelScope.launch {
                             when (paymentResult) {
                                 PaymentResult.InvalidPaymentState -> {
-                                    dataStoreRepository.setPremium(false)
+                                    setPremium(false)
                                     onError(application.getString(R.string.invalid_payment_state))
                                 }
                                 is PaymentResult.Cancelled -> {
-                                    dataStoreRepository.setPremium(false)
+                                    setPremium(false)
                                     onError(application.getString(R.string.cancelled))
                                 }
                                 is PaymentResult.Failure -> {
-                                    dataStoreRepository.setPremium(false)
+                                    setPremium(false)
                                     onError(application.getString(R.string.failure))
                                 }
                                 is PaymentResult.Success -> {
@@ -59,31 +59,32 @@ class PremiumActivityViewModel(
                                         .addOnSuccessListener { purchases ->
                                             viewModelScope.launch {
                                                 val hasPremium = purchases.any { it.productId == "premium_monthly" }
-                                                dataStoreRepository.setPremium(hasPremium)
+                                                setPremium(hasPremium)
                                                 onSuccess()
                                             }
                                         }
                                         .addOnFailureListener { error ->
-                                            viewModelScope.launch {
-                                                dataStoreRepository.setPremium(false)
-                                            }
+                                            setPremium(false)
                                             onError(error.message.toString())
                                         }
                                 }
                             }
                         }
                     }.addOnFailureListener { error ->
-                        viewModelScope.launch {
-                            dataStoreRepository.setPremium(false)
-                        }
+                        setPremium(false)
                         onError(error.message.toString())
                     }
                 } else {
+                    setPremium(false)
                     onError(application.getString(R.string.not_authorized_in_rustore))
                 }
             }
             .addOnFailureListener { error ->
                 onError(error.message)
             }
+    }
+
+    fun setPremium(isPremium: Boolean) = viewModelScope.launch {
+        dataStoreRepository.setPremium(isPremium)
     }
 }

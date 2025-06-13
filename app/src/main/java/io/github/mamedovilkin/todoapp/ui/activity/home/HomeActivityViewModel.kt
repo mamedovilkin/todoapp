@@ -35,13 +35,16 @@ class HomeActivityViewModel(
                                                 purchase.productId == "premium_monthly" &&
                                                 purchase.purchaseState == PurchaseState.CONFIRMED
                                     }
-                                    dataStoreRepository.setPremium(hasPremium)
+                                    setPremium(hasPremium)
                                 }
                             }
                             .addOnFailureListener { error ->
                                 onError(error.message)
                             }
                     } else {
+                        viewModelScope.launch {
+                            setPremium(false)
+                        }
                         onError(application.getString(R.string.not_authorized_in_rustore))
                     }
                 }
@@ -49,5 +52,9 @@ class HomeActivityViewModel(
                     onError(error.message)
                 }
         }
+    }
+
+    fun setPremium(isPremium: Boolean) = viewModelScope.launch {
+        dataStoreRepository.setPremium(isPremium)
     }
 }

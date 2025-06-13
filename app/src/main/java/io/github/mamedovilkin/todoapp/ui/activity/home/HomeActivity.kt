@@ -62,6 +62,7 @@ class HomeActivity : ComponentActivity(), KoinComponent {
                         }
                     }
                 } else {
+                    homeActivityViewModel.setPremium(false)
                     toast(getString(R.string.rustore_is_not_installed_on_this_device))
                 }
             } else {

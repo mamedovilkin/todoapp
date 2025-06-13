@@ -53,6 +53,20 @@ fun Task.isTodayTask(): Boolean {
     return taskDayOfYear == currentDayOfYear && taskYear == currentYear
 }
 
+fun Task.isTomorrowTask(): Boolean {
+    val taskCalendar = Calendar.getInstance()
+    taskCalendar.timeInMillis = datetime
+    val taskDayOfYear = taskCalendar.get(Calendar.DAY_OF_YEAR)
+    val taskYear = taskCalendar.get(Calendar.YEAR)
+
+    val tomorrowCalendar = Calendar.getInstance()
+    tomorrowCalendar.add(Calendar.DAY_OF_YEAR, 1)
+    val tomorrowDayOfYear = tomorrowCalendar.get(Calendar.DAY_OF_YEAR)
+    val tomorrowYear = tomorrowCalendar.get(Calendar.YEAR)
+
+    return taskDayOfYear == tomorrowDayOfYear && taskYear == tomorrowYear
+}
+
 fun Task.isTaskThisYear(): Boolean {
     val taskCalendar = Calendar.getInstance()
     taskCalendar.timeInMillis = datetime

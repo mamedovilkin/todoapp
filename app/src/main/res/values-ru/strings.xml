@@ -21,9 +21,11 @@
     <string name="date_pattern">dd.MM.yyyy</string>
     <string name="datetime_pattern">EEE, d MMMM \'в\' hh:mm a</string>
     <string name="datetime_today_pattern">\'Сегодня в\' hh:mm a</string>
+    <string name="datetime_tomorrow_pattern">\'Завтра в\' hh:mm a</string>
     <string name="datetime_year_pattern">EEE, d MMMM yyyy \'в\' hh:mm a</string>
     <string name="datetime_24hour_pattern">EEE, d MMMM \'в\' HH:mm</string>
     <string name="datetime_today_24hour_pattern">\'Сегодня в\' HH:mm</string>
+    <string name="datetime_tomorrow_24hour_pattern">\'Завтра в\' HH:mm</string>
     <string name="datetime_year_24hour_pattern">EEE, d MMMM yyyy \'в\' HH:mm</string>
     <string name="notification_channel">Напоминание о задаче</string>
     <string name="task_deleted">Задача удалена</string>
@@ -88,6 +90,7 @@
     <string name="automatically_delete_completed_tasks">Автоматически удалять выполненные задачи</string>
     <string name="rustore_is_not_installed_on_this_device">RuStore не установлен на этом устройстве</string>
     <string name="not_authorized_in_rustore">Не авторизован в RuStore</string>
+    <string name="report_issues_suggest_new_features">Сообщайте о проблемах, предлагайте новые функции</string>
     <string-array name="auto_delete">
         <item>Никогда</item>
         <item>Ежедневно</item>

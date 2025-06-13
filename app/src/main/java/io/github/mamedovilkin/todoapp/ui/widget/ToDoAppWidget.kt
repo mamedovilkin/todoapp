@@ -25,6 +25,7 @@ import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.isTodayTask
 import io.github.mamedovilkin.todoapp.R
@@ -34,7 +35,6 @@ import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity
 import io.github.mamedovilkin.todoapp.ui.widget.action.RefreshAction
 import io.github.mamedovilkin.todoapp.ui.widget.state.NoTasksState
 import io.github.mamedovilkin.todoapp.ui.widget.state.TodayTasksState
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -53,25 +53,24 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
             val tasks = taskRepository.tasks.collectAsState(emptyList())
             val filteredTasks = tasks.value.filter { task -> !task.isDone && task.isTodayTask() }
             val coroutineScope = rememberCoroutineScope()
+            val isPremium = dataStoreRepository.isPremium.collectAsState(false)
 
             GlanceTheme {
                 Content(
                     tasks = filteredTasks,
                     onToggle = {
                         coroutineScope.launch {
-                            val isPremium = dataStoreRepository.isPremium.first()
-
-                            var task = it.copy(
+                            var updatedTask = it.copy(
                                 isDone = !it.isDone,
                                 isSynced = false,
                                 updatedAt = System.currentTimeMillis()
                             )
 
-                            val updatedTask = if (task.isDone) {
-                                taskReminderRepository.cancelReminder(task, isPremium)
-                                task
+                            updatedTask = if (updatedTask.isDone && updatedTask.repeatType == RepeatType.ONE_TIME) {
+                                taskReminderRepository.cancelReminder(updatedTask, isPremium.value)
+                                updatedTask
                             } else {
-                                taskReminderRepository.scheduleReminder(task, isPremium)
+                                taskReminderRepository.scheduleReminder(updatedTask, isPremium.value)
                             }
 
                             taskRepository.update(updatedTask)

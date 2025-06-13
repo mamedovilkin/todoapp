@@ -21,9 +21,11 @@
     <string name="date_pattern">MM.dd.yyyy</string>
     <string name="datetime_pattern">EEE, MMM d \'at\' hh:mm a</string>
     <string name="datetime_today_pattern">\'Today at\' hh:mm a</string>
+    <string name="datetime_tomorrow_pattern">\'Tomorrow at\' hh:mm a</string>
     <string name="datetime_year_pattern">EEE, MMM d, yyyy \'at\' hh:mm a</string>
     <string name="datetime_24hour_pattern">EEE, MMM d \'at\' HH:mm</string>
     <string name="datetime_today_24hour_pattern">\'Today at\' HH:mm</string>
+    <string name="datetime_tomorrow_24hour_pattern">\'Tomorrow at\' HH:mm</string>
     <string name="datetime_year_24hour_pattern">EEE, MMM d, yyyy \'at\' HH:mm</string>
     <string name="notification_channel">Task reminder</string>
     <string name="task_deleted">Task deleted</string>
@@ -92,6 +94,7 @@
     <string name="automatically_delete_completed_tasks">Automatically delete completed tasks</string>
     <string name="rustore_is_not_installed_on_this_device">RuStore is not installed on this device</string>
     <string name="not_authorized_in_rustore">Not authorized in RuStore</string>
+    <string name="report_issues_suggest_new_features">Report issues, suggest new features</string>
     <string-array name="auto_delete">
         <item>Never</item>
         <item>Daily</item>

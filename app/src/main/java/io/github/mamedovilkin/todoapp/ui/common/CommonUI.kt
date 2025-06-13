@@ -1367,6 +1367,7 @@ private fun SettingsTopBarPreview() {
 fun Setting(
     imageVector: ImageVector,
     title: String,
+    subtitle: String? = null,
     showEndIcon: Boolean = true,
     onClick: () -> Unit,
 ) {
@@ -1403,6 +1404,13 @@ fun Setting(
                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                         style = MaterialTheme.typography.headlineMedium
                     )
+                    if (subtitle != null) {
+                        Text(
+                            text = subtitle,
+                            color = MaterialTheme.colorScheme.secondary,
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                    }
                 }
             }
             AnimatedVisibility(showEndIcon) {

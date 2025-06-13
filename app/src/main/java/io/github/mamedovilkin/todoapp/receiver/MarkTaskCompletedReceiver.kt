@@ -7,6 +7,7 @@ import android.os.Build
 import androidx.core.app.NotificationManagerCompat
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
@@ -41,13 +42,19 @@ class MarkTaskCompletedReceiver : BroadcastReceiver(), KoinComponent {
                 CoroutineScope(Dispatchers.IO).launch {
                     val isPremium = dataStoreRepository.isPremium.first()
 
-                    val updatedTask = it.copy(
+                    var updatedTask = it.copy(
                         isDone = true,
                         isSynced = false,
                         updatedAt = System.currentTimeMillis()
                     )
 
-                    taskReminderRepository.cancelReminder(updatedTask, isPremium)
+                    updatedTask = if (updatedTask.isDone && updatedTask.repeatType == RepeatType.ONE_TIME) {
+                        taskReminderRepository.cancelReminder(updatedTask, isPremium)
+                        updatedTask
+                    } else {
+                        taskReminderRepository.scheduleReminder(updatedTask, isPremium)
+                    }
+
                     taskRepository.update(updatedTask)
                     syncWorkerRepository.scheduleSyncTasksWork()
 

@@ -1,6 +1,5 @@
 package io.github.mamedovilkin.todoapp.ui.activity.settings
 
-import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -66,6 +65,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                                         }
                                     }
                                 } else {
+                                    settingsActivityViewModel.setPremium(false)
                                     toast(getString(R.string.rustore_is_not_installed_on_this_device))
                                 }
                             } else {
@@ -97,6 +97,7 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                                             }
                                         }
                                     } else {
+                                        settingsActivityViewModel.setPremium(false)
                                         toast(getString(R.string.rustore_is_not_installed_on_this_device))
                                     }
                                 } else {
@@ -124,9 +125,9 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
     }
 
     private fun manageSubscription() {
-        try {
+        if (RuStoreUtils.isRuStoreInstalled(this)) {
             startActivity(Intent(Intent.ACTION_VIEW, "rustore://profile/subscriptions".toUri()))
-        }  catch (_: ActivityNotFoundException) {
+        } else {
             startActivity(Intent(Intent.ACTION_VIEW, "https://www.rustore.ru/".toUri()))
         }
     }

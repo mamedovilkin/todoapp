@@ -7,6 +7,7 @@ import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.isTaskThisYear
 import io.github.mamedovilkin.database.room.isTodayTask
+import io.github.mamedovilkin.database.room.isTomorrowTask
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -53,6 +54,8 @@ private fun getPattern(task: Task, context: Context): String {
     if (DateFormat.is24HourFormat(context)) {
         return if (task.isTodayTask()) {
             context.resources.getString(R.string.datetime_today_24hour_pattern)
+        } else if (task.isTomorrowTask()) {
+            context.resources.getString(R.string.datetime_tomorrow_24hour_pattern)
         } else if (!task.isTaskThisYear()) {
             context.resources.getString(R.string.datetime_year_24hour_pattern)
         } else {
@@ -61,6 +64,8 @@ private fun getPattern(task: Task, context: Context): String {
     } else {
         return if (task.isTodayTask()) {
             context.resources.getString(R.string.datetime_today_pattern)
+        } else if (task.isTomorrowTask()) {
+            context.resources.getString(R.string.datetime_tomorrow_pattern)
         } else if (!task.isTaskThisYear()) {
             context.resources.getString(R.string.datetime_year_pattern)
         } else {

@@ -477,6 +477,7 @@ fun SettingsScreen(
                     Setting(
                         imageVector = Icons.Outlined.Feedback,
                         title = stringResource(R.string.feedback),
+                        subtitle = stringResource(R.string.report_issues_suggest_new_features),
                         onClick = onFeedback
                     )
                 }
