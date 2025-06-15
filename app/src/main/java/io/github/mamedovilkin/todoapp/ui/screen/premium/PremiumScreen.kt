@@ -137,6 +137,8 @@ fun PremiumScreen(
                             )
                         }
 
+                        item { Spacer(modifier = Modifier.height(50.dp)) }
+
                         item {
                             Text(
                                 text = stringResource(R.string.whats_in_subscription),

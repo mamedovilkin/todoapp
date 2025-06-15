@@ -104,6 +104,12 @@ class SettingsActivityViewModel(
 
     fun setPremium(isPremium: Boolean) = viewModelScope.launch {
         dataStoreRepository.setPremium(isPremium)
+
+        if (isPremium) {
+            syncWorkerRepository.scheduleSyncToggleTasksWork()
+        } else {
+            syncWorkerRepository.cancelScheduleSyncToggleTasksWork()
+        }
     }
 
     private fun saveUser(

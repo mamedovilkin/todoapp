@@ -1,6 +1,9 @@
 package io.github.mamedovilkin.todoapp.util
 
 import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.text.format.DateFormat
 import android.widget.Toast
 import io.github.mamedovilkin.todoapp.R
@@ -106,5 +109,17 @@ fun getGreeting(context: Context, displayName: String): String {
         in 12..17 -> context.getString(R.string.good_afternoon, displayName)
         in 18..21 -> context.getString(R.string.good_evening, displayName)
         else -> context.getString(R.string.good_night, displayName)
+    }
+}
+
+@Suppress("DEPRECATION")
+fun vibrate(context: Context) {
+    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator ?: return
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val effect = VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE)
+        vibrator.vibrate(effect)
+    } else {
+        vibrator.vibrate(50)
     }
 }

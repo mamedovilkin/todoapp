@@ -66,11 +66,10 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
                                 updatedAt = System.currentTimeMillis()
                             )
 
-                            updatedTask = if (updatedTask.isDone && updatedTask.repeatType == RepeatType.ONE_TIME) {
-                                taskReminderRepository.cancelReminder(updatedTask, isPremium.value)
-                                updatedTask
-                            } else {
-                                taskReminderRepository.scheduleReminder(updatedTask, isPremium.value)
+                            taskReminderRepository.cancelReminder(updatedTask, isPremium.value)
+
+                            if (updatedTask.repeatType != RepeatType.ONE_TIME) {
+                                updatedTask = taskReminderRepository.scheduleReminder(updatedTask, isPremium.value)
                             }
 
                             taskRepository.update(updatedTask)

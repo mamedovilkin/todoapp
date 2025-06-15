@@ -88,9 +88,9 @@ class SettingsViewModel(
         dataStoreRepository.setRescheduleUncompletedTasks(rescheduleUncompletedTasks)
 
         if (rescheduleUncompletedTasks) {
-            syncWorkerRepository.rescheduleUncompletedTasksWork()
+            syncWorkerRepository.scheduleSyncUncompletedTasksWork()
         } else {
-            syncWorkerRepository.cancelRescheduleUncompletedTasksWork()
+            syncWorkerRepository.cancelScheduleSyncUncompletedTasksWork()
         }
     }
 
@@ -98,9 +98,9 @@ class SettingsViewModel(
         dataStoreRepository.setAutoDeleteIndex(autoDeleteIndex)
 
         if (autoDeleteIndex == 0) {
-            syncWorkerRepository.cancelAutoDeleteTasksWork()
+            syncWorkerRepository.cancelSyncAutoDeleteTasksWork()
         } else {
-            syncWorkerRepository.scheduleAutoDeleteTasksWork(autoDeleteIndex)
+            syncWorkerRepository.scheduleSyncAutoDeleteTasksWork(autoDeleteIndex)
         }
     }
 

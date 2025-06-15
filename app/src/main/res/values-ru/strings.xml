@@ -91,6 +91,7 @@
     <string name="rustore_is_not_installed_on_this_device">RuStore не установлен на этом устройстве</string>
     <string name="not_authorized_in_rustore">Не авторизован в RuStore</string>
     <string name="report_issues_suggest_new_features">Сообщайте о проблемах, предлагайте новые функции</string>
+    <string name="next">Следующее: %1$s</string>
     <string-array name="auto_delete">
         <item>Никогда</item>
         <item>Ежедневно</item>

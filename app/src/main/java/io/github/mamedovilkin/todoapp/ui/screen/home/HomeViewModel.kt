@@ -1,7 +1,8 @@
 package io.github.mamedovilkin.todoapp.ui.screen.home
 
+import android.app.Application
 import androidx.compose.runtime.Immutable
-import androidx.lifecycle.ViewModel
+import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
@@ -9,6 +10,7 @@ import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
+import io.github.mamedovilkin.todoapp.util.vibrate
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -43,11 +45,12 @@ data class HomeUiState(
 )
 
 class HomeViewModel(
+    private val application: Application,
     private val taskRepository: TaskRepository,
     private val taskReminderRepository: TaskReminderRepository,
     private val syncWorkerRepository: SyncWorkerRepository,
     dataStoreRepository: DataStoreRepository
-) : ViewModel() {
+) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(HomeUiState())
     val uiState: StateFlow<HomeUiState> = _uiState.asStateFlow()
@@ -149,15 +152,33 @@ class HomeViewModel(
             updatedAt = System.currentTimeMillis()
         )
 
-        updatedTask = if (updatedTask.isDone && updatedTask.repeatType == RepeatType.ONE_TIME) {
-            taskReminderRepository.cancelReminder(updatedTask, isPremium.value)
-            updatedTask
-        } else {
-            taskReminderRepository.scheduleReminder(updatedTask, isPremium.value)
+        taskReminderRepository.cancelReminder(updatedTask, isPremium.value)
+
+        if (updatedTask.repeatType != RepeatType.ONE_TIME) {
+            updatedTask = taskReminderRepository.scheduleReminder(updatedTask, isPremium.value)
         }
 
         taskRepository.update(updatedTask)
         syncWorkerRepository.scheduleSyncTasksWork()
+    }
+
+
+    fun toggleTask(task: Task) = viewModelScope.launch {
+        var updatedTask = task.copy(
+            isSynced = false,
+            updatedAt = System.currentTimeMillis()
+        )
+
+        taskReminderRepository.cancelReminder(updatedTask, isPremium.value)
+
+        if (updatedTask.repeatType != RepeatType.ONE_TIME) {
+            updatedTask = taskReminderRepository.scheduleReminder(updatedTask, isPremium.value)
+        }
+
+        taskRepository.update(updatedTask)
+        syncWorkerRepository.scheduleSyncTasksWork()
+
+        vibrate(application)
     }
 
     fun searchForTasks(query: String) {

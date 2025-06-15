@@ -3,6 +3,7 @@ package io.github.mamedovilkin.todoapp.ui.common
 import android.content.Intent
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInHorizontally
@@ -10,6 +11,7 @@ import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.PressInteraction
 import androidx.compose.foundation.layout.Arrangement
@@ -93,6 +95,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -105,6 +108,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.testTag
@@ -118,6 +122,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
@@ -262,7 +267,6 @@ fun TaskItem(
     isPremium: Boolean,
     onEdit: (Task) -> Unit,
     onToggle: () -> Unit,
-    onDelete: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -324,15 +328,11 @@ fun TaskItem(
                     color = Color.Gray
                 )
             }
-        }
-        AnimatedVisibility(task.isDone) {
-            IconButton(
-                onClick = onDelete,
-                modifier = Modifier.testTag(stringResource(R.string.delete))
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Delete,
-                    contentDescription = stringResource(R.string.delete)
+            AnimatedVisibility(isPremium && task.isDone && task.repeatType != RepeatType.ONE_TIME) {
+                Text(
+                    text = stringResource(R.string.next, convertMillisToDatetime(task, LocalContext.current)),
+                    style = MaterialTheme.typography.headlineSmall,
+                    color = Color.Gray
                 )
             }
         }
@@ -347,8 +347,7 @@ private fun TaskItemPreview() {
             task = Task(title = "Clean my room up"),
             isPremium = false,
             onEdit = {},
-            onToggle = {},
-            onDelete = {}
+            onToggle = {}
         )
     }
 }
@@ -361,8 +360,7 @@ private fun TaskItemDonePreview() {
             task = Task(title = "Clean my room up", isDone = true),
             isPremium = false,
             onEdit = {},
-            onToggle = {},
-            onDelete = {}
+            onToggle = {}
         )
     }
 }
@@ -622,12 +620,57 @@ fun TaskList(
                 tasks
             },
             key = { it.id }) { task ->
+            var offsetX by remember { mutableFloatStateOf(0f) }
+            val maxOffset = 56f
+
+            val animatedOffsetX by animateDpAsState(
+                targetValue = offsetX.dp
+            )
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(IntrinsicSize.Min)
+                    .background(Color.Transparent)
                     .animateItem(fadeInSpec = null, fadeOutSpec = null)
             ) {
-                Column {
+                AnimatedVisibility(
+                    offsetX < 0f,
+                    enter = slideInHorizontally { (it) / 3 } + fadeIn(),
+                    exit = slideOutHorizontally { (it) / 3 } + fadeOut(),
+                    modifier = Modifier.align(Alignment.CenterEnd)
+                ) {
+                    IconButton(
+                        onClick = {
+                            offsetX = 0f
+                            onDelete(task)
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 8.dp)
+                            .align(Alignment.CenterEnd)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = stringResource(R.string.delete)
+                        )
+                    }
+                }
+
+                Column(
+                    modifier = Modifier
+                        .offset { IntOffset(animatedOffsetX.roundToPx(), 0) }
+                        .pointerInput(Unit) {
+                            detectHorizontalDragGestures(
+                                onHorizontalDrag = { change, dragAmount ->
+                                    change.consume()
+                                    offsetX = (offsetX + dragAmount).coerceIn(-maxOffset, 0f)
+                                },
+                                onDragEnd = {
+                                    offsetX = if (offsetX < -maxOffset / 2) -maxOffset else 0f
+                                }
+                            )
+                        }
+                ) {
                     AnimatedVisibility(!task.isDone) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
@@ -657,8 +700,7 @@ fun TaskList(
                         task = task,
                         isPremium = isPremium,
                         onEdit = { onEdit(it) },
-                        onToggle = { onToggle(task) },
-                        onDelete = { onDelete(task) },
+                        onToggle = { onToggle(task) }
                     )
                 }
             }
@@ -845,7 +887,6 @@ fun NewTaskBottomSheet(
                     minute = it2
                 },
                 windowHeightSizeClass = windowHeightSizeClass,
-                selectedRepeatType = selectedRepeat
             )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
@@ -1066,7 +1107,6 @@ fun EditTaskBottomSheet(
                     minute = it2
                 },
                 windowHeightSizeClass = windowHeightSizeClass,
-                selectedRepeatType = selectedRepeat
             )
             Button(
                 onClick = {
@@ -1109,8 +1149,7 @@ fun DateTimePickerTextFields(
     minute: Int,
     onDateSelected: (Long) -> Unit,
     onTimeSelected: (Int, Int) -> Unit,
-    windowHeightSizeClass: WindowHeightSizeClass,
-    selectedRepeatType: String
+    windowHeightSizeClass: WindowHeightSizeClass
 ) {
     val datePickerState = rememberDatePickerState(
         initialSelectedDateMillis = date,
@@ -1238,7 +1277,6 @@ fun DateTimePickerTextFields(
             label = { Text(stringResource(R.string.select_date)) },
             readOnly = true,
             singleLine = true,
-            enabled = selectedRepeatType != stringArrayResource(R.array.repeat_types)[1],
             leadingIcon = {
                 Icon(
                     Icons.Default.DateRange,

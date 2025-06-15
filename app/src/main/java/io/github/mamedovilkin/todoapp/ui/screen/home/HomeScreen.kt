@@ -161,7 +161,7 @@ fun HomeScreen(
                             viewModel.searchForTasks(it)
                         },
                         onClear = { viewModel.searchForTasks("") },
-                        onToggle = { viewModel.updateTask(it.copy(isDone = !it.isDone)) },
+                        onToggle = { viewModel.toggleTask(it.copy(isDone = !it.isDone)) },
                         onDelete = {
                             viewModel.deleteTask(it)
 

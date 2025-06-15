@@ -48,11 +48,10 @@ class MarkTaskCompletedReceiver : BroadcastReceiver(), KoinComponent {
                         updatedAt = System.currentTimeMillis()
                     )
 
-                    updatedTask = if (updatedTask.isDone && updatedTask.repeatType == RepeatType.ONE_TIME) {
-                        taskReminderRepository.cancelReminder(updatedTask, isPremium)
-                        updatedTask
-                    } else {
-                        taskReminderRepository.scheduleReminder(updatedTask, isPremium)
+                    taskReminderRepository.cancelReminder(updatedTask, isPremium)
+
+                    if (updatedTask.repeatType != RepeatType.ONE_TIME) {
+                        updatedTask = taskReminderRepository.scheduleReminder(updatedTask, isPremium)
                     }
 
                     taskRepository.update(updatedTask)

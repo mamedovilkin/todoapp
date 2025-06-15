@@ -47,12 +47,10 @@ class TaskReminderRepositoryImpl(
         }
 
         return when (task.repeatType) {
-            RepeatType.ONE_TIME -> {
-                task
-            }
+            RepeatType.ONE_TIME -> task
 
             RepeatType.DAILY -> {
-                if (!due.after(now)) due.add(Calendar.DAY_OF_YEAR, 1)
+                while (!due.after(now)) due.add(Calendar.DAY_OF_YEAR, 1)
                 task.copy(
                     datetime = due.timeInMillis,
                     isSynced = false
@@ -60,7 +58,7 @@ class TaskReminderRepositoryImpl(
             }
 
             RepeatType.WEEKLY -> {
-                if (!due.after(now)) due.timeInMillis = getNextWeeklyReminder(task, due)
+                while (!due.after(now)) due.timeInMillis = getNextWeeklyReminder(task, due)
                 task.copy(
                     datetime = due.timeInMillis,
                     isSynced = false
@@ -68,9 +66,7 @@ class TaskReminderRepositoryImpl(
             }
 
             RepeatType.MONTHLY -> {
-                while (!due.after(now)) {
-                    due.add(Calendar.MONTH, 1)
-                }
+                while (!due.after(now)) due.add(Calendar.MONTH, 1)
                 task.copy(
                     datetime = due.timeInMillis,
                     isSynced = false
@@ -78,9 +74,7 @@ class TaskReminderRepositoryImpl(
             }
 
             RepeatType.YEARLY -> {
-                while (!due.after(now)) {
-                    due.add(Calendar.YEAR, 1)
-                }
+                while (!due.after(now)) due.add(Calendar.YEAR, 1)
                 task.copy(
                     datetime = due.timeInMillis,
                     isSynced = false

@@ -5,6 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.todoapp.R
+import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
@@ -16,7 +17,8 @@ import java.util.UUID
 class PremiumActivityViewModel(
     private val application: Application,
     private val dataStoreRepository: DataStoreRepository,
-    private val ruStoreBillingClient: RuStoreBillingClient
+    private val ruStoreBillingClient: RuStoreBillingClient,
+    private val syncWorkerRepository: SyncWorkerRepository
 ) : AndroidViewModel(application) {
 
     val isPremium = dataStoreRepository.isPremium
@@ -86,5 +88,11 @@ class PremiumActivityViewModel(
 
     fun setPremium(isPremium: Boolean) = viewModelScope.launch {
         dataStoreRepository.setPremium(isPremium)
+
+        if (isPremium) {
+            syncWorkerRepository.scheduleSyncToggleTasksWork()
+        } else {
+            syncWorkerRepository.cancelScheduleSyncToggleTasksWork()
+        }
     }
 }

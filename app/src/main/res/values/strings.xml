@@ -95,6 +95,7 @@
     <string name="rustore_is_not_installed_on_this_device">RuStore is not installed on this device</string>
     <string name="not_authorized_in_rustore">Not authorized in RuStore</string>
     <string name="report_issues_suggest_new_features">Report issues, suggest new features</string>
+    <string name="next">Next: %1$s</string>
     <string-array name="auto_delete">
         <item>Never</item>
         <item>Daily</item>
