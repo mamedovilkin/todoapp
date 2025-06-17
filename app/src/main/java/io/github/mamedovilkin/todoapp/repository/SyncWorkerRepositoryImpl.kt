@@ -55,7 +55,7 @@ class SyncWorkerRepositoryImpl(
             .build()
 
         val now = LocalDateTime.now()
-        val targetTime = now.withHour(9).withMinute(0).withSecond(0)
+        val targetTime = now.withHour(0).withMinute(0).withSecond(0)
         var delay = Duration.between(now, targetTime).toMinutes()
 
         if (delay < 0) {
@@ -84,7 +84,7 @@ class SyncWorkerRepositoryImpl(
             .build()
 
         val now = LocalDateTime.now()
-        val targetTime = now.withHour(9).withMinute(0).withSecond(0)
+        val targetTime = now.withHour(0).withMinute(0).withSecond(0)
         var delay = Duration.between(now, targetTime).toMinutes()
 
         if (delay < 0) {
@@ -119,7 +119,7 @@ class SyncWorkerRepositoryImpl(
             .build()
 
         val now = LocalDateTime.now()
-        val targetTime = now.withHour(9).withMinute(0).withSecond(0)
+        val targetTime = now.withHour(0).withMinute(0).withSecond(0)
         var delay = Duration.between(now, targetTime).toMinutes()
 
         if (delay < 0) {

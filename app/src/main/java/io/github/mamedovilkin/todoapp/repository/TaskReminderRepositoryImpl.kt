@@ -8,6 +8,7 @@ import android.content.Intent
 import androidx.annotation.RequiresPermission
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.database.room.isTodayTask
 import io.github.mamedovilkin.todoapp.receiver.TaskReminderReceiver
 import io.github.mamedovilkin.todoapp.util.FIFTEEN_MINUTES_OFFSET
 import io.github.mamedovilkin.todoapp.util.FIVE_MINUTES_OFFSET
@@ -50,7 +51,11 @@ class TaskReminderRepositoryImpl(
             RepeatType.ONE_TIME -> task
 
             RepeatType.DAILY -> {
-                while (!due.after(now)) due.add(Calendar.DAY_OF_YEAR, 1)
+                if (task.isTodayTask() && task.isDone) {
+                    due.add(Calendar.DAY_OF_YEAR, 1)
+                } else {
+                    while (!due.after(now)) due.add(Calendar.DAY_OF_YEAR, 1)
+                }
                 task.copy(
                     datetime = due.timeInMillis,
                     isSynced = false
@@ -58,7 +63,11 @@ class TaskReminderRepositoryImpl(
             }
 
             RepeatType.WEEKLY -> {
-                while (!due.after(now)) due.timeInMillis = getNextWeeklyReminder(task, due)
+                if (task.isTodayTask() && task.isDone) {
+                    due.timeInMillis = getNextWeeklyReminder(task, due)
+                } else {
+                    while (!due.after(now)) due.timeInMillis = getNextWeeklyReminder(task, due)
+                }
                 task.copy(
                     datetime = due.timeInMillis,
                     isSynced = false
@@ -66,7 +75,11 @@ class TaskReminderRepositoryImpl(
             }
 
             RepeatType.MONTHLY -> {
-                while (!due.after(now)) due.add(Calendar.MONTH, 1)
+                if (task.isTodayTask() && task.isDone) {
+                    due.add(Calendar.MONTH, 1)
+                } else {
+                    while (!due.after(now)) due.add(Calendar.MONTH, 1)
+                }
                 task.copy(
                     datetime = due.timeInMillis,
                     isSynced = false
@@ -74,7 +87,11 @@ class TaskReminderRepositoryImpl(
             }
 
             RepeatType.YEARLY -> {
-                while (!due.after(now)) due.add(Calendar.YEAR, 1)
+                if (task.isTodayTask() && task.isDone) {
+                    due.add(Calendar.YEAR, 1)
+                } else {
+                    while (!due.after(now)) due.add(Calendar.YEAR, 1)
+                }
                 task.copy(
                     datetime = due.timeInMillis,
                     isSynced = false

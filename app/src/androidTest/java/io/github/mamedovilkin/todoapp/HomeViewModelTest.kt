@@ -1,5 +1,6 @@
 package io.github.mamedovilkin.todoapp
 
+import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
@@ -42,6 +43,7 @@ class HomeViewModelTest {
     private val dataStoreRepository: DataStoreRepository = FakeDataStoreRepository()
     private val syncWorkerRepository: SyncWorkerRepository = FakeSyncWorkerRepository()
     private var homeViewModel = HomeViewModel(
+        ApplicationProvider.getApplicationContext(),
         taskRepository,
         taskReminderRepository,
         syncWorkerRepository,
@@ -107,6 +109,7 @@ class HomeViewModelTest {
         }
 
         homeViewModel = HomeViewModel(
+            ApplicationProvider.getApplicationContext(),
             taskRepository,
             taskReminderRepository,
             syncWorkerRepository,
@@ -152,6 +155,26 @@ class HomeViewModelTest {
             .first()
 
         assertTrue(result.result is Result.NoTasks)
+    }
+
+    @Test
+    fun viewModelToggleTask_toggleTask() = runTest {
+        val task = Task(title = "Clean my room up")
+
+        taskRepository.insert(task)
+        homeViewModel.toggleTask(task.copy(isDone = !task.isDone))
+        homeViewModel.observeTasks()
+
+        advanceUntilIdle()
+
+        val result = homeViewModel.uiState
+            .filter { it.result is Result.Success }
+            .map { it.result as Result.Success }
+            .map { it.tasks }
+            .first { it.isNotEmpty() }
+            .first()
+
+        assertTrue(result.isDone)
     }
 
     @Test

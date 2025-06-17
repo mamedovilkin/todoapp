@@ -139,6 +139,7 @@ import io.github.mamedovilkin.todoapp.util.convertMillisToDatetime
 import io.github.mamedovilkin.todoapp.util.convertToTime
 import java.util.Calendar
 import io.github.mamedovilkin.todoapp.ui.activity.settings.SettingsActivity
+import io.github.mamedovilkin.todoapp.util.getDate
 import io.github.mamedovilkin.todoapp.util.getGreeting
 import kotlin.collections.filter
 
@@ -281,8 +282,7 @@ fun TaskItem(
         Checkbox(
             checked = task.isDone,
             onCheckedChange = { onToggle() },
-            modifier = Modifier
-                .testTag("Toggle")
+            modifier = Modifier.testTag("Toggle")
         )
         Column(
             modifier = Modifier
@@ -559,6 +559,24 @@ fun TaskList(
     onDelete: (Task) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val filteredTasks by remember(query, selectedCategory, tasks) {
+        derivedStateOf {
+            if (query.isNotEmpty()) {
+                tasks.filter { it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true) }
+            } else if (selectedCategory.isNotEmpty()) {
+                tasks.filter { it.category == selectedCategory }
+            } else {
+                tasks
+            }
+        }
+    }
+
+    val isScrollingFast by remember {
+        derivedStateOf {
+            lazyListState.isScrollInProgress && filteredTasks.size > 5
+        }
+    }
+
     LazyColumn(
         modifier = modifier
             .padding(innerPadding)
@@ -568,14 +586,22 @@ fun TaskList(
     ) {
         if (displayName.isNotEmpty()) {
             item {
-                Text(
-                    text = getGreeting(LocalContext.current, displayName),
-                    style = MaterialTheme.typography.displayLarge,
+                Column(
                     modifier = Modifier
                         .padding(top = 16.dp)
                         .padding(horizontal = 8.dp)
                         .padding(bottom = 8.dp)
-                )
+                ) {
+                    Text(
+                        text = getDate(),
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = Color.Gray
+                    )
+                    Text(
+                        text = getGreeting(LocalContext.current, displayName),
+                        style = MaterialTheme.typography.displayLarge
+                    )
+                }
             }
         }
 
@@ -611,15 +637,7 @@ fun TaskList(
             }
         }
 
-        items(
-            items = if (query.isNotEmpty()) {
-                tasks.filter { it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true) }
-            } else if (selectedCategory.isNotEmpty()) {
-                tasks.filter { it.category == selectedCategory }
-            } else {
-                tasks
-            },
-            key = { it.id }) { task ->
+        items(items = filteredTasks, key = { it.id }) { task ->
             var offsetX by remember { mutableFloatStateOf(0f) }
             val maxOffset = 56f
 
@@ -627,13 +645,7 @@ fun TaskList(
                 targetValue = offsetX.dp
             )
 
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min)
-                    .background(Color.Transparent)
-                    .animateItem(fadeInSpec = null, fadeOutSpec = null)
-            ) {
+            Box(if (isScrollingFast) Modifier else Modifier.animateItem()) {
                 AnimatedVisibility(
                     offsetX < 0f,
                     enter = slideInHorizontally { (it) / 3 } + fadeIn(),
@@ -648,6 +660,7 @@ fun TaskList(
                         modifier = Modifier
                             .padding(horizontal = 8.dp)
                             .align(Alignment.CenterEnd)
+                            .testTag(stringResource(R.string.delete))
                     ) {
                         Icon(
                             imageVector = Icons.Default.Delete,
@@ -819,11 +832,11 @@ fun NewTaskBottomSheet(
                 value = title,
                 onValueChange = { title = it },
                 maxLines = 3,
-                label = { Text(text = stringResource(R.string.new_task)) },
+                label = { Text(text = stringResource(R.string.title)) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Title,
-                        contentDescription = stringResource(R.string.new_task)
+                        contentDescription = stringResource(R.string.title)
                     )
                 },
                 modifier = Modifier
@@ -1039,11 +1052,11 @@ fun EditTaskBottomSheet(
                 value = title,
                 onValueChange = { title = it },
                 maxLines = 3,
-                label = { Text(text = stringResource(R.string.edit_task)) },
+                label = { Text(text = stringResource(R.string.title)) },
                 leadingIcon = {
                     Icon(
                         imageVector = Icons.Filled.Title,
-                        contentDescription = stringResource(R.string.edit_task)
+                        contentDescription = stringResource(R.string.title)
                     )
                 },
                 modifier = Modifier

@@ -100,6 +100,11 @@ fun Context.toast(message: String?) {
     Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
 }
 
+fun getDate(): String {
+    val formatter = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
+    return formatter.format(Date())
+}
+
 fun getGreeting(context: Context, displayName: String): String {
     val calendar = Calendar.getInstance()
     val currentHour = calendar.get(Calendar.HOUR_OF_DAY)

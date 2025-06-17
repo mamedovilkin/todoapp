@@ -92,6 +92,8 @@
     <string name="not_authorized_in_rustore">Не авторизован в RuStore</string>
     <string name="report_issues_suggest_new_features">Сообщайте о проблемах, предлагайте новые функции</string>
     <string name="next">Следующее: %1$s</string>
+    <string name="title">Название</string>
+    <string name="premium_notification">Премиум активирован. Спасибо за поддержку! Если у вас возникнут вопросы или проблемы, пожалуйста, свяжитесь с нами через "Настройки" > "Обратная связь".</string>
     <string-array name="auto_delete">
         <item>Никогда</item>
         <item>Ежедневно</item>

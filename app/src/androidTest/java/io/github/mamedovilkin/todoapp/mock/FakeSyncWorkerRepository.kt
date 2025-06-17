@@ -10,4 +10,5 @@ class FakeSyncWorkerRepository : SyncWorkerRepository {
     override fun scheduleSyncAutoDeleteTasksWork(autoDeleteIndex: Int) {}
     override fun cancelSyncAutoDeleteTasksWork() {}
     override fun scheduleSyncToggleTasksWork() {}
+    override fun cancelScheduleSyncToggleTasksWork() {}
 }

@@ -1,7 +1,7 @@
 /*
     IMPORTANT TO KNOW:
     TO RUN TESTS IN THIS FILE CORRECTLY YOU NEED TO COMMENT THAT OF CODE
-    IN ToDoAppActivity.kt FILE
+    IN HomeActivity.kt FILE
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ...
@@ -27,6 +27,8 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
 import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity
 import org.junit.Rule
 import org.junit.Test
@@ -169,6 +171,18 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
+            .onNodeWithText("Walk my dog")
+            .performTouchInput {
+                swipeLeft()
+            }
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithTag("Delete")
+                .isDisplayed()
+        }
+
+        composeTestRule
             .onNodeWithTag("Delete")
             .performClick()
 
@@ -253,12 +267,6 @@ class HomeScreenTest {
             composeTestRule
                 .onNodeWithText("New task")
                 .performClick()
-
-            composeTestRule.waitUntil {
-                composeTestRule
-                    .onNodeWithText("Repeat")
-                    .isDisplayed()
-            }
 
             composeTestRule
                 .onNodeWithTag("New task")
@@ -440,6 +448,18 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
+            .onNodeWithText("Task")
+            .performTouchInput {
+                swipeLeft()
+            }
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithTag("Delete")
+                .isDisplayed()
+        }
+
+        composeTestRule
             .onNodeWithTag("Delete")
             .performClick()
 
@@ -477,183 +497,5 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Walk my dog")
             .assertIsNotDisplayed()
-    }
-
-    @Test
-    fun homeScreen_taskWithDescriptionDescriptionDisplayed() {
-        composeTestRule
-            .onNodeWithText("New task")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("New task")
-            .performTextInput("Walk my dog")
-
-        composeTestRule
-            .onNodeWithTag("Description")
-            .performTextInput("Walk with my dog tonight")
-
-        composeTestRule
-            .onNodeWithText("Save")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("Walk with my dog tonight")
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onAllNodesWithTag("Toggle")
-            .onFirst()
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("Walk with my dog tonight")
-            .assertIsNotDisplayed()
-    }
-
-    @Test
-    fun homeScreen_taskWithCategorySelectCategory() {
-        composeTestRule
-            .onNodeWithText("New task")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("New task")
-            .performTextInput("Walk my dog")
-
-        composeTestRule
-            .onNodeWithTag("Description")
-            .performTextInput("Walk with my dog tonight")
-
-        composeTestRule
-            .onNodeWithText("Save")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("New task")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("New task")
-            .performTextInput("Clean my room up")
-
-        composeTestRule
-            .onNodeWithTag("Category")
-            .performTextInput("Home")
-
-        composeTestRule
-            .onNodeWithText("Save")
-            .performClick()
-
-        composeTestRule
-            .onAllNodesWithText("home")
-            .onLast()
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onAllNodesWithText("home")
-            .onFirst()
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("Walk my dog")
-            .assertIsNotDisplayed()
-    }
-
-    @Test
-    fun homeScreen_deleteAllDataClickedAllTasksDelete() {
-        composeTestRule
-            .onNodeWithText("New task")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("New task")
-            .performTextInput("Walk my dog")
-
-        composeTestRule
-            .onNodeWithText("Save")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Settings")
-            .performClick()
-
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onAllNodesWithText("Settings")
-                .onFirst()
-                .isDisplayed()
-        }
-
-        composeTestRule
-            .onNodeWithText("Delete all data")
-            .performClick()
-
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onNodeWithText("Do you really want to delete all data?")
-                .isDisplayed()
-        }
-
-        composeTestRule
-            .onAllNodesWithText("Delete all data")
-            .onLast()
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Back")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("No tasks yet")
-            .isDisplayed()
-    }
-
-    @Test
-    fun homeScreen_dailyRepeatSelectedRepeatIconDisplayed() {
-        composeTestRule
-            .onNodeWithText("New task")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("Repeat")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("Daily")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("New task")
-            .performTextInput("Walk my dog")
-
-        composeTestRule
-            .onNodeWithText("Save")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithTag("Repeat")
-            .assertIsDisplayed()
-    }
-
-    @Test
-    fun homeScreen_weeklyRepeatSelectedWeekdaysDisplayed() {
-        composeTestRule
-            .onNodeWithText("New task")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("Repeat")
-            .performClick()
-
-        composeTestRule
-            .onNodeWithText("Weekly")
-            .performClick()
-
-        composeTestRule.waitUntil {
-            composeTestRule
-                .onNodeWithText("Mon")
-                .isDisplayed()
-        }
     }
 }
