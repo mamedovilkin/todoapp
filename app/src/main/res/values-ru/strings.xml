@@ -94,6 +94,7 @@
     <string name="next">Следующее: %1$s</string>
     <string name="title">Название</string>
     <string name="premium_notification">Премиум активирован. Спасибо за поддержку! Если у вас возникнут вопросы или проблемы, пожалуйста, свяжитесь с нами через "Настройки" > "Обратная связь".</string>
+    <string name="date_today_pattern">EEEE, d MMMM</string>
     <string-array name="auto_delete">
         <item>Никогда</item>
         <item>Ежедневно</item>

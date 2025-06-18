@@ -593,7 +593,7 @@ fun TaskList(
                         .padding(bottom = 8.dp)
                 ) {
                     Text(
-                        text = getDate(),
+                        text = getDate(LocalContext.current),
                         style = MaterialTheme.typography.headlineMedium,
                         color = Color.Gray
                     )
@@ -1426,8 +1426,7 @@ fun Setting(
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.primaryContainer
         ),
-        modifier = Modifier
-            .fillMaxWidth()
+        modifier = Modifier.fillMaxWidth()
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
@@ -1439,7 +1438,9 @@ fun Setting(
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier.padding(16.dp)
+                modifier = Modifier
+                    .weight(1F)
+                    .padding(16.dp)
             ) {
                 Icon(
                     imageVector = imageVector,

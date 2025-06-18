@@ -98,6 +98,7 @@
     <string name="next">Next: %1$s</string>
     <string name="title">Title</string>
     <string name="premium_notification">Premium activated. Thank you for supporting us! If you have any questions or issues, please contact us via "Settings" > "Feedback".</string>
+    <string name="date_today_pattern">EEEE, MMMM d</string>
     <string-array name="auto_delete">
         <item>Never</item>
         <item>Daily</item>

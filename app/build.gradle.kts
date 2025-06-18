@@ -131,8 +131,8 @@ dependencies {
     // Lottie
     implementation(libs.lottie.compose)
 
-    // Coil
-    implementation(libs.compose)
+    // Glide
+    implementation(libs.glide)
 
     // Testing
     testImplementation(libs.junit)

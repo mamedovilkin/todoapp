@@ -100,9 +100,13 @@ fun Context.toast(message: String?) {
     Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
 }
 
-fun getDate(): String {
-    val formatter = SimpleDateFormat("EEE, MMM d", Locale.getDefault())
-    return formatter.format(Date())
+fun getDate(context: Context): String {
+    val formatter = SimpleDateFormat(context.getString(R.string.date_today_pattern), Locale.getDefault())
+    return formatter.format(Date()).replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.getDefault()
+        ) else it.toString()
+    }
 }
 
 fun getGreeting(context: Context, displayName: String): String {
