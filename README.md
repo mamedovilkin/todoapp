@@ -10,37 +10,6 @@
 - **Reminders** – Set reminders to ensure you never miss a deadline.
 - **Themes** – Switch between light and dark modes to suit your preference.
 
-## Screenshots
-
-<table>
-  <tr>
-    <td align="center">
-      <img src="screenshots/HomeScreenshot.png" alt="Home" width="150" /><br/>
-      <strong>Home</strong>
-    </td>
-    <td align="center">
-      <img src="screenshots/SearchScreenshot.png" alt="Search" width="150" /><br/>
-      <strong>Search</strong>
-    </td>
-    <td align="center">
-      <img src="screenshots/DarkThemeScreenshot.png" alt="Dark Theme" width="150" /><br/>
-      <strong>Dark Theme</strong>
-    </td>
-     <td align="center">
-      <img src="screenshots/NotificationScreenshot.png" alt="Notification" width="150" /><br/>
-      <strong>Notification</strong>
-    </td>
-    <td align="center">
-      <img src="screenshots/NewTaskScreenshot.png" alt="New Task" width="150" /><br/>
-      <strong>New Task</strong>
-    </td>
-    <td align="center">
-      <img src="screenshots/EditTaskScreenshot.png" alt="Edit Task" width="150" /><br/>
-      <strong>Edit Task</strong>
-    </td>
-  </tr>
-</table>
-
 ## Installation
 
 To install ToDoApp on your Android device:
