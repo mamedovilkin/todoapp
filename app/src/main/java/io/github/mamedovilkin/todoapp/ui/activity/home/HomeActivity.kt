@@ -83,7 +83,7 @@ class HomeActivity : ComponentActivity(), KoinComponent {
                 intent.getParcelableExtra(TASK_KEY, Task::class.java)
             } else {
                 @Suppress("DEPRECATION")
-                intent.getParcelableExtra<Task>(TASK_KEY)
+                intent.getParcelableExtra(TASK_KEY)
             }
 
             if (shouldOpenEditTaskDialog) {

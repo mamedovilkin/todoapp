@@ -15,12 +15,12 @@ plugins {
 
 android {
     namespace = "io.github.mamedovilkin.todoapp"
-    compileSdk = 35
+    compileSdk = 36
 
     defaultConfig {
         applicationId = "io.github.mamedovilkin.todoapp"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 36
         versionCode = 6
         versionName = "2.0"
 

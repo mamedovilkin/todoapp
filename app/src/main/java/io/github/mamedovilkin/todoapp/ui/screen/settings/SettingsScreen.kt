@@ -181,7 +181,7 @@ fun SettingsScreen(
                                     )
                                 } else {
                                     GlideImage(
-                                        model = photoURL.toString(),
+                                        model = photoURL,
                                         contentDescription = stringResource(R.string.vk_id),
                                         contentScale = ContentScale.Crop,
                                         modifier = Modifier
@@ -193,7 +193,7 @@ fun SettingsScreen(
                                     verticalArrangement = Arrangement.Center
                                 ) {
                                     Text(
-                                        text = if (displayName.isEmpty()) stringResource(R.string.vk_id) else displayName,
+                                        text = displayName.ifEmpty { stringResource(R.string.vk_id) },
                                         color = MaterialTheme.colorScheme.onPrimaryContainer,
                                         style = MaterialTheme.typography.displayMedium
                                     )
@@ -208,70 +208,72 @@ fun SettingsScreen(
                     }
                 }
 
-                item {
-                    Card(
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.primaryContainer
-                        ),
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        if (isPremium) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            ) {
-                                Column {
-                                    Text(
-                                        text = stringResource(R.string.your_plan).uppercase(),
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Light,
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.premium).uppercase(),
-                                        style = MaterialTheme.typography.displayMedium
-                                    )
-                                }
-                                FilledTonalButton(
-                                    onClick = onManageSubscription,
-                                    colors = ButtonDefaults.buttonColors(
-                                        contentColor = MaterialTheme.colorScheme.primary,
-                                        containerColor = MaterialTheme.colorScheme.background
-                                    )
+                if (userID.isNotEmpty()) {
+                    item {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            if (isPremium) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
                                 ) {
-                                    Text(
-                                        text = stringResource(R.string.manage_subscription),
-                                        textAlign = TextAlign.Center,
-                                        maxLines = 1
-                                    )
+                                    Column {
+                                        Text(
+                                            text = stringResource(R.string.your_plan).uppercase(),
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Light,
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.premium).uppercase(),
+                                            style = MaterialTheme.typography.displayMedium
+                                        )
+                                    }
+                                    FilledTonalButton(
+                                        onClick = onManageSubscription,
+                                        colors = ButtonDefaults.buttonColors(
+                                            contentColor = MaterialTheme.colorScheme.primary,
+                                            containerColor = MaterialTheme.colorScheme.background
+                                        )
+                                    ) {
+                                        Text(
+                                            text = stringResource(R.string.manage_subscription),
+                                            textAlign = TextAlign.Center,
+                                            maxLines = 1
+                                        )
+                                    }
                                 }
-                            }
-                        } else {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp)
-                            ) {
-                                Column {
-                                    Text(
-                                        text = stringResource(R.string.your_plan).uppercase(),
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Light,
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.free).uppercase(),
-                                        style = MaterialTheme.typography.displayMedium
-                                    )
-                                }
-                                Button(onClick = onPremium) {
-                                    Text(
-                                        text = stringResource(R.string.go_premium),
-                                        textAlign = TextAlign.Center
-                                    )
+                            } else {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(16.dp)
+                                ) {
+                                    Column {
+                                        Text(
+                                            text = stringResource(R.string.your_plan).uppercase(),
+                                            fontSize = 16.sp,
+                                            fontWeight = FontWeight.Light,
+                                        )
+                                        Text(
+                                            text = stringResource(R.string.free).uppercase(),
+                                            style = MaterialTheme.typography.displayMedium
+                                        )
+                                    }
+                                    Button(onClick = onPremium) {
+                                        Text(
+                                            text = stringResource(R.string.go_premium),
+                                            textAlign = TextAlign.Center
+                                        )
+                                    }
                                 }
                             }
                         }

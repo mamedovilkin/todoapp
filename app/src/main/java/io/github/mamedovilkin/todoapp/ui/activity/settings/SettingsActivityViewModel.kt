@@ -38,10 +38,10 @@ class SettingsActivityViewModel(
 
     fun signInWithVK(onError: (String?) -> Unit) = viewModelScope.launch {
         VKID.instance.authorize(object : VKIDAuthCallback {
-            override fun onAuth(token: AccessToken) {
-                val userID = token.userID.toString()
-                val photoURL = token.userData.photo200.toString()
-                val displayName = token.userData.firstName.toString()
+            override fun onAuth(accessToken: AccessToken) {
+                val userID = accessToken.userID.toString()
+                val photoURL = accessToken.userData.photo200.toString()
+                val displayName = accessToken.userData.firstName
 
                 saveUser(userID, photoURL, displayName)
                 checkPremiumAvailability(userID, onError = {

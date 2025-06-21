@@ -26,7 +26,7 @@ class SyncDeleteWorker(
             try {
                 val taskId = inputData.getString("taskId") ?: return Result.failure()
 
-                firestoreRepository.delete(userID.toString(), taskId)
+                firestoreRepository.delete(userID, taskId)
 
                 return Result.success()
             } catch (_: Exception) {

@@ -69,7 +69,7 @@ class PremiumActivityViewModel(
                                     purchasesUseCase.getPurchases()
                                         .addOnSuccessListener { purchases ->
                                             viewModelScope.launch {
-                                                val hasPremium = purchases.any { it.productId == "premium_monthly" }
+                                                val hasPremium = purchases.any { purchase -> purchase.productId == "premium_monthly" }
                                                 setPremium(hasPremium)
                                                 onSuccess()
                                             }

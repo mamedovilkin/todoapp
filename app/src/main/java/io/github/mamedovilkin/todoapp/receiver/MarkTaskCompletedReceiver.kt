@@ -35,7 +35,7 @@ class MarkTaskCompletedReceiver : BroadcastReceiver(), KoinComponent {
             val task = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 intent.getParcelableExtra(TASK_KEY, Task::class.java)
             } else {
-                intent.getParcelableExtra<Task>(TASK_KEY)
+                intent.getParcelableExtra(TASK_KEY)
             }
 
             task?.let {

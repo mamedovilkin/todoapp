@@ -29,7 +29,7 @@ class SyncTasksWorker(
 
         if (userID.isNotEmpty() && isPremium && isInternetAvailable()) {
             try {
-                val uid = userID.toString()
+                val uid = userID
                 val remoteTasks = firestoreRepository.get(uid)
                 val localTasks = taskRepository.tasks.first()
                 val localTasksMap = localTasks.associateBy { it.id }
@@ -43,11 +43,13 @@ class SyncTasksWorker(
                     when {
                         localTask == null -> {
                             taskRepository.insert(remoteTask)
+                            taskReminderRepository.cancelReminder(remoteTask, true)
                             taskReminderRepository.scheduleReminder(remoteTask, true)
                         }
 
                         remoteUpdatedAt > localUpdatedAt -> {
                             taskRepository.update(remoteTask)
+                            taskReminderRepository.cancelReminder(remoteTask, true)
                             taskReminderRepository.scheduleReminder(remoteTask, true)
                         }
 
@@ -55,6 +57,8 @@ class SyncTasksWorker(
                             val synced = localTask.copy(isSynced = true)
                             firestoreRepository.insert(uid, synced)
                             taskRepository.update(synced)
+                            taskReminderRepository.cancelReminder(synced, true)
+                            taskReminderRepository.scheduleReminder(synced, true)
                         }
                     }
                 }

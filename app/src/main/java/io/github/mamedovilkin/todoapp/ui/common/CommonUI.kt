@@ -734,7 +734,7 @@ fun NewTaskBottomSheet(
     val repeatTypes = stringArrayResource(R.array.repeat_types)
     var selectedRepeat by remember { mutableStateOf(repeatTypes[0]) }
     val repeatDaysOfWeek = stringArrayResource(R.array.repeat_days_of_week)
-    var selectedRepeatDaysOfWeek = remember { mutableListOf<Int>(0, 1, 2, 3, 4, 5, 6) }
+    val selectedRepeatDaysOfWeek = remember { mutableListOf(0, 1, 2, 3, 4, 5, 6) }
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
@@ -921,7 +921,7 @@ fun NewTaskBottomSheet(
                             category = category.lowercase().trim(),
                             datetime = calendar.timeInMillis,
                             repeatType = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size == repeatDaysOfWeek.size) RepeatType.DAILY else RepeatType.entries[repeatTypes.indexOf(selectedRepeat)],
-                            repeatDaysOfWeek = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size != repeatDaysOfWeek.size) selectedRepeatDaysOfWeek.toList() else emptyList<Int>()
+                            repeatDaysOfWeek = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size != repeatDaysOfWeek.size) selectedRepeatDaysOfWeek.toList() else emptyList()
                         ))
                         title = ""
                         date = 0L
@@ -1133,7 +1133,7 @@ fun EditTaskBottomSheet(
                         category = category.lowercase().trim(),
                         datetime = calendar.timeInMillis,
                         repeatType = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size == repeatDaysOfWeek.size) RepeatType.DAILY else RepeatType.entries[repeatTypes.indexOf(selectedRepeat)],
-                        repeatDaysOfWeek = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size != repeatDaysOfWeek.size) selectedRepeatDaysOfWeek.toList() else emptyList<Int>()
+                        repeatDaysOfWeek = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size != repeatDaysOfWeek.size) selectedRepeatDaysOfWeek.toList() else emptyList()
                     ))
                 },
                 enabled = title.isNotEmpty() && category.length <= 25,

@@ -45,7 +45,7 @@ class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
             intent.getParcelableExtra(TASK_KEY, Task::class.java)
         } else {
             @Suppress("DEPRECATION")
-            intent.getParcelableExtra<Task>(TASK_KEY)
+            intent.getParcelableExtra(TASK_KEY)
         } ?: return
 
         if (task.repeatType != RepeatType.ONE_TIME) {
