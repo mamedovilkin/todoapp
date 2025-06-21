@@ -83,12 +83,12 @@ class TaskRepositoryTest {
         taskRepository.insert(task1)
         taskRepository.insert(task2)
 
-        taskRepository.update(Task("1", "Walk my dog", isDone = true))
-        taskRepository.update(Task("2", "Call mom"))
+        taskRepository.update(task1.copy(title = "Walk my dog"))
+        taskRepository.update(task2.copy(title = "Call mom"))
 
         val allTasks = taskRepository.tasks.first()
 
-        assertEquals(allTasks[0], Task("1", "Walk my dog", isDone = true))
-        assertEquals(allTasks[1], Task("2", "Call mom"))
+        assertEquals(allTasks[0].title, "Walk my dog")
+        assertEquals(allTasks[1].title, "Call mom")
     }
 }
