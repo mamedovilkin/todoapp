@@ -57,8 +57,6 @@ class SyncTasksWorker(
                             val synced = localTask.copy(isSynced = true)
                             firestoreRepository.insert(uid, synced)
                             taskRepository.update(synced)
-                            taskReminderRepository.cancelReminder(synced, true)
-                            taskReminderRepository.scheduleReminder(synced, true)
                         }
                     }
                 }

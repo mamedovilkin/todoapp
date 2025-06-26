@@ -5,7 +5,6 @@ import com.google.firebase.firestore.FirebaseFirestore
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.toHashMap
-import io.github.mamedovilkin.database.room.Converters
 import kotlinx.coroutines.tasks.await
 
 class FirestoreRepositoryImpl(
@@ -74,12 +73,8 @@ fun DocumentSnapshot.toTask(): Task? {
         val id = getString("id") ?: return null
         val repeatTypeRaw = getString("repeatType")
         val repeatType = RepeatType.entries.firstOrNull { it.name == repeatTypeRaw } ?: RepeatType.ONE_TIME
-        val repeatDaysOfWeekRaw = get("repeatDaysOfWeek")
-        val repeatDaysOfWeek: List<Int> = when (repeatDaysOfWeekRaw) {
-            is List<*> -> repeatDaysOfWeekRaw.filterIsInstance<Number>().map { it.toInt() }
-            is String -> Converters().fromStringToList(repeatDaysOfWeekRaw)
-            else -> emptyList()
-        }
+        val repeatDaysOfWeekRaw = get("repeatDaysOfWeek") as List<*>
+        val repeatDaysOfWeek: List<Int> = repeatDaysOfWeekRaw.filterIsInstance<Number>().map { it.toInt() }
 
         Task(
             id = id,

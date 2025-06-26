@@ -35,7 +35,7 @@ fun Task.toHashMap(): HashMap<String, Any> {
         "datetime" to datetime,
         "isSynced" to isSynced,
         "repeatType" to repeatType.name,
-        "repeatDaysOfWeek" to repeatDaysOfWeek.toString(),
+        "repeatDaysOfWeek" to repeatDaysOfWeek,
         "updatedAt" to updatedAt,
     )
 }

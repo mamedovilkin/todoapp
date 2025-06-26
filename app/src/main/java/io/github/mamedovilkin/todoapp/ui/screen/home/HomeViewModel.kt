@@ -90,6 +90,10 @@ class HomeViewModel(
             false
         )
 
+    init {
+        syncWorkerRepository.scheduleSyncTasksWork()
+    }
+
     fun observeTasks() = viewModelScope.launch {
         taskRepository.tasks
             .catch { error ->

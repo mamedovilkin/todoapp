@@ -1,5 +1,5 @@
 [versions]
-agp = "8.10.1"
+agp = "8.11.0"
 glide = "1.0.0-beta01"
 coreTesting = "2.2.0"
 desugar_jdk_libs = "2.1.5"

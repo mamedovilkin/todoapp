@@ -74,7 +74,7 @@
         <item>Автоудаление завершённых задач — сохраняйте список дел чистым и актуальным без лишних движений.</item>
     </string-array>
     <string name="try_it_free">Попробуйте бесплатно</string>
-    <string name="premium_terms">14 дней бесплатно, затем 99.00₽ в месяц.\nОтменить сможете в любое время. Применяются условия использования.</string>
+    <string name="premium_terms">14 дней бесплатно, затем 99.00₽ в месяц.\nОтменить можно в любое время. Применяются условия использования.</string>
     <string name="manage_subscription">Управлять подпиской</string>
     <string name="cancelled">Отменено</string>
     <string name="failure">Ошибка</string>
