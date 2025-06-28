@@ -20,7 +20,6 @@ import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity
 import io.github.mamedovilkin.todoapp.util.CHANNEL_ID
 import io.github.mamedovilkin.todoapp.util.MARK_TASK_COMPLETED_ACTION
-import io.github.mamedovilkin.todoapp.util.NOTIFICATION_ID
 import io.github.mamedovilkin.todoapp.util.REQUEST_CODE
 import io.github.mamedovilkin.todoapp.util.RESCHEDULE_REQUEST_CODE
 import io.github.mamedovilkin.todoapp.util.TASK_KEY
@@ -88,7 +87,7 @@ class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
                 builder.addAction(0, context.getString(R.string.reschedule), reschedulePendingIntent)
             }
         }.invokeOnCompletion {
-            NotificationManagerCompat.from(context).notify(NOTIFICATION_ID, builder.build())
+            NotificationManagerCompat.from(context).notify(task.id.hashCode(), builder.build())
         }
     }
 

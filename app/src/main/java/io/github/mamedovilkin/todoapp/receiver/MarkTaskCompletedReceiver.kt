@@ -12,7 +12,6 @@ import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.todoapp.util.MARK_TASK_COMPLETED_ACTION
-import io.github.mamedovilkin.todoapp.util.NOTIFICATION_ID
 import io.github.mamedovilkin.todoapp.util.TASK_KEY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -59,7 +58,7 @@ class MarkTaskCompletedReceiver : BroadcastReceiver(), KoinComponent {
 
                     withContext(Dispatchers.Main) {
                         val notificationManager = NotificationManagerCompat.from(context)
-                        notificationManager.cancel(NOTIFICATION_ID)
+                        notificationManager.cancel(task.id.hashCode())
                     }
                 }
             }

@@ -22,7 +22,6 @@ import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
-import io.github.mamedovilkin.todoapp.util.NOTIFICATION_ID
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_PERMISSION_REQUEST_CODE
 import io.github.mamedovilkin.todoapp.util.TASK_KEY
 import io.github.mamedovilkin.todoapp.util.isInternetAvailable
@@ -88,7 +87,7 @@ class HomeActivity : ComponentActivity(), KoinComponent {
 
             if (shouldOpenEditTaskDialog) {
                 val notificationManager = NotificationManagerCompat.from(this)
-                notificationManager.cancel(NOTIFICATION_ID)
+                notificationManager.cancel(task?.id.hashCode())
             }
 
             ToDoAppTheme {
