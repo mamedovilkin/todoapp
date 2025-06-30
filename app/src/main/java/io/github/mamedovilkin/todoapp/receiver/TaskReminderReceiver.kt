@@ -74,6 +74,8 @@ class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
         val builder = NotificationCompat.Builder(context, CHANNEL_ID)
             .setSmallIcon(R.drawable.ic_task)
             .setContentTitle(task.title)
+            .setContentText(task.description)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(task.description))
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setVibrate(LongArray(0))
             .setContentIntent(pendingIntent)
