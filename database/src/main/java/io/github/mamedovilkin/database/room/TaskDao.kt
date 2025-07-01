@@ -25,6 +25,9 @@ interface TaskDao {
     @Update
     suspend fun update(task: Task)
 
+    @Query("SELECT * FROM tasks WHERE id = :id")
+    fun getTask(id: String): Task?
+
     @Query("SELECT * FROM tasks ORDER BY isDone, datetime ASC")
     fun getTasks(): Flow<List<Task>>
 

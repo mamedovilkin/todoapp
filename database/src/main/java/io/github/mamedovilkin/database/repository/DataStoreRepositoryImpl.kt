@@ -23,6 +23,7 @@ class DataStoreRepositoryImpl(
 ) : DataStoreRepository {
 
     private companion object {
+        val WAS_FIRST_LAUNCH = booleanPreferencesKey("wasFirstLaunch")
         val SHOW_STATISTICS = booleanPreferencesKey("showStatistics")
         val USER_ID = stringPreferencesKey("userID")
         val PHOTO_URL = stringPreferencesKey("photoURL")
@@ -31,6 +32,19 @@ class DataStoreRepositoryImpl(
         val RESCHEDULE_UNCOMPLETED_TASKS = booleanPreferencesKey("rescheduleUncompletedTasks")
         val AUTO_DELETE = intPreferencesKey("autoDelete")
     }
+
+    override suspend fun setWasFirstLaunch(wasFirstLaunch: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[WAS_FIRST_LAUNCH] = wasFirstLaunch
+        }
+    }
+
+    override val wasFirstLaunch: Flow<Boolean> = dataStore.data
+        .catch {
+            emit(emptyPreferences())
+        }.map { preferences ->
+            preferences[WAS_FIRST_LAUNCH] == true
+        }
 
     override suspend fun setShowStatistics(showStatistics: Boolean) {
         dataStore.edit { preferences ->

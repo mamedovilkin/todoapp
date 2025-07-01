@@ -4,7 +4,9 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.mamedovilkin.database.repository.DataStoreRepository
+import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.todoapp.R
+import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
@@ -14,9 +16,31 @@ import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
 
 class HomeActivityViewModel(
     private val application: Application,
+    private val taskRepository: TaskRepository,
     private val dataStoreRepository: DataStoreRepository,
+    private val taskReminderRepository: TaskReminderRepository,
     private val ruStoreBillingClient: RuStoreBillingClient
 ) : AndroidViewModel(application) {
+
+    init {
+        viewModelScope.launch {
+            val wasFirstLaunch = dataStoreRepository.wasFirstLaunch.first()
+
+            if (!wasFirstLaunch) {
+                val tasks = taskRepository.tasks.first()
+                val isPremium = dataStoreRepository.isPremium.first()
+
+                tasks.forEach { task ->
+                   taskReminderRepository.scheduleReminder(task, isPremium)
+                }
+
+                dataStoreRepository.setWasFirstLaunch(true)
+            }
+        }
+
+    }
+
+    fun getTask(id: String) = taskRepository.getTask(id)
 
     fun checkPremiumAvailability(onError: (String?) -> Unit) = viewModelScope.launch {
         val userID = dataStoreRepository.userID.first()

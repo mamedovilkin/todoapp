@@ -22,7 +22,7 @@ import io.github.mamedovilkin.todoapp.util.CHANNEL_ID
 import io.github.mamedovilkin.todoapp.util.MARK_TASK_COMPLETED_ACTION
 import io.github.mamedovilkin.todoapp.util.REQUEST_CODE
 import io.github.mamedovilkin.todoapp.util.RESCHEDULE_REQUEST_CODE
-import io.github.mamedovilkin.todoapp.util.TASK_KEY
+import io.github.mamedovilkin.todoapp.util.TASK_ID_KEY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -36,31 +36,33 @@ class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
     private val dataStoreRepository: DataStoreRepository by inject()
     private val syncWorkerRepository: SyncWorkerRepository by inject()
 
+    @Suppress("DEPRECATION")
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     override fun onReceive(context: Context?, intent: Intent?) {
         if (context == null || intent == null) return
 
-        val task = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(TASK_KEY, Task::class.java)
-        } else {
-            @Suppress("DEPRECATION")
-            intent.getParcelableExtra(TASK_KEY)
-        } ?: return
+        val id = intent.getStringExtra(TASK_ID_KEY)
 
-        if (task.repeatType != RepeatType.ONE_TIME) {
-            CoroutineScope(Dispatchers.IO).launch {
-                val updatedTask = task.copy(
-                    isDone = false,
-                    isSynced = false,
-                    updatedAt = System.currentTimeMillis()
-                )
+        CoroutineScope(Dispatchers.IO).launch {
+            if (id != null) {
+                val task = taskRepository.getTask(id)
 
-                taskRepository.update(updatedTask)
-                syncWorkerRepository.scheduleSyncTasksWork()
+                task?.let { task ->
+                    if (task.repeatType != RepeatType.ONE_TIME) {
+                        val updatedTask = task.copy(
+                            isDone = false,
+                            isSynced = false,
+                            updatedAt = System.currentTimeMillis()
+                        )
+
+                        taskRepository.update(updatedTask)
+                        syncWorkerRepository.scheduleSyncTasksWork()
+                    }
+
+                    createNotification(task, context)
+                }
             }
         }
-
-        createNotification(task, context)
     }
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
@@ -128,7 +130,7 @@ class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
     private fun createMarkCompletedPendingIntent(context: Context, task: Task): PendingIntent {
         val intent = Intent(context, MarkTaskCompletedReceiver::class.java).apply {
             action = MARK_TASK_COMPLETED_ACTION
-            putExtra(TASK_KEY, task)
+            putExtra(TASK_ID_KEY, task.id)
         }
 
         return PendingIntent.getBroadcast(
@@ -142,7 +144,7 @@ class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
     private fun createReschedulePendingIntent(context: Context, task: Task): PendingIntent {
         val intent = Intent(context, HomeActivity::class.java).apply {
             putExtra("action", "todoapp://reschedule/")
-            putExtra(TASK_KEY, task)
+            putExtra(TASK_ID_KEY, task.id)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 

@@ -64,6 +64,16 @@ class TaskDaoTest {
 
     @Test
     @Throws(IOException::class)
+    fun daoGetTaskById_returnsTaskFromDatabase() = runBlocking {
+        addTwoTaskToDatabase()
+
+        val task = taskDao.getTask("1")
+
+        assertEquals(task, task1)
+    }
+
+    @Test
+    @Throws(IOException::class)
     fun daoGetTasks_returnsAllTasksFromDatabase() = runBlocking {
         addTwoTaskToDatabase()
 

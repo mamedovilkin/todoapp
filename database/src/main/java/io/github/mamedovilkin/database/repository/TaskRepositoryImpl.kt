@@ -17,6 +17,8 @@ class TaskRepositoryImpl(
 
     override suspend fun update(task: Task) = taskDao.update(task)
 
+    override fun getTask(id: String): Task? = taskDao.getTask(id)
+
     override val tasks: Flow<List<Task>> = taskDao.getTasks()
 
     override val unSyncedTasks: Flow<List<Task>> = taskDao.getUnSyncedTasks()

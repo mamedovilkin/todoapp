@@ -9,6 +9,7 @@ interface TaskRepository {
     suspend fun delete(task: Task)
     suspend fun deleteAll()
     suspend fun update(task: Task)
+    fun getTask(id: String): Task?
     val tasks: Flow<List<Task>>
     val unSyncedTasks: Flow<List<Task>>
 }

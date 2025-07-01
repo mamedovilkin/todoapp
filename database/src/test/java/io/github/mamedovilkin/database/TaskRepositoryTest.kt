@@ -18,6 +18,16 @@ class TaskRepositoryTest {
     private var task2 = Task("2", "Do homework", isDone = true)
 
     @Test
+    fun repositoryGetTaskById_returnsTaskByIdFromRepository() = runBlocking {
+        taskRepository.insert(task1)
+        taskRepository.insert(task2)
+
+        val task = taskRepository.getTask("1")
+
+        assertEquals(task, task1)
+    }
+
+    @Test
     fun repositoryGetTasks_returnsAllTasksFromRepository() = runBlocking {
         taskRepository.insert(task1)
         taskRepository.insert(task2)

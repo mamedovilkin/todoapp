@@ -23,7 +23,7 @@ import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_PERMISSION_REQUEST_CODE
-import io.github.mamedovilkin.todoapp.util.TASK_KEY
+import io.github.mamedovilkin.todoapp.util.TASK_ID_KEY
 import io.github.mamedovilkin.todoapp.util.isInternetAvailable
 import io.github.mamedovilkin.todoapp.util.toast
 import kotlinx.coroutines.launch
@@ -78,12 +78,8 @@ class HomeActivity : ComponentActivity(), KoinComponent {
             val windowSizeClass = calculateWindowSizeClass(this)
             val shouldOpenNewTaskDialog = intent?.getStringExtra("action") == "todoapp://new_task/"
             val shouldOpenEditTaskDialog = intent?.getStringExtra("action") == "todoapp://reschedule/"
-            val task = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                intent.getParcelableExtra(TASK_KEY, Task::class.java)
-            } else {
-                @Suppress("DEPRECATION")
-                intent.getParcelableExtra(TASK_KEY)
-            }
+            val id = intent?.getStringExtra(TASK_ID_KEY)
+            val task = if (id != null) homeActivityViewModel.getTask(id) else null
 
             if (shouldOpenEditTaskDialog) {
                 val notificationManager = NotificationManagerCompat.from(this)

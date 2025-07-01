@@ -12,7 +12,7 @@ import io.github.mamedovilkin.database.room.isTodayTask
 import io.github.mamedovilkin.todoapp.receiver.TaskReminderReceiver
 import io.github.mamedovilkin.todoapp.util.FIFTEEN_MINUTES_OFFSET
 import io.github.mamedovilkin.todoapp.util.FIVE_MINUTES_OFFSET
-import io.github.mamedovilkin.todoapp.util.TASK_KEY
+import io.github.mamedovilkin.todoapp.util.TASK_ID_KEY
 import io.github.mamedovilkin.todoapp.util.TEN_MINUTES_OFFSET
 import io.github.mamedovilkin.todoapp.util.TWENTY_MINUTES_OFFSET
 import java.util.Calendar
@@ -156,7 +156,7 @@ class TaskReminderRepositoryImpl(
 
         return offsets.map { offset ->
             val intent = Intent(context, TaskReminderReceiver::class.java).apply {
-                putExtra(TASK_KEY, task)
+                putExtra(TASK_ID_KEY, task.id)
             }
 
             val requestCode = 31 * task.id.hashCode() + offset.hashCode()

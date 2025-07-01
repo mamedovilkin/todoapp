@@ -28,6 +28,15 @@ class DataStoreRepositoryTest {
     }
 
     @Test
+    fun repositorySetWasFirstLaunch_getWasFirstLaunch() = runBlocking {
+        dataStoreRepository.setWasFirstLaunch(true)
+
+        val wasFirstLaunch = dataStoreRepository.wasFirstLaunch.first()
+
+        assertTrue(wasFirstLaunch)
+    }
+
+    @Test
     fun repositorySetShowStatistics_getShowStatistics() = runBlocking {
         dataStoreRepository.setShowStatistics(true)
 

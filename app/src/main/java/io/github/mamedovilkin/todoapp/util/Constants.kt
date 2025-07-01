@@ -3,7 +3,7 @@ package io.github.mamedovilkin.todoapp.util
 const val CHANNEL_ID = "TASK_REMINDER"
 const val REQUEST_CODE = 0
 const val RESCHEDULE_REQUEST_CODE = 1
-const val TASK_KEY = "TASK"
+const val TASK_ID_KEY = "TASK_ID"
 const val NOTIFICATION_PERMISSION_REQUEST_CODE = 101
 const val FIVE_MINUTES_OFFSET = 300_000
 const val TEN_MINUTES_OFFSET = 600_000
