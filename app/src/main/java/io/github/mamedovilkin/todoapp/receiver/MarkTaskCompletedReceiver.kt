@@ -29,11 +29,12 @@ class MarkTaskCompletedReceiver : BroadcastReceiver(), KoinComponent {
     override fun onReceive(context: Context, intent: Intent) {
         if (intent.action == MARK_TASK_COMPLETED_ACTION) {
             val id = intent.getStringExtra(TASK_ID_KEY)
-            if (id != null) {
-                val task = taskRepository.getTask(id)
 
-                task?.let {
-                    CoroutineScope(Dispatchers.IO).launch {
+            CoroutineScope(Dispatchers.IO).launch {
+                if (id != null) {
+                    val task = taskRepository.getTask(id)
+
+                    task?.let {
                         val isPremium = dataStoreRepository.isPremium.first()
 
                         var updatedTask = it.copy(

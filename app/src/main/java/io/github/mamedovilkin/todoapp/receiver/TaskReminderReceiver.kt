@@ -23,6 +23,7 @@ import io.github.mamedovilkin.todoapp.util.MARK_TASK_COMPLETED_ACTION
 import io.github.mamedovilkin.todoapp.util.REQUEST_CODE
 import io.github.mamedovilkin.todoapp.util.RESCHEDULE_REQUEST_CODE
 import io.github.mamedovilkin.todoapp.util.TASK_ID_KEY
+import io.github.mamedovilkin.todoapp.util.TASK_KEY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
@@ -144,7 +145,7 @@ class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
     private fun createReschedulePendingIntent(context: Context, task: Task): PendingIntent {
         val intent = Intent(context, HomeActivity::class.java).apply {
             putExtra("action", "todoapp://reschedule/")
-            putExtra(TASK_ID_KEY, task.id)
+            putExtra(TASK_KEY, task)
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         }
 
