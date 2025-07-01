@@ -1,7 +1,7 @@
 /*
     IMPORTANT TO KNOW:
     TO RUN TESTS IN THIS FILE CORRECTLY YOU NEED TO COMMENT THAT OF CODE
-    IN ToDoAppActivity.kt FILE
+    IN HomeActivity.kt FILE
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         ...
@@ -18,6 +18,7 @@ import androidx.compose.ui.test.assertIsOn
 import androidx.compose.ui.test.isDisplayed
 import androidx.compose.ui.test.junit4.createAndroidComposeRule
 import androidx.compose.ui.test.onAllNodesWithTag
+import androidx.compose.ui.test.onAllNodesWithText
 import androidx.compose.ui.test.onFirst
 import androidx.compose.ui.test.onLast
 import androidx.compose.ui.test.onNodeWithTag
@@ -26,34 +27,35 @@ import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performScrollToIndex
 import androidx.compose.ui.test.performTextClearance
 import androidx.compose.ui.test.performTextInput
-import io.github.mamedovilkin.todoapp.ui.ToDoAppActivity
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeLeft
+import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity
 import org.junit.Rule
 import org.junit.Test
 
-class ToDoAppTest {
+class HomeScreenTest {
 
     @get:Rule
-    val composeTestRule = createAndroidComposeRule<ToDoAppActivity>()
+    val composeTestRule = createAndroidComposeRule<HomeActivity>()
 
     @Test
-    fun homeScreen_menuButtonClickedMenuDisplayed() {
+    fun homeScreen_settingsButtonClickedSettingsDisplayed() {
         composeTestRule.waitUntil {
             composeTestRule
-                .onNodeWithTag("Menu")
+                .onNodeWithTag("Settings")
                 .isDisplayed()
         }
 
         composeTestRule
-            .onNodeWithTag("Menu")
+            .onNodeWithTag("Settings")
             .performClick()
 
-        composeTestRule
-            .onNodeWithText("Feedback")
-            .assertIsDisplayed()
-
-        composeTestRule
-            .onNodeWithText("Rate us")
-            .assertIsDisplayed()
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onAllNodesWithText("Settings")
+                .onFirst()
+                .isDisplayed()
+        }
     }
 
     @Test
@@ -169,6 +171,18 @@ class ToDoAppTest {
             .performClick()
 
         composeTestRule
+            .onNodeWithText("Walk my dog")
+            .performTouchInput {
+                swipeLeft()
+            }
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithTag("Delete")
+                .isDisplayed()
+        }
+
+        composeTestRule
             .onNodeWithTag("Delete")
             .performClick()
 
@@ -183,6 +197,18 @@ class ToDoAppTest {
 
     @Test
     fun homeScreen_statisticsCardDisplayed() {
+        composeTestRule
+            .onNodeWithTag("Settings")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Show Statistics")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Back")
+            .performClick()
+
         composeTestRule
             .onNodeWithText("New task")
             .performClick()
@@ -202,6 +228,18 @@ class ToDoAppTest {
 
     @Test
     fun homeScreen_statisticsCardAllTasksCompletedDisplayed() {
+        composeTestRule
+            .onNodeWithTag("Settings")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Show Statistics")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Back")
+            .performClick()
+
         composeTestRule
             .onNodeWithText("New task")
             .performClick()
@@ -408,6 +446,18 @@ class ToDoAppTest {
         composeTestRule
             .onNodeWithTag("Toggle")
             .performClick()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .performTouchInput {
+                swipeLeft()
+            }
+
+        composeTestRule.waitUntil {
+            composeTestRule
+                .onNodeWithTag("Delete")
+                .isDisplayed()
+        }
 
         composeTestRule
             .onNodeWithTag("Delete")

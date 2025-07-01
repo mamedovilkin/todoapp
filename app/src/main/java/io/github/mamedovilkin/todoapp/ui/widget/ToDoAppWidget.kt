@@ -23,15 +23,18 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
+import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.database.room.isTodayTask
 import io.github.mamedovilkin.todoapp.R
+import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
-import io.github.mamedovilkin.todoapp.ui.ToDoAppActivity
+import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity
 import io.github.mamedovilkin.todoapp.ui.widget.action.RefreshAction
 import io.github.mamedovilkin.todoapp.ui.widget.state.NoTasksState
 import io.github.mamedovilkin.todoapp.ui.widget.state.TodayTasksState
-import io.github.mamedovilkin.todoapp.util.isTodayTask
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -42,27 +45,35 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
 
     override suspend fun provideGlance(context: Context, id: GlanceId) {
         val taskRepository: TaskRepository by inject()
+        val syncWorkerRepository: SyncWorkerRepository by inject()
         val taskReminderRepository: TaskReminderRepository by inject()
+        val dataStoreRepository: DataStoreRepository by inject()
 
         provideContent {
             val tasks = taskRepository.tasks.collectAsState(emptyList())
-            val filteredTasks = tasks.value.filter { task -> !task.isDone && isTodayTask(task.datetime) }
+            val filteredTasks = tasks.value.filter { task -> !task.isDone && task.isTodayTask() }
             val coroutineScope = rememberCoroutineScope()
+            val isPremium = dataStoreRepository.isPremium.collectAsState(false)
 
             GlanceTheme {
                 Content(
                     tasks = filteredTasks,
                     onToggle = {
                         coroutineScope.launch {
-                            val task = it.copy(isDone = !it.isDone)
+                            var updatedTask = it.copy(
+                                isDone = !it.isDone,
+                                isSynced = false,
+                                updatedAt = System.currentTimeMillis()
+                            )
 
-                            taskRepository.update(task)
+                            taskReminderRepository.cancelReminder(updatedTask, isPremium.value)
 
-                            if (task.isDone) {
-                                taskReminderRepository.cancelReminder(task)
-                            } else {
-                                taskReminderRepository.scheduleReminder(task)
+                            if (updatedTask.repeatType != RepeatType.ONE_TIME) {
+                                updatedTask = taskReminderRepository.scheduleReminder(updatedTask, isPremium.value)
                             }
+
+                            taskRepository.update(updatedTask)
+                            syncWorkerRepository.scheduleSyncTasksWork()
                         }
                     }
                 )
@@ -102,9 +113,9 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
         onToggle: (Task) -> Unit,
     ) {
         val context = LocalContext.current
-        val intent = Intent(context, ToDoAppActivity::class.java).apply {
+        val intent = Intent(context, HomeActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK
-            putExtra("action", "new_task")
+            putExtra("action", "todoapp://new_task/")
         }
 
         Scaffold(

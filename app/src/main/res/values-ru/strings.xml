@@ -21,9 +21,11 @@
     <string name="date_pattern">dd.MM.yyyy</string>
     <string name="datetime_pattern">EEE, d MMMM \'в\' hh:mm a</string>
     <string name="datetime_today_pattern">\'Сегодня в\' hh:mm a</string>
+    <string name="datetime_tomorrow_pattern">\'Завтра в\' hh:mm a</string>
     <string name="datetime_year_pattern">EEE, d MMMM yyyy \'в\' hh:mm a</string>
     <string name="datetime_24hour_pattern">EEE, d MMMM \'в\' HH:mm</string>
     <string name="datetime_today_24hour_pattern">\'Сегодня в\' HH:mm</string>
+    <string name="datetime_tomorrow_24hour_pattern">\'Завтра в\' HH:mm</string>
     <string name="datetime_year_24hour_pattern">EEE, d MMMM yyyy \'в\' HH:mm</string>
     <string name="notification_channel">Напоминание о задаче</string>
     <string name="task_deleted">Задача удалена</string>
@@ -32,10 +34,89 @@
     <string name="todoapp_widget_description">Управляйте сегодняшними незавершенными задачами</string>
     <string name="there_are_no_tasks_for_today">Нет задач на сегодня</string>
     <string name="refresh">Обновить</string>
-    <string name="menu">Меню</string>
+    <string name="settings">Настройки</string>
+    <string name="vk_id">VK ID</string>
+    <string name="sign_in_with_your_vk_id">Войдите используя свой VK ID</string>
+    <string name="sign_out">Выйти</string>
+    <string name="do_you_really_want_to_sign_out">Вы действительно хотите выйти?</string>
+    <string name="show_statistics">Показывать статистику</string>
+    <string name="about">О приложении</string>
     <string name="feedback">Обратная связь</string>
     <string name="rate_us">Оцените нас</string>
+    <string name="tell_a_friend">Расскажите другу</string>
+    <string name="about_developer">О разработчике</string>
+    <string name="version">Версия %s</string>
     <string name="mark_as_completed">Отметить как выполнено</string>
+    <string name="tell_a_friend_text">
+        Привет! 👋\n\nХочу порекомендовать тебе классное приложение, которое помогает мне не забывать важные дела — ToDoApp.\n\nПростое, удобное и без лишнего — самое то для ежедневных задач ✅\n\nСкачай и попробуй:\n📲https://www.rustore.ru/catalog/app/io.github.mamedovilkin.todoapp
+    </string>
+    <string name="description">Описание</string>
+    <string name="category">Категория</string>
+    <string name="back">Назад</string>
+    <string name="repeat">Повтор</string>
+    <string name="free">Бесплатный</string>
+    <string name="go_premium">Перейти на Premium</string>
+    <string name="no_internet_connection">Нет интернет соединения</string>
+    <string name="delete_all_data">Удалить все данные</string>
+    <string name="do_you_really_want_to_delete_all_data">Вы действительно хотите удалить все данные?</string>
+    <string name="premium_summary">
+        Получите максимум от своего дня с ToDoApp Premium. Расширенные функции и удобные инструменты помогут Вам оставаться организованным и эффективным. Продуктивность — без компромиссов. Подписка помогает нам делать ToDoApp ещё лучше.
+    </string>
+    <string name="whats_in_subscription">Что в подписке?</string>
+    <string-array name="premium_features">
+        <item>Синхронизация между устройствами — оставайтесь организованными в любом месте.</item>
+        <item>Повтор задач — настраивайте ежедневные, еженедельные, ежемесячные и даже ежегодные повторы.</item>
+        <item>Описания к задачам — добавляйте заметки, важные детали и инструкции.</item>
+        <item>Категории задач — наводите порядок с помощью удобной группировки.</item>
+        <item>Расширенные уведомления — до 5 напоминаний для каждой задачи, чтобы точно ничего не упустить.</item>
+        <item>Перенос из уведомления — откладывайте задачи прямо из уведомлений, не заходя в приложение.</item>
+        <item>Автоматический перенос на завтра — невыполненные задачи не исчезнут, а плавно перейдут на следующий день.</item>
+        <item>Автоудаление завершённых задач — сохраняйте список дел чистым и актуальным без лишних движений.</item>
+    </string-array>
+    <string name="try_it_free">Попробуйте бесплатно</string>
+    <string name="premium_terms">14 дней бесплатно, затем 99.00₽ в месяц.\nОтменить можно в любое время. Применяются условия использования.</string>
+    <string name="manage_subscription">Управлять подпиской</string>
+    <string name="cancelled">Отменено</string>
+    <string name="failure">Ошибка</string>
+    <string name="invalid_payment_state">Неверное состояние платежа</string>
+    <string name="reschedule">Перенести</string>
+    <string name="your_plan">Ваш план</string>
+    <string name="delete_all_data_summary">Все данные будут удалены из локальной и удалённой базы данных</string>
+    <string name="reschedule_uncompleted_tasks_to_tomorrow">Переносить невыполненые задачи на завтра</string>
+    <string name="good_morning">Доброе утро, %1$s 👋</string>
+    <string name="good_afternoon">Добрый день, %1$s 👋</string>
+    <string name="good_evening">Добрый вечер, %1$s 👋</string>
+    <string name="good_night">Доброй ночи, %1$s 👋</string>
+    <string name="automatically_delete_completed_tasks">Автоматически удалять выполненные задачи</string>
+    <string name="rustore_is_not_installed_on_this_device">RuStore не установлен на этом устройстве</string>
+    <string name="not_authorized_in_rustore">Не авторизован в RuStore</string>
+    <string name="report_issues_suggest_new_features">Сообщайте о проблемах, предлагайте новые функции</string>
+    <string name="next">Следующее: %1$s</string>
+    <string name="title">Название</string>
+    <string name="premium_notification">Премиум активирован. Спасибо за поддержку! Если у вас возникнут вопросы или проблемы, пожалуйста, свяжитесь с нами через "Настройки" > "Обратная связь".</string>
+    <string name="date_today_pattern">EEEE, d MMMM</string>
+    <string-array name="auto_delete">
+        <item>Никогда</item>
+        <item>Ежедневно</item>
+        <item>Еженедельно</item>
+        <item>Ежемесячно</item>
+    </string-array>
+    <string-array name="repeat_types">
+        <item>Один раз</item>
+        <item>Ежедневно</item>
+        <item>Еженедельно</item>
+        <item>Ежемесячно</item>
+        <item>Ежегодно</item>
+    </string-array>
+    <string-array name="repeat_days_of_week">
+        <item>Пн</item>
+        <item>Вт</item>
+        <item>Ср</item>
+        <item>Чт</item>
+        <item>Пт</item>
+        <item>Сб</item>
+        <item>Вс</item>
+    </string-array>
     <plurals name="you_have_tasks_to_do">
         <item quantity="one">У Вас есть %d задача!</item>
         <item quantity="few">У Вас есть %d задачи!</item>

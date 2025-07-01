@@ -26,18 +26,15 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.common.EditTaskBottomSheet
 import io.github.mamedovilkin.todoapp.ui.common.NewTaskBottomSheet
 import io.github.mamedovilkin.todoapp.ui.common.NewTaskFloatingActionButton
@@ -58,16 +55,19 @@ fun HomeScreen(
     windowWidthSizeClass: WindowWidthSizeClass,
     windowHeightSizeClass: WindowHeightSizeClass,
     shouldOpenNewTaskDialog: Boolean = false,
+    shouldOpenEditTaskDialog: Boolean = false,
+    task: Task? = null,
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
     val lazyListState = rememberLazyListState()
-    val newTaskSheetState = rememberModalBottomSheetState()
-    var showNewTaskBottomSheet by rememberSaveable { mutableStateOf(false) }
-    val editTaskSheetState = rememberModalBottomSheetState()
-    var showEditTaskBottomSheet by rememberSaveable { mutableStateOf(false) }
+    val newTaskSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
+    val editTaskSheetState = rememberModalBottomSheetState(
+        skipPartiallyExpanded = true
+    )
     val uiState by viewModel.uiState.collectAsState()
-    var task: Task? = null
     val coroutineScope = rememberCoroutineScope()
     val showUpFloatingActionButton by remember {
         derivedStateOf {
@@ -75,14 +75,35 @@ fun HomeScreen(
         }
     }
     val snackbarHostState = remember { SnackbarHostState() }
+    val exception = uiState.exception
+    val userID by viewModel.userID.collectAsState()
+    val photoURL by viewModel.photoURL.collectAsState()
+    val displayName by viewModel.displayName.collectAsState()
+    val showStatistics by viewModel.showStatistics.collectAsState()
+    val isPremium by viewModel.isPremium.collectAsState()
 
     LaunchedEffect(Unit) {
-        showNewTaskBottomSheet = shouldOpenNewTaskDialog
+        viewModel.setShowNewTaskBottomSheet(shouldOpenNewTaskDialog)
+        viewModel.setShowEditTaskBottomSheet(shouldOpenEditTaskDialog)
+        task?.let { viewModel.setTaskToEdit(it) }
+        viewModel.observeTasks()
+
+        exception?.let {
+            coroutineScope.launch {
+                snackbarHostState.showSnackbar(
+                    message = it.message.toString(),
+                    duration = SnackbarDuration.Short
+                )
+            }
+        }
     }
 
     Scaffold(
         topBar = {
-            ToDoAppTopBar()
+            ToDoAppTopBar(
+                userID = userID,
+                photoURL = photoURL
+            )
         },
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) { snackbarData ->
             val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = {
@@ -104,7 +125,7 @@ fun HomeScreen(
             NewTaskFloatingActionButton(
                 expanded = lazyListState.isScrollingUp(),
                 onNewTaskClick = {
-                    showNewTaskBottomSheet = true
+                    viewModel.setShowNewTaskBottomSheet(true)
                 },
             )
         },
@@ -120,20 +141,27 @@ fun HomeScreen(
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     TaskList(
+                        displayName = displayName,
+                        showStatistics = showStatistics,
+                        isPremium = isPremium,
                         innerPadding = innerPadding,
                         lazyListState = lazyListState,
                         tasks = result.tasks,
                         count = uiState.notDoneTasksCount,
                         query = uiState.query,
+                        showVerticalGradient = showUpFloatingActionButton,
+                        selectedCategory = uiState.selectedCategory,
+                        categories = result.categories,
+                        onSelection = { viewModel.setSelectedCategory(it) },
                         onEdit = {
-                            task = it
-                            showEditTaskBottomSheet = true
+                            viewModel.setTaskToEdit(it)
+                            viewModel.setShowEditTaskBottomSheet(true)
                         },
                         onSearch = {
                             viewModel.searchForTasks(it)
                         },
                         onClear = { viewModel.searchForTasks("") },
-                        onToggle = { viewModel.toggleDone(it) },
+                        onToggle = { viewModel.toggleTask(it.copy(isDone = !it.isDone)) },
                         onDelete = {
                             viewModel.deleteTask(it)
 
@@ -146,7 +174,10 @@ fun HomeScreen(
 
                                 when (snackBar) {
                                     SnackbarResult.ActionPerformed -> {
-                                        viewModel.newTask(it)
+                                        viewModel.newTask(it.copy(
+                                            isSynced = false,
+                                            updatedAt = System.currentTimeMillis()
+                                        ))
                                     }
                                     SnackbarResult.Dismissed -> {}
                                 }
@@ -155,19 +186,13 @@ fun HomeScreen(
                         modifier = if (windowWidthSizeClass == WindowWidthSizeClass.Compact) {
                             Modifier.fillMaxSize()
                         } else {
-                            Modifier
-                                .width(600.dp)
-                                .fillMaxHeight()
+                            Modifier.width(600.dp).fillMaxHeight()
                         },
                     )
                     AnimatedVisibility(
                         showUpFloatingActionButton,
-                        enter = slideInVertically {
-                            it
-                        },
-                        exit = slideOutVertically {
-                            it
-                        }
+                        enter = slideInVertically { it },
+                        exit = slideOutVertically { it }
                     ) {
                         UpFloatingActionButton(
                             onUpClick = {
@@ -187,31 +212,33 @@ fun HomeScreen(
             }
         }
 
-        if (showNewTaskBottomSheet) {
+        if (uiState.showNewTaskBottomSheet) {
             NewTaskBottomSheet(
                 sheetState = newTaskSheetState,
+                isPremium = isPremium,
                 onSave = {
                     viewModel.newTask(it)
-                    showNewTaskBottomSheet = false
+                    viewModel.setShowNewTaskBottomSheet(false)
                 },
                 onCancel = {
-                    showNewTaskBottomSheet = false
+                    viewModel.setShowNewTaskBottomSheet(false)
                 },
                 windowHeightSizeClass = windowHeightSizeClass
             )
         }
 
-        if (showEditTaskBottomSheet && task != null) {
+        if (uiState.showEditTaskBottomSheet && uiState.task != null) {
             EditTaskBottomSheet(
-                task = task!!,
+                task = uiState.task!!,
+                isPremium = isPremium,
                 sheetState = editTaskSheetState,
                 onSave = {
-                    viewModel.updateTask(it)
-                    showEditTaskBottomSheet = false
+                    viewModel.updateTask(it.copy(isDone = if (System.currentTimeMillis() > it.datetime) it.isDone else false))
+                    viewModel.setShowEditTaskBottomSheet(false)
                 },
                 onDelete = { viewModel.deleteTask(it) },
                 onCancel = {
-                    showEditTaskBottomSheet = false
+                    viewModel.setShowEditTaskBottomSheet(false)
                 },
                 windowHeightSizeClass = windowHeightSizeClass
             )

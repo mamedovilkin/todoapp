@@ -10,15 +10,31 @@ class FakeTaskRepository : TaskRepository {
     private var tasksList = mutableListOf<Task>()
     private val _tasksFlow = MutableStateFlow<List<Task>>(emptyList())
     override val tasks: Flow<List<Task>> get() = _tasksFlow
+    private val _unSyncedTasksFlow = MutableStateFlow<List<Task>>(emptyList())
+    override val unSyncedTasks: Flow<List<Task>> get() = _unSyncedTasksFlow
 
     override suspend fun insert(task: Task) {
         tasksList.add(task)
         _tasksFlow.value = tasksList.toList()
+        _unSyncedTasksFlow.value = tasksList.filter { !it.isSynced }.toList()
+    }
+
+    override suspend fun insertAll(tasks: List<Task>) {
+        tasksList.addAll(tasks)
+        _tasksFlow.value = tasksList.toList()
+        _unSyncedTasksFlow.value = tasksList.filter { !it.isSynced }.toList()
     }
 
     override suspend fun delete(task: Task) {
         tasksList.remove(task)
         _tasksFlow.value = tasksList.toList()
+        _unSyncedTasksFlow.value = tasksList.filter { !it.isSynced }.toList()
+    }
+
+    override suspend fun deleteAll() {
+        tasksList = mutableListOf()
+        _tasksFlow.value = tasksList.toList()
+        _unSyncedTasksFlow.value = tasksList.filter { !it.isSynced }.toList()
     }
 
     override suspend fun update(task: Task) {
@@ -26,12 +42,11 @@ class FakeTaskRepository : TaskRepository {
         if (index != -1) {
             tasksList[index] = task
             _tasksFlow.value = tasksList.toList()
+            _unSyncedTasksFlow.value = tasksList.filter { !it.isSynced }.toList()
         }
     }
 
-    override fun searchForTasks(query: String): Flow<List<Task>> {
-        tasksList = tasksList.filter { it.title.contains(query) }.toMutableList()
-        _tasksFlow.value = tasksList.toList()
-        return _tasksFlow
+    override fun getTask(id: String): Task? {
+        return tasksList.first { it.id == id }
     }
 }

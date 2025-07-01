@@ -1,13 +1,26 @@
 package io.github.mamedovilkin.todoapp.util
 
 import android.content.Context
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.text.format.DateFormat
+import android.widget.Toast
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.database.room.isTaskThisYear
+import io.github.mamedovilkin.database.room.isTodayTask
+import io.github.mamedovilkin.database.room.isTomorrowTask
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import java.io.IOException
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
 import java.util.Locale
+import java.util.concurrent.TimeUnit
 
 fun convertMillisToDate(millis: Long, context: Context): String {
     val formatter = SimpleDateFormat(context.resources.getString(R.string.date_pattern), Locale.getDefault())
@@ -24,35 +37,39 @@ fun convertToTime(hour: Int, minute: Int, context: Context): String {
     val calendar = Calendar.getInstance()
     calendar.set(Calendar.HOUR_OF_DAY, hour)
     calendar.set(Calendar.MINUTE, minute)
-    val pattern = if (DateFormat.is24HourFormat(context)) "HH:mm" else "hh:mm"
+    val pattern = if (DateFormat.is24HourFormat(context)) "HH:mm" else "hh:mm a"
     val formatter = SimpleDateFormat(pattern, Locale.getDefault())
     return formatter.format(Date(calendar.timeInMillis))
 }
 
-fun convertMillisToDatetime(millis: Long, context: Context): String {
-    val pattern = getPattern(millis, context)
+fun convertMillisToDatetime(task: Task, context: Context): String {
+    val pattern = getPattern(task, context)
 
     val formatter = SimpleDateFormat(pattern, Locale.getDefault())
-    return formatter.format(Date(millis)).replaceFirstChar {
+    return formatter.format(Date(task.datetime)).replaceFirstChar {
         if (it.isLowerCase()) it.titlecase(
             Locale.getDefault()
         ) else it.toString()
     }
 }
 
-private fun getPattern(millis: Long, context: Context): String {
+private fun getPattern(task: Task, context: Context): String {
     if (DateFormat.is24HourFormat(context)) {
-        return if (isTodayTask(millis)) {
+        return if (task.isTodayTask()) {
             context.resources.getString(R.string.datetime_today_24hour_pattern)
-        } else if (!isTaskThisYear(millis)) {
+        } else if (task.isTomorrowTask()) {
+            context.resources.getString(R.string.datetime_tomorrow_24hour_pattern)
+        } else if (!task.isTaskThisYear()) {
             context.resources.getString(R.string.datetime_year_24hour_pattern)
         } else {
             context.resources.getString(R.string.datetime_24hour_pattern)
         }
     } else {
-        return if (isTodayTask(millis)) {
+        return if (task.isTodayTask()) {
             context.resources.getString(R.string.datetime_today_pattern)
-        } else if (!isTaskThisYear(millis)) {
+        } else if (task.isTomorrowTask()) {
+            context.resources.getString(R.string.datetime_tomorrow_pattern)
+        } else if (!task.isTaskThisYear()) {
             context.resources.getString(R.string.datetime_year_pattern)
         } else {
             context.resources.getString(R.string.datetime_pattern)
@@ -60,32 +77,58 @@ private fun getPattern(millis: Long, context: Context): String {
     }
 }
 
-fun isTodayTask(millis: Long): Boolean {
-    val taskCalendar = Calendar.getInstance()
-    taskCalendar.timeInMillis = millis
-    val taskDayOfYear = taskCalendar.get(Calendar.DAY_OF_YEAR)
-    val taskYear = taskCalendar.get(Calendar.YEAR)
+suspend fun isInternetAvailable(): Boolean = withContext(Dispatchers.IO) {
+    try {
+        val client = OkHttpClient.Builder()
+            .connectTimeout(1, TimeUnit.SECONDS)
+            .readTimeout(1, TimeUnit.SECONDS)
+            .writeTimeout(1, TimeUnit.SECONDS)
+            .build()
 
-    val currentCalendar = Calendar.getInstance()
-    currentCalendar.timeInMillis = System.currentTimeMillis()
-    val currentDayOfYear = currentCalendar.get(Calendar.DAY_OF_YEAR)
-    val currentYear = currentCalendar.get(Calendar.YEAR)
+        val request = Request.Builder()
+            .url("https://clients3.google.com/generate_204")
+            .build()
 
-    return taskDayOfYear == currentDayOfYear && taskYear == currentYear
+        val response = client.newCall(request).execute()
+        response.code == 204
+    } catch (_: IOException) {
+        false
+    }
 }
 
-fun isTaskThisYear(millis: Long): Boolean {
-    val taskCalendar = Calendar.getInstance()
-    taskCalendar.timeInMillis = millis
-    val taskYear = taskCalendar.get(Calendar.YEAR)
-
-    val currentCalendar = Calendar.getInstance()
-    currentCalendar.timeInMillis = System.currentTimeMillis()
-    val currentYear = currentCalendar.get(Calendar.YEAR)
-
-    return taskYear == currentYear
+fun Context.toast(message: String?) {
+    Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
 }
 
-fun Task.isExpired(): Boolean {
-    return Calendar.getInstance().timeInMillis > datetime
+fun getDate(context: Context): String {
+    val formatter = SimpleDateFormat(context.getString(R.string.date_today_pattern), Locale.getDefault())
+    return formatter.format(Date()).replaceFirstChar {
+        if (it.isLowerCase()) it.titlecase(
+            Locale.getDefault()
+        ) else it.toString()
+    }
+}
+
+fun getGreeting(context: Context, displayName: String): String {
+    val calendar = Calendar.getInstance()
+    val currentHour = calendar.get(Calendar.HOUR_OF_DAY)
+
+    return when (currentHour) {
+        in 4..11 -> context.getString(R.string.good_morning, displayName)
+        in 12..17 -> context.getString(R.string.good_afternoon, displayName)
+        in 18..21 -> context.getString(R.string.good_evening, displayName)
+        else -> context.getString(R.string.good_night, displayName)
+    }
+}
+
+@Suppress("DEPRECATION")
+fun vibrate(context: Context) {
+    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as? Vibrator ?: return
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val effect = VibrationEffect.createOneShot(50, VibrationEffect.DEFAULT_AMPLITUDE)
+        vibrator.vibrate(effect)
+    } else {
+        vibrator.vibrate(50)
+    }
 }

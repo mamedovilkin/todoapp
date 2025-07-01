@@ -6,50 +6,167 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.RequiresPermission
+import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
+import io.github.mamedovilkin.database.room.isTodayTask
 import io.github.mamedovilkin.todoapp.receiver.TaskReminderReceiver
-import io.github.mamedovilkin.todoapp.util.FIVE_MINUTES_IN_MILLISECONDS
-import io.github.mamedovilkin.todoapp.util.TEN_MINUTES_IN_MILLISECONDS
-import io.github.mamedovilkin.todoapp.util.TASK_KEY
+import io.github.mamedovilkin.todoapp.util.FIFTEEN_MINUTES_OFFSET
+import io.github.mamedovilkin.todoapp.util.FIVE_MINUTES_OFFSET
+import io.github.mamedovilkin.todoapp.util.TASK_ID_KEY
+import io.github.mamedovilkin.todoapp.util.TEN_MINUTES_OFFSET
+import io.github.mamedovilkin.todoapp.util.TWENTY_MINUTES_OFFSET
+import java.util.Calendar
 
 class TaskReminderRepositoryImpl(
     private val context: Context
 ) : TaskReminderRepository {
 
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
-    private val intent = Intent(context, TaskReminderReceiver::class.java)
 
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
-    override fun scheduleReminder(task: Task) {
-        if (task.datetime > System.currentTimeMillis()) {
-            intent.putExtra(TASK_KEY, task)
+    override fun scheduleReminder(task: Task, isPremium: Boolean): Task {
+        val updatedTask = getTaskWithUpdatedDatetime(task)
 
-            val pendingIntents = getPendingIntents(task)
+        val pendingIntents = getPendingIntents(updatedTask, isPremium)
 
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.datetime, pendingIntents[0])
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.datetime + FIVE_MINUTES_IN_MILLISECONDS, pendingIntents[1])
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, task.datetime + TEN_MINUTES_IN_MILLISECONDS, pendingIntents[2])
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime, pendingIntents[0])
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + FIVE_MINUTES_OFFSET, pendingIntents[1])
+        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TEN_MINUTES_OFFSET, pendingIntents[2])
+
+        if (isPremium) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + FIFTEEN_MINUTES_OFFSET, pendingIntents[3])
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TWENTY_MINUTES_OFFSET, pendingIntents[4])
+        }
+
+        return updatedTask
+    }
+
+    override fun getTaskWithUpdatedDatetime(task: Task): Task {
+        val now = Calendar.getInstance()
+        val due = Calendar.getInstance().apply {
+            timeInMillis = task.datetime
+        }
+
+        return when (task.repeatType) {
+            RepeatType.ONE_TIME -> task
+
+            RepeatType.DAILY -> {
+                if (task.isTodayTask() && task.isDone) {
+                    due.add(Calendar.DAY_OF_YEAR, 1)
+                } else {
+                    while (!due.after(now)) due.add(Calendar.DAY_OF_YEAR, 1)
+                }
+                task.copy(
+                    datetime = due.timeInMillis,
+                    isSynced = false
+                )
+            }
+
+            RepeatType.WEEKLY -> {
+                if (task.isTodayTask() && task.isDone) {
+                    due.timeInMillis = getNextWeeklyReminder(task, due)
+                } else {
+                    while (!due.after(now)) due.timeInMillis = getNextWeeklyReminder(task, due)
+                }
+                task.copy(
+                    datetime = due.timeInMillis,
+                    isSynced = false
+                )
+            }
+
+            RepeatType.MONTHLY -> {
+                if (task.isTodayTask() && task.isDone) {
+                    due.add(Calendar.MONTH, 1)
+                } else {
+                    while (!due.after(now)) due.add(Calendar.MONTH, 1)
+                }
+                task.copy(
+                    datetime = due.timeInMillis,
+                    isSynced = false
+                )
+            }
+
+            RepeatType.YEARLY -> {
+                if (task.isTodayTask() && task.isDone) {
+                    due.add(Calendar.YEAR, 1)
+                } else {
+                    while (!due.after(now)) due.add(Calendar.YEAR, 1)
+                }
+                task.copy(
+                    datetime = due.timeInMillis,
+                    isSynced = false
+                )
+            }
         }
     }
 
-    override fun cancelReminder(task: Task) {
-        val pendingIntents = getPendingIntents(task)
+    override fun getNextWeeklyReminder(task: Task, base: Calendar): Long {
+        val days = task.repeatDaysOfWeek.map {
+            when (it) {
+                0 -> Calendar.MONDAY
+                1 -> Calendar.TUESDAY
+                2 -> Calendar.WEDNESDAY
+                3 -> Calendar.THURSDAY
+                4 -> Calendar.FRIDAY
+                5 -> Calendar.SATURDAY
+                6 -> Calendar.SUNDAY
+                else -> throw IllegalArgumentException("Invalid index: $it")
+            }
+        }
+
+        val now = Calendar.getInstance().apply {
+            timeInMillis = base.timeInMillis
+        }
+
+        val todayDayOfWeek = now.get(Calendar.DAY_OF_WEEK)
+
+        val difference = days.minOf {
+            val diff = it - todayDayOfWeek
+            if (diff <= 0) diff + 7 else diff
+        }
+
+        now.add(Calendar.DAY_OF_MONTH, difference)
+
+        return now.timeInMillis
+    }
+
+    override fun cancelReminder(task: Task, isPremium: Boolean) {
+        val pendingIntents = getPendingIntents(task, isPremium)
 
         alarmManager.cancel(pendingIntents[0])
         alarmManager.cancel(pendingIntents[1])
         alarmManager.cancel(pendingIntents[2])
+
+        if (isPremium) {
+            alarmManager.cancel(pendingIntents[3])
+            alarmManager.cancel(pendingIntents[4])
+        }
     }
 
-    override fun getPendingIntents(task: Task): List<PendingIntent> {
-        val requestCode = task.id.hashCode()
-        val pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE)
+    override fun getPendingIntents(task: Task, isPremium: Boolean): List<PendingIntent> {
+        val offsets = mutableListOf(
+            0,
+            FIVE_MINUTES_OFFSET,
+            TEN_MINUTES_OFFSET
+        )
 
-        val requestCodeAfterFiveMinutes = task.id.hashCode() + FIVE_MINUTES_IN_MILLISECONDS
-        val pendingIntentAfterFiveMinutes = PendingIntent.getBroadcast(context, requestCodeAfterFiveMinutes, intent, PendingIntent.FLAG_IMMUTABLE)
+        if (isPremium) {
+            offsets.addAll(listOf(FIFTEEN_MINUTES_OFFSET, TWENTY_MINUTES_OFFSET))
+        }
 
-        val requestCodeAfterTenMinutes = task.id.hashCode() + TEN_MINUTES_IN_MILLISECONDS
-        val pendingIntentAfterTenMinutes = PendingIntent.getBroadcast(context, requestCodeAfterTenMinutes, intent, PendingIntent.FLAG_IMMUTABLE)
+        return offsets.map { offset ->
+            val intent = Intent(context, TaskReminderReceiver::class.java).apply {
+                putExtra(TASK_ID_KEY, task.id)
+            }
 
-        return listOf(pendingIntent, pendingIntentAfterFiveMinutes, pendingIntentAfterTenMinutes)
+            val requestCode = 31 * task.id.hashCode() + offset.hashCode()
+
+            PendingIntent.getBroadcast(
+                context,
+                requestCode,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+            )
+        }
     }
 }

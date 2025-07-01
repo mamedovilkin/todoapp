@@ -21,9 +21,11 @@
     <string name="date_pattern">MM.dd.yyyy</string>
     <string name="datetime_pattern">EEE, MMM d \'at\' hh:mm a</string>
     <string name="datetime_today_pattern">\'Today at\' hh:mm a</string>
+    <string name="datetime_tomorrow_pattern">\'Tomorrow at\' hh:mm a</string>
     <string name="datetime_year_pattern">EEE, MMM d, yyyy \'at\' hh:mm a</string>
     <string name="datetime_24hour_pattern">EEE, MMM d \'at\' HH:mm</string>
     <string name="datetime_today_24hour_pattern">\'Today at\' HH:mm</string>
+    <string name="datetime_tomorrow_24hour_pattern">\'Tomorrow at\' HH:mm</string>
     <string name="datetime_year_24hour_pattern">EEE, MMM d, yyyy \'at\' HH:mm</string>
     <string name="notification_channel">Task reminder</string>
     <string name="task_deleted">Task deleted</string>
@@ -32,10 +34,93 @@
     <string name="todoapp_widget_description">Manage today\'s uncompleted tasks</string>
     <string name="there_are_no_tasks_for_today">There are no tasks for today</string>
     <string name="refresh">Refresh</string>
-    <string name="menu">Menu</string>
+    <string name="settings">Settings</string>
+    <string name="vk_id">VK ID</string>
+    <string name="sign_in_with_your_vk_id">Sign in with your VK ID</string>
+    <string name="sign_out">Sign out</string>
+    <string name="do_you_really_want_to_sign_out">Do you really want to sign out?</string>
+    <string name="show_statistics">Show statistics</string>
+    <string name="about">About</string>
     <string name="feedback">Feedback</string>
     <string name="rate_us">Rate us</string>
+    <string name="tell_a_friend">Tell a friend</string>
+    <string name="about_developer">About developer</string>
+    <string name="version">Version %s</string>
     <string name="mark_as_completed">Mark as completed</string>
+    <string name="tell_a_friend_text">
+        Hi! 👋\n\nI want to recommend you a cool app that helps me not to forget important things — ToDoApp.\n\nSimple, convenient and without unnecessary things — just right for everyday tasks ✅\n\nDownload and try:\n📲https://www.rustore.ru/catalog/app/io.github.mamedovilkin.todoapp
+    </string>
+    <string name="description">Description</string>
+    <string name="category">Category</string>
+    <string name="back">Back</string>
+    <string name="repeat">Repeat</string>
+    <string name="free">Free</string>
+    <string name="go_premium">Go Premium</string>
+    <string name="no_internet_connection">No internet connection</string>
+    <string name="delete_all_data">Delete all data</string>
+    <string name="do_you_really_want_to_delete_all_data">Do you really want to delete all data?</string>
+    <string name="premium" translatable="false">Premium</string>
+    <string name="premium_summary">
+        Get the most out of your day with ToDoApp Premium.
+        Advanced features and convenient tools help you stay organized and efficient.
+        Productivity — without compromises.
+        Your subscription helps us make ToDoApp even better.
+    </string>
+    <string name="whats_in_subscription">What\'s in subscription?</string>
+    <string-array name="premium_features">
+        <item>Sync across devices — stay organized wherever you are.</item>
+        <item>Recurring tasks — set daily, weekly, monthly, or even yearly repeats.</item>
+        <item>Task descriptions — add notes, important details, and instructions.</item>
+        <item>Task categories — keep things tidy with smart grouping.</item>
+        <item>Extended reminders — get up to 5 alerts per task so you never miss a thing.</item>
+        <item>Reschedule tasks from notification — reschedule tasks right from the notification without opening the app.</item>
+        <item>Reschedule uncompleted tasks to tomorrow — uncompleted tasks will automatically reschedule to the next day.</item>
+        <item>Auto-delete completed tasks — keep your to-do list clean and up-to-date effortlessly.</item>
+    </string-array>
+    <string name="try_it_free">Try It Free</string>
+    <string name="premium_terms">14 days free, then 99.00₽ per month.\nCancel anytime. Terms &amp; Conditions apply.</string>
+    <string name="manage_subscription">Manage subscription</string>
+    <string name="cancelled">Cancelled</string>
+    <string name="failure">Failure</string>
+    <string name="invalid_payment_state">Invalid payment state</string>
+    <string name="reschedule">Reschedule</string>
+    <string name="your_plan">Your plan</string>
+    <string name="delete_all_data_summary">All data will be deleted from local and remote databases</string>
+    <string name="reschedule_uncompleted_tasks_to_tomorrow">Reschedule uncompleted tasks to tomorrow</string>
+    <string name="good_morning">Good morning, %1$s 👋</string>
+    <string name="good_afternoon">Good afternoon, %1$s 👋</string>
+    <string name="good_evening">Good evening, %1$s 👋</string>
+    <string name="good_night">Good night, %1$s 👋</string>
+    <string name="automatically_delete_completed_tasks">Automatically delete completed tasks</string>
+    <string name="rustore_is_not_installed_on_this_device">RuStore is not installed on this device</string>
+    <string name="not_authorized_in_rustore">Not authorized in RuStore</string>
+    <string name="report_issues_suggest_new_features">Report issues, suggest new features</string>
+    <string name="next">Next: %1$s</string>
+    <string name="title">Title</string>
+    <string name="premium_notification">Premium activated. Thank you for supporting us! If you have any questions or issues, please contact us via "Settings" > "Feedback".</string>
+    <string name="date_today_pattern">EEEE, MMMM d</string>
+    <string-array name="auto_delete">
+        <item>Never</item>
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+    </string-array>
+    <string-array name="repeat_types">
+        <item>One time</item>
+        <item>Daily</item>
+        <item>Weekly</item>
+        <item>Monthly</item>
+        <item>Yearly</item>
+    </string-array>
+    <string-array name="repeat_days_of_week">
+        <item>Mon</item>
+        <item>Tue</item>
+        <item>Wed</item>
+        <item>Thu</item>
+        <item>Fri</item>
+        <item>Sat</item>
+        <item>Sun</item>
+    </string-array>
     <plurals name="you_have_tasks_to_do">
         <item quantity="one">You have task to do!</item>
         <item quantity="other">You have %d tasks to do!</item>
