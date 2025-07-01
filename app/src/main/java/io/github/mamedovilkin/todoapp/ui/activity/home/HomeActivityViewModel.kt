@@ -37,10 +37,7 @@ class HomeActivityViewModel(
                 dataStoreRepository.setWasFirstLaunch(true)
             }
         }
-
     }
-
-    fun getTask(id: String) = taskRepository.getTask(id)
 
     fun checkPremiumAvailability(onError: (String?) -> Unit) = viewModelScope.launch {
         val userID = dataStoreRepository.userID.first()
