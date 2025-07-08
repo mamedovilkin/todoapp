@@ -80,18 +80,18 @@ class ToDoApp : Application() {
                     }
 
                     // Repository
-                    single<TaskReminderRepository> { TaskReminderRepositoryImpl(androidContext()) }
+                    single<TaskReminderRepository> { TaskReminderRepositoryImpl(androidContext(), get()) }
                     single<SyncWorkerRepository> { SyncWorkerRepositoryImpl(androidContext()) }
                     single<TaskRepository> { TaskRepositoryImpl(get()) }
                     single<DataStoreRepository> { DataStoreRepositoryImpl(get()) }
-                    single<FirestoreRepository> { FirestoreRepositoryImpl(get()) }
+                    single<FirestoreRepository> { FirestoreRepositoryImpl(this@ToDoApp, get()) }
 
                     // ViewModel
                     viewModel { HomeActivityViewModel(this@ToDoApp, get(), get(), get(), get()) }
-                    viewModel { HomeViewModel(this@ToDoApp, get(), get(), get(), get()) }
-                    viewModel { PremiumActivityViewModel(this@ToDoApp, get(), get(), get()) }
+                    viewModel { HomeViewModel(this@ToDoApp, get(), get(), get(), get(), get()) }
+                    viewModel { PremiumActivityViewModel(this@ToDoApp, get(), get(), get(), get()) }
                     viewModel { SettingsActivityViewModel(this@ToDoApp, get(), get(), get(), get()) }
-                    viewModel { SettingsViewModel(get(), get(), get(), get()) }
+                    viewModel { SettingsViewModel(get(), get(), get(), get(), get()) }
                 }
             )
         }

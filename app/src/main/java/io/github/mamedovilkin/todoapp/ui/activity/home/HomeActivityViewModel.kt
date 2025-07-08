@@ -28,10 +28,9 @@ class HomeActivityViewModel(
 
             if (!wasFirstLaunch) {
                 val tasks = taskRepository.tasks.first()
-                val isPremium = dataStoreRepository.isPremium.first()
 
                 tasks.forEach { task ->
-                   taskReminderRepository.scheduleReminder(task, isPremium)
+                    taskReminderRepository.scheduleReminder(task)
                 }
 
                 dataStoreRepository.setWasFirstLaunch(true)
@@ -52,9 +51,9 @@ class HomeActivityViewModel(
                             .addOnSuccessListener { purchases ->
                                 viewModelScope.launch {
                                     val hasPremium = purchases.any { purchase ->
-                                        purchase.productType == ProductType.SUBSCRIPTION &&
-                                                purchase.productId == "premium_monthly" &&
-                                                purchase.purchaseState == PurchaseState.CONFIRMED
+                                        purchase.productType == ProductType.SUBSCRIPTION
+                                        && purchase.purchaseState == PurchaseState.CONFIRMED
+                                        && (purchase.productId == "premium_monthly" || purchase.productId == "premium_annual")
                                     }
                                     setPremium(hasPremium)
                                 }

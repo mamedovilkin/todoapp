@@ -88,29 +88,28 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     },
                     onPremium = {
                         lifecycleScope.launch {
-                            if (userID.isEmpty()) {
-                                if (isInternetAvailable()) {
-                                    if (RuStoreUtils.isRuStoreInstalled(this@SettingsActivity)) {
+                            if (isInternetAvailable()) {
+                                if (RuStoreUtils.isRuStoreInstalled(this@SettingsActivity)) {
+                                    if (userID.isEmpty()) {
                                         settingsActivityViewModel.signInWithVK { error ->
                                             if (error != null) {
                                                 toast(error)
                                             }
                                         }
                                     } else {
-                                        settingsActivityViewModel.setPremium(false)
-                                        toast(getString(R.string.rustore_is_not_installed_on_this_device))
+                                        startActivity(
+                                            Intent(
+                                                this@SettingsActivity,
+                                                PremiumActivity::class.java
+                                            )
+                                        )
                                     }
                                 } else {
-                                    toast(getString(R.string.no_internet_connection))
+                                    settingsActivityViewModel.setPremium(false)
+                                    toast(getString(R.string.rustore_is_not_installed_on_this_device))
                                 }
-
                             } else {
-                                startActivity(
-                                    Intent(
-                                        this@SettingsActivity,
-                                        PremiumActivity::class.java
-                                    )
-                                )
+                                toast(getString(R.string.no_internet_connection))
                             }
                         }
                     },

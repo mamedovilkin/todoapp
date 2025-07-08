@@ -133,12 +133,14 @@ import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.isExpired
 import io.github.mamedovilkin.todoapp.R
+import io.github.mamedovilkin.todoapp.ui.activity.premium.PremiumActivity
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.util.convertMillisToDate
 import io.github.mamedovilkin.todoapp.util.convertMillisToDatetime
 import io.github.mamedovilkin.todoapp.util.convertToTime
 import java.util.Calendar
 import io.github.mamedovilkin.todoapp.ui.activity.settings.SettingsActivity
+import io.github.mamedovilkin.todoapp.ui.theme.textColor
 import io.github.mamedovilkin.todoapp.util.getDate
 import io.github.mamedovilkin.todoapp.util.getGreeting
 import kotlin.collections.filter
@@ -291,7 +293,7 @@ fun TaskItem(
                 .padding(end = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            AnimatedVisibility(task.category.isNotEmpty() && !task.isDone && isPremium) {
+            AnimatedVisibility(task.category.isNotEmpty() && !task.isDone) {
                 Text(
                     text = task.category,
                     maxLines = 1,
@@ -318,7 +320,7 @@ fun TaskItem(
                 },
                 color = if (task.isDone) Color.Gray else MaterialTheme.colorScheme.onPrimaryContainer
             )
-            AnimatedVisibility(task.description.isNotEmpty() && !task.isDone && isPremium) {
+            AnimatedVisibility(task.description.isNotEmpty() && !task.isDone) {
                 Text(
                     text = task.description,
                     maxLines = 3,
@@ -559,6 +561,8 @@ fun TaskList(
     onDelete: (Task) -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val context = LocalContext.current
+    var showPremiumAd by remember { mutableStateOf(true) }
     val filteredTasks by remember(query, selectedCategory, tasks) {
         derivedStateOf {
             if (query.isNotEmpty()) {
@@ -584,6 +588,66 @@ fun TaskList(
         state = lazyListState,
         contentPadding = PaddingValues(top = 0.dp, bottom = 72.dp)
     ) {
+        if (!isPremium && showPremiumAd) {
+            item {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp),
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .padding(horizontal = 16.dp)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_task),
+                            contentDescription = stringResource(R.string.app_name),
+                            tint = textColor.getColor(context),
+                            modifier = Modifier.size(18.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.premium),
+                            color = textColor.getColor(context),
+                            style = MaterialTheme.typography.displaySmall
+                        )
+                        Spacer(modifier = Modifier.weight(1f))
+                        Icon(
+                            painter = painterResource(R.drawable.ic_close),
+                            contentDescription = stringResource(R.string.close),
+                            tint = textColor.getColor(context),
+                            modifier = Modifier
+                                .size(18.dp)
+                                .clickable(onClick = {
+                                    showPremiumAd = false
+                                })
+                                .testTag("Close")
+                        )
+                    }
+                    Text(
+                        text = stringResource(R.string.premium_short_summary),
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.learn_more),
+                        style = MaterialTheme.typography.displaySmall,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier
+                            .padding(vertical = 8.dp)
+                            .padding(horizontal = 16.dp)
+                            .clickable(onClick = {
+                                context.startActivity(
+                                    Intent(context, PremiumActivity::class.java)
+                                )
+                            })
+                    )
+                }
+            }
+        }
+
         if (displayName.isNotEmpty()) {
             item {
                 Column(
@@ -625,7 +689,7 @@ fun TaskList(
         }
 
         item {
-            AnimatedVisibility(categories.isNotEmpty() && isPremium) {
+            AnimatedVisibility(categories.isNotEmpty()) {
                 CategoryChips(
                     selectedCategory = selectedCategory,
                     categories = categories.sortedWith(compareBy<String> {
@@ -726,6 +790,7 @@ fun TaskList(
 fun NewTaskBottomSheet(
     sheetState: SheetState,
     isPremium: Boolean,
+    categories: Set<String>,
     onSave: (Task) -> Unit,
     onCancel: () -> Unit,
     windowHeightSizeClass: WindowHeightSizeClass
@@ -843,22 +908,22 @@ fun NewTaskBottomSheet(
                     .fillMaxWidth()
                     .testTag(stringResource(R.string.new_task))
             )
-            if (isPremium) {
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    maxLines = 3,
-                    label = { Text(text = stringResource(R.string.description)) },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_description),
-                            contentDescription = stringResource(R.string.description)
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(stringResource(R.string.description))
-                )
+            OutlinedTextField(
+                value = description,
+                onValueChange = { description = it },
+                maxLines = 3,
+                label = { Text(text = stringResource(R.string.description)) },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_description),
+                        contentDescription = stringResource(R.string.description)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(stringResource(R.string.description))
+            )
+            if (isPremium || categories.size < 3) {
                 OutlinedTextField(
                     value = category,
                     onValueChange = { category = it },
@@ -942,6 +1007,7 @@ fun EditTaskBottomSheet(
     task: Task,
     sheetState: SheetState,
     isPremium: Boolean,
+    categories: Set<String>,
     onSave: (Task) -> Unit,
     onDelete: (Task) -> Unit,
     onCancel: () -> Unit,
@@ -1063,22 +1129,22 @@ fun EditTaskBottomSheet(
                     .fillMaxWidth()
                     .testTag(stringResource(R.string.edit_task))
             )
-            if (isPremium) {
-                OutlinedTextField(
-                    value = description,
-                    onValueChange = { description = it },
-                    maxLines = 3,
-                    label = { Text(text = stringResource(R.string.description)) },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_description),
-                            contentDescription = stringResource(R.string.description)
-                        )
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(stringResource(R.string.description))
-                )
+            OutlinedTextField(
+                value = description,
+                onValueChange = { description = it },
+                maxLines = 3,
+                label = { Text(text = stringResource(R.string.description)) },
+                leadingIcon = {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_description),
+                        contentDescription = stringResource(R.string.description)
+                    )
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .testTag(stringResource(R.string.description))
+            )
+            if (isPremium || task.category.isNotEmpty() || categories.size < 3) {
                 OutlinedTextField(
                     value = category,
                     onValueChange = { category = it },

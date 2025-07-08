@@ -30,6 +30,7 @@ class DataStoreRepositoryImpl(
         val DISPLAY_NAME = stringPreferencesKey("displayName")
         val PREMIUM = booleanPreferencesKey("premium")
         val RESCHEDULE_UNCOMPLETED_TASKS = booleanPreferencesKey("rescheduleUncompletedTasks")
+        val REMINDER_COUNT = intPreferencesKey("reminderCount")
         val AUTO_DELETE = intPreferencesKey("autoDelete")
     }
 
@@ -122,6 +123,19 @@ class DataStoreRepositoryImpl(
             emit(emptyPreferences())
         }.map { preferences ->
             preferences[RESCHEDULE_UNCOMPLETED_TASKS] == true
+        }
+
+    override suspend fun setReminderCount(reminderCount: Int) {
+        dataStore.edit { preferences ->
+            preferences[REMINDER_COUNT] = reminderCount
+        }
+    }
+
+    override val reminderCount: Flow<Int> = dataStore.data
+        .catch {
+            emit(emptyPreferences())
+        }.map { preferences ->
+            preferences[REMINDER_COUNT] ?: 3
         }
 
     override suspend fun setAutoDeleteIndex(autoDeleteIndex: Int) {

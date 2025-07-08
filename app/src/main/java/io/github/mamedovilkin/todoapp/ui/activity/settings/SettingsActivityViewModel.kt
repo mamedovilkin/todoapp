@@ -69,9 +69,9 @@ class SettingsActivityViewModel(
                             .addOnSuccessListener { purchases ->
                                 viewModelScope.launch {
                                     val hasPremium = purchases.any { purchase ->
-                                        purchase.productType == ProductType.SUBSCRIPTION &&
-                                                purchase.productId == "premium_monthly" &&
-                                                purchase.purchaseState == PurchaseState.CONFIRMED
+                                        purchase.productType == ProductType.SUBSCRIPTION
+                                        && purchase.purchaseState == PurchaseState.CONFIRMED
+                                        && (purchase.productId == "premium_monthly" || purchase.productId == "premium_annual")
                                     }
                                     setPremium(hasPremium)
                                 }

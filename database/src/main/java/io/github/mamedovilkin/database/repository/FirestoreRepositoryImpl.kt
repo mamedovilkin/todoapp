@@ -1,5 +1,6 @@
 package io.github.mamedovilkin.database.repository
 
+import android.app.Application
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import io.github.mamedovilkin.database.room.RepeatType
@@ -8,6 +9,7 @@ import io.github.mamedovilkin.database.room.toHashMap
 import kotlinx.coroutines.tasks.await
 
 class FirestoreRepositoryImpl(
+    private val application: Application,
     private val firestore: FirebaseFirestore,
 ) : FirestoreRepository {
 
@@ -17,6 +19,16 @@ class FirestoreRepositoryImpl(
             .document(uid)
             .set(mapOf("lastSignIn" to System.currentTimeMillis()))
             .await()
+    }
+
+    override suspend fun getLatestVersion(): String {
+        val document = firestore
+            .collection("about")
+            .document("version")
+            .get()
+            .await()
+
+        return document.getString("latest") ?: application.packageManager.getPackageInfo(application.packageName, 0).versionName.toString()
     }
 
     override suspend fun deleteAllData(uid: String) {

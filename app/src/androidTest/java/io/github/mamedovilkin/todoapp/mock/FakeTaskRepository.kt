@@ -45,4 +45,8 @@ class FakeTaskRepository : TaskRepository {
             _unSyncedTasksFlow.value = tasksList.filter { !it.isSynced }.toList()
         }
     }
+
+    override fun getTask(id: String): Task? {
+        return tasksList.find { it.id == id }
+    }
 }

@@ -32,6 +32,7 @@ class PremiumActivity : ComponentActivity(), KoinComponent {
         enableEdgeToEdge()
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
+            val userID: String by premiumActivityViewModel.userID.collectAsState()
             val isPremium by premiumActivityViewModel.isPremium.collectAsState()
 
             ToDoAppTheme {
@@ -40,18 +41,27 @@ class PremiumActivity : ComponentActivity(), KoinComponent {
                     onBack = {
                         onBackPressedDispatcher.onBackPressed()
                     },
-                    onTryItFree = {
+                    onTryItFree = { productId ->
                         lifecycleScope.launch {
                             if (isInternetAvailable()) {
                                 if (RuStoreUtils.isRuStoreInstalled(this@PremiumActivity)) {
-                                    premiumActivityViewModel.subscribe(
-                                        onSuccess = {
-                                            finish()
-                                        },
-                                        onError = { error ->
-                                            toast(error)
+                                    if (userID.isEmpty()) {
+                                        premiumActivityViewModel.signInWithVK { error ->
+                                            if (error != null) {
+                                                toast(error)
+                                            }
                                         }
-                                    )
+                                    } else {
+                                        premiumActivityViewModel.subscribe(
+                                            productId = productId,
+                                            onSuccess = {
+                                                finish()
+                                            },
+                                            onError = { error ->
+                                                toast(error)
+                                            }
+                                        )
+                                    }
                                 } else {
                                     premiumActivityViewModel.setPremium(false)
                                     toast(getString(R.string.rustore_is_not_installed_on_this_device))

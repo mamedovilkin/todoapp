@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Delete
@@ -27,6 +29,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
@@ -88,6 +91,7 @@ fun SettingsScreen(
     val showStatistics by viewModel.showStatistics.collectAsState()
     val isPremium by viewModel.isPremium.collectAsState()
     val rescheduleUncompletedTasks by viewModel.rescheduleUncompletedTasks.collectAsState()
+    val reminderCount by viewModel.reminderCount.collectAsState()
     val autoDeleteIndex by viewModel.autoDeleteIndex.collectAsState()
 
     if (uiState.showSignOutDialog) {
@@ -375,6 +379,65 @@ fun SettingsScreen(
                                         .padding(end = 16.dp)
                                         .testTag("Reschedule")
                                 )
+                            }
+                        }
+                    }
+
+                    item {
+                        Card(
+                            colors = CardDefaults.cardColors(
+                                containerColor = MaterialTheme.colorScheme.primaryContainer
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween,
+                                modifier = Modifier.fillMaxWidth()
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                    modifier = Modifier
+                                        .weight(1F)
+                                        .padding(16.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(R.drawable.ic_reminder_count),
+                                        contentDescription = stringResource(R.string.reminder_count_per_task),
+                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.reminder_count_per_task),
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        style = MaterialTheme.typography.headlineMedium
+                                    )
+                                }
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    IconButton(
+                                        onClick = { viewModel.setReminderCount(reminderCount - 1) },
+                                        enabled = reminderCount > 1
+                                    ) {
+                                        Icon(Icons.Default.Remove, contentDescription = stringResource(
+                                            R.string.decrease
+                                        ))
+                                    }
+                                    Text(
+                                        text = reminderCount.toString(),
+                                        modifier = Modifier.width(16.dp),
+                                        textAlign = TextAlign.Center,
+                                        fontSize = 18.sp
+                                    )
+                                    IconButton(
+                                        onClick = { viewModel.setReminderCount(reminderCount + 1) },
+                                        enabled = reminderCount < 5
+                                    ) {
+                                        Icon(Icons.Default.Add, contentDescription = stringResource(
+                                            R.string.increase
+                                        ))
+                                    }
+                                }
                             }
                         }
                     }

@@ -91,6 +91,15 @@ class DataStoreRepositoryTest {
     }
 
     @Test
+    fun repositorySetReminderCount_reminderCount() = runBlocking {
+        dataStoreRepository.setReminderCount(5)
+
+        val reminderCount = dataStoreRepository.reminderCount.first()
+
+        assertEquals(5, reminderCount)
+    }
+
+    @Test
     fun repositorySetAutoDeleteIndex_autoDeleteIndex() = runBlocking {
         dataStoreRepository.setAutoDeleteIndex(1)
 

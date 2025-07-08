@@ -498,4 +498,83 @@ class HomeScreenTest {
             .onNodeWithText("Walk my dog")
             .assertIsNotDisplayed()
     }
+
+    @Test
+    fun homeScreen_taskWithDescriptionDescriptionDisplayed() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Task")
+
+        composeTestRule
+            .onNodeWithText("Description")
+            .performTextInput("Description")
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Description")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun homeScreen_taskWithCategorySelectedCategoryCategoryDisplayed() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Task")
+
+        composeTestRule
+            .onNodeWithText("Category")
+            .performTextInput("Category")
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onAllNodesWithText("category")
+            .onFirst()
+            .performClick()
+
+        composeTestRule
+            .onAllNodesWithText("category")
+            .onLast()
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun homeScreen_premiumAdDisplayedClickedCloseButtonPremiumAdIsNotDisplayed() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Task")
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Premium")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag("Close")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Premium")
+            .assertIsNotDisplayed()
+    }
 }

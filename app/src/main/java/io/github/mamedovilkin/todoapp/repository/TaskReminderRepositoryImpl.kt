@@ -6,6 +6,7 @@ import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
 import androidx.annotation.RequiresPermission
+import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.isTodayTask
@@ -15,30 +16,46 @@ import io.github.mamedovilkin.todoapp.util.FIVE_MINUTES_OFFSET
 import io.github.mamedovilkin.todoapp.util.TASK_ID_KEY
 import io.github.mamedovilkin.todoapp.util.TEN_MINUTES_OFFSET
 import io.github.mamedovilkin.todoapp.util.TWENTY_MINUTES_OFFSET
+import kotlinx.coroutines.flow.first
 import java.util.Calendar
 
 class TaskReminderRepositoryImpl(
-    private val context: Context
+    private val context: Context,
+    private val dataStoreRepository: DataStoreRepository
 ) : TaskReminderRepository {
 
     private val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+    private val offsets = mutableListOf(
+        0,
+        FIVE_MINUTES_OFFSET,
+        TEN_MINUTES_OFFSET,
+        FIFTEEN_MINUTES_OFFSET,
+        TWENTY_MINUTES_OFFSET
+    )
 
     @RequiresPermission(Manifest.permission.SCHEDULE_EXACT_ALARM)
-    override fun scheduleReminder(task: Task, isPremium: Boolean): Task {
+    override suspend fun scheduleReminder(task: Task): Task {
         val updatedTask = getTaskWithUpdatedDatetime(task)
+        val reminderCount = dataStoreRepository.reminderCount.first()
+        val isPremium = dataStoreRepository.isPremium.first()
 
-        val pendingIntents = getPendingIntents(updatedTask, isPremium)
+        val pendingIntents = getPendingIntents(updatedTask, reminderCount, isPremium)
 
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime, pendingIntents[0])
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + FIVE_MINUTES_OFFSET, pendingIntents[1])
-        alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TEN_MINUTES_OFFSET, pendingIntents[2])
-
-        if (isPremium) {
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + FIFTEEN_MINUTES_OFFSET, pendingIntents[3])
-            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + TWENTY_MINUTES_OFFSET, pendingIntents[4])
+        for (i in 0 until reminderCount) {
+            alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + offsets[i], pendingIntents[i])
         }
 
         return updatedTask
+    }
+
+    override suspend fun cancelReminder(task: Task) {
+        val reminderCount = dataStoreRepository.reminderCount.first()
+        val isPremium = dataStoreRepository.isPremium.first()
+        val pendingIntents = getPendingIntents(task, reminderCount, isPremium)
+
+        for (i in 0 until reminderCount) {
+            alarmManager.cancel(pendingIntents[i])
+        }
     }
 
     override fun getTaskWithUpdatedDatetime(task: Task): Task {
@@ -130,30 +147,7 @@ class TaskReminderRepositoryImpl(
         return now.timeInMillis
     }
 
-    override fun cancelReminder(task: Task, isPremium: Boolean) {
-        val pendingIntents = getPendingIntents(task, isPremium)
-
-        alarmManager.cancel(pendingIntents[0])
-        alarmManager.cancel(pendingIntents[1])
-        alarmManager.cancel(pendingIntents[2])
-
-        if (isPremium) {
-            alarmManager.cancel(pendingIntents[3])
-            alarmManager.cancel(pendingIntents[4])
-        }
-    }
-
-    override fun getPendingIntents(task: Task, isPremium: Boolean): List<PendingIntent> {
-        val offsets = mutableListOf(
-            0,
-            FIVE_MINUTES_OFFSET,
-            TEN_MINUTES_OFFSET
-        )
-
-        if (isPremium) {
-            offsets.addAll(listOf(FIFTEEN_MINUTES_OFFSET, TWENTY_MINUTES_OFFSET))
-        }
-
+    override fun getPendingIntents(task: Task, reminderCount: Int, isPremium: Boolean): List<PendingIntent> {
         return offsets.map { offset ->
             val intent = Intent(context, TaskReminderReceiver::class.java).apply {
                 putExtra(TASK_ID_KEY, task.id)

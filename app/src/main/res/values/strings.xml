@@ -70,7 +70,6 @@
     <string-array name="premium_features">
         <item>Sync across devices — stay organized wherever you are.</item>
         <item>Recurring tasks — set daily, weekly, monthly, or even yearly repeats.</item>
-        <item>Task descriptions — add notes, important details, and instructions.</item>
         <item>Task categories — keep things tidy with smart grouping.</item>
         <item>Extended reminders — get up to 5 alerts per task so you never miss a thing.</item>
         <item>Reschedule tasks from notification — reschedule tasks right from the notification without opening the app.</item>
@@ -78,7 +77,8 @@
         <item>Auto-delete completed tasks — keep your to-do list clean and up-to-date effortlessly.</item>
     </string-array>
     <string name="try_it_free">Try It Free</string>
-    <string name="premium_terms">14 days free, then 99.00₽ per month.\nCancel anytime. Terms &amp; Conditions apply.</string>
+    <string name="premium_monthly_terms">14 days free, then 99.00₽ per month.\nCancel anytime. Terms &amp; Conditions apply.</string>
+    <string name="premium_annual_terms">14 days free, then 999.00₽ per year.\nCancel anytime. Terms &amp; Conditions apply.</string>
     <string name="manage_subscription">Manage subscription</string>
     <string name="cancelled">Cancelled</string>
     <string name="failure">Failure</string>
@@ -99,6 +99,17 @@
     <string name="title">Title</string>
     <string name="premium_notification">Premium activated. Thank you for supporting us! If you have any questions or issues, please contact us via "Settings" > "Feedback".</string>
     <string name="date_today_pattern">EEEE, MMMM d</string>
+    <string name="update_title">There is a new version of ToDoApp available in RuStore!</string>
+    <string name="update_description">Update the app to the latest version to continue using. This update includes new features, bug fixes, and performance improvements.</string>
+    <string name="update">Update</string>
+    <string name="monthly">Monthly</string>
+    <string name="annual">Annual (%1$s off)</string>
+    <string name="reminder_count_per_task">Reminder count per task</string>
+    <string name="decrease">Decrease</string>
+    <string name="increase">Increase</string>
+    <string name="premium_short_summary">Advanced features and convenient tools help you stay organized and efficient.</string>
+    <string name="learn_more">Learn more</string>
+    <string name="close">Close</string>
     <string-array name="auto_delete">
         <item>Never</item>
         <item>Daily</item>

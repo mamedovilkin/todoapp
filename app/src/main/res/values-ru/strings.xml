@@ -66,15 +66,15 @@
     <string-array name="premium_features">
         <item>Синхронизация между устройствами — оставайтесь организованными в любом месте.</item>
         <item>Повтор задач — настраивайте ежедневные, еженедельные, ежемесячные и даже ежегодные повторы.</item>
-        <item>Описания к задачам — добавляйте заметки, важные детали и инструкции.</item>
         <item>Категории задач — наводите порядок с помощью удобной группировки.</item>
         <item>Расширенные уведомления — до 5 напоминаний для каждой задачи, чтобы точно ничего не упустить.</item>
         <item>Перенос из уведомления — откладывайте задачи прямо из уведомлений, не заходя в приложение.</item>
         <item>Автоматический перенос на завтра — невыполненные задачи не исчезнут, а плавно перейдут на следующий день.</item>
         <item>Автоудаление завершённых задач — сохраняйте список дел чистым и актуальным без лишних движений.</item>
     </string-array>
-    <string name="try_it_free">Попробуйте бесплатно</string>
-    <string name="premium_terms">14 дней бесплатно, затем 99.00₽ в месяц.\nОтменить можно в любое время. Применяются условия использования.</string>
+    <string name="try_it_free">Попробовать бесплатно</string>
+    <string name="premium_monthly_terms">14 дней бесплатно, затем 99.00₽ в месяц.\nОтменить можно в любое время. Применяются условия использования.</string>
+    <string name="premium_annual_terms">14 дней бесплатно, затем 999.00₽ в год.\nОтменить можно в любое время. Применяются условия использования.</string>
     <string name="manage_subscription">Управлять подпиской</string>
     <string name="cancelled">Отменено</string>
     <string name="failure">Ошибка</string>
@@ -95,6 +95,17 @@
     <string name="title">Название</string>
     <string name="premium_notification">Премиум активирован. Спасибо за поддержку! Если у вас возникнут вопросы или проблемы, пожалуйста, свяжитесь с нами через "Настройки" > "Обратная связь".</string>
     <string name="date_today_pattern">EEEE, d MMMM</string>
+    <string name="update_title">В RuStore доступна новая версия ToDoApp!</string>
+    <string name="update_description">Обновите приложение до последней версии, чтобы продолжить его использование. Это обновление включает новые функции, исправления ошибок и улучшение производительности.</string>
+    <string name="update">Обновить</string>
+    <string name="monthly">На месяц</string>
+    <string name="annual">На год (%1$s скидка)</string>
+    <string name="reminder_count_per_task">Колличество напоминаний на задачу</string>
+    <string name="decrease">Уменьшить</string>
+    <string name="increase">Увеличить</string>
+    <string name="premium_short_summary">Расширенные функции и удобные инструменты помогут Вам оставаться организованным и эффективным.</string>
+    <string name="learn_more">Узнать больше</string>
+    <string name="close">Закрыть</string>
     <string-array name="auto_delete">
         <item>Никогда</item>
         <item>Ежедневно</item>

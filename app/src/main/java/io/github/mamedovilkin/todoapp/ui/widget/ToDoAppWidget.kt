@@ -23,7 +23,6 @@ import androidx.glance.layout.fillMaxSize
 import androidx.glance.layout.padding
 import androidx.glance.layout.width
 import androidx.glance.state.PreferencesGlanceStateDefinition
-import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
@@ -47,13 +46,11 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
         val taskRepository: TaskRepository by inject()
         val syncWorkerRepository: SyncWorkerRepository by inject()
         val taskReminderRepository: TaskReminderRepository by inject()
-        val dataStoreRepository: DataStoreRepository by inject()
 
         provideContent {
             val tasks = taskRepository.tasks.collectAsState(emptyList())
             val filteredTasks = tasks.value.filter { task -> !task.isDone && task.isTodayTask() }
             val coroutineScope = rememberCoroutineScope()
-            val isPremium = dataStoreRepository.isPremium.collectAsState(false)
 
             GlanceTheme {
                 Content(
@@ -66,10 +63,10 @@ class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
                                 updatedAt = System.currentTimeMillis()
                             )
 
-                            taskReminderRepository.cancelReminder(updatedTask, isPremium.value)
+                            taskReminderRepository.cancelReminder(updatedTask)
 
                             if (updatedTask.repeatType != RepeatType.ONE_TIME) {
-                                updatedTask = taskReminderRepository.scheduleReminder(updatedTask, isPremium.value)
+                                updatedTask = taskReminderRepository.scheduleReminder(updatedTask)
                             }
 
                             taskRepository.update(updatedTask)

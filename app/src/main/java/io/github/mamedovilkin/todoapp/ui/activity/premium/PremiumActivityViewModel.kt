@@ -11,23 +11,38 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
+import com.vk.id.AccessToken
+import com.vk.id.VKID
+import com.vk.id.VKIDAuthFail
+import com.vk.id.auth.VKIDAuthCallback
 import io.github.mamedovilkin.database.repository.DataStoreRepository
+import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import ru.rustore.sdk.billingclient.RuStoreBillingClient
+import ru.rustore.sdk.billingclient.model.product.ProductType
 import ru.rustore.sdk.billingclient.model.purchase.PaymentResult
+import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
 import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
 import java.util.UUID
 
 class PremiumActivityViewModel(
     private val application: Application,
     private val dataStoreRepository: DataStoreRepository,
-    private val ruStoreBillingClient: RuStoreBillingClient,
-    private val syncWorkerRepository: SyncWorkerRepository
+    private val firestoreRepository: FirestoreRepository,
+    private val syncWorkerRepository: SyncWorkerRepository,
+    private val ruStoreBillingClient: RuStoreBillingClient
 ) : AndroidViewModel(application) {
+
+    val userID = dataStoreRepository.userID
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            ""
+        )
 
     val isPremium = dataStoreRepository.isPremium
         .stateIn(
@@ -36,8 +51,84 @@ class PremiumActivityViewModel(
             false
         )
 
+    fun signInWithVK(onError: (String?) -> Unit) = viewModelScope.launch {
+        VKID.instance.authorize(object : VKIDAuthCallback {
+            @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+            override fun onAuth(accessToken: AccessToken) {
+                val userID = accessToken.userID.toString()
+                val photoURL = accessToken.userData.photo200.toString()
+                val displayName = accessToken.userData.firstName
+
+                saveUser(userID, photoURL, displayName)
+                checkPremiumAvailability(userID, onError = {
+                    onError(it)
+                })
+            }
+
+            override fun onFail(fail: VKIDAuthFail) {
+                onError(fail.description)
+            }
+        })
+    }
+
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    private fun checkPremiumAvailability(
+        userID: String,
+        onError: (String?) -> Unit
+    ) = viewModelScope.launch {
+        if (userID.isNotEmpty()) {
+            ruStoreBillingClient.userInfo.getAuthorizationStatus()
+                .addOnSuccessListener {
+                    if (it.authorized) {
+                        val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
+
+                        purchasesUseCase.getPurchases()
+                            .addOnSuccessListener { purchases ->
+                                viewModelScope.launch {
+                                    val hasPremium = purchases.any { purchase ->
+                                        purchase.productType == ProductType.SUBSCRIPTION
+                                                && purchase.purchaseState == PurchaseState.CONFIRMED
+                                                && (purchase.productId == "premium_monthly" || purchase.productId == "premium_annual")
+                                    }
+
+                                    dataStoreRepository.setPremium(hasPremium)
+
+                                    if (hasPremium) {
+                                        syncWorkerRepository.scheduleSyncToggleTasksWork()
+                                    } else {
+                                        syncWorkerRepository.cancelScheduleSyncToggleTasksWork()
+                                    }
+                                }
+                            }
+                            .addOnFailureListener { error ->
+                                onError(error.message)
+                            }
+                    } else {
+                        setPremium(false)
+                        onError(application.getString(R.string.not_authorized_in_rustore))
+                    }
+                }
+                .addOnFailureListener { error ->
+                    onError(error.message)
+                }
+        }
+    }
+
+    private fun saveUser(
+        userID: String,
+        photoURL: String,
+        displayName: String,
+    ) = viewModelScope.launch {
+        dataStoreRepository.setUserID(userID)
+        dataStoreRepository.setPhotoURL(photoURL)
+        dataStoreRepository.setDisplayName(displayName)
+        firestoreRepository.setLastSignIn(userID)
+        syncWorkerRepository.scheduleSyncTasksWork()
+    }
+
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     fun subscribe(
+        productId: String,
         onSuccess: () -> Unit,
         onError: (String?) -> Unit
     ) = viewModelScope.launch {
@@ -46,7 +137,7 @@ class PremiumActivityViewModel(
                 if (it.authorized) {
                     val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
                     purchasesUseCase.purchaseProduct(
-                        productId = "premium_monthly",
+                        productId = productId,
                         orderId = UUID.randomUUID().toString(),
                         quantity = 1,
                         developerPayload = null,
@@ -69,7 +160,7 @@ class PremiumActivityViewModel(
                                     purchasesUseCase.getPurchases()
                                         .addOnSuccessListener { purchases ->
                                             viewModelScope.launch {
-                                                val hasPremium = purchases.any { purchase -> purchase.productId == "premium_monthly" }
+                                                val hasPremium = purchases.any { purchase -> purchase.productId == "premium_monthly" || purchase.productId == "premium_annual" }
                                                 setPremium(hasPremium)
                                                 onSuccess()
                                             }

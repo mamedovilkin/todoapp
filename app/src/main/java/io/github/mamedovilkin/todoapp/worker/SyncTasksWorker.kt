@@ -43,14 +43,14 @@ class SyncTasksWorker(
                     when {
                         localTask == null -> {
                             taskRepository.insert(remoteTask)
-                            taskReminderRepository.cancelReminder(remoteTask, true)
-                            taskReminderRepository.scheduleReminder(remoteTask, true)
+                            taskReminderRepository.cancelReminder(remoteTask)
+                            taskReminderRepository.scheduleReminder(remoteTask)
                         }
 
                         remoteUpdatedAt > localUpdatedAt -> {
                             taskRepository.update(remoteTask)
-                            taskReminderRepository.cancelReminder(remoteTask, true)
-                            taskReminderRepository.scheduleReminder(remoteTask, true)
+                            taskReminderRepository.cancelReminder(remoteTask)
+                            taskReminderRepository.scheduleReminder(remoteTask)
                         }
 
                         localUpdatedAt > remoteUpdatedAt -> {
