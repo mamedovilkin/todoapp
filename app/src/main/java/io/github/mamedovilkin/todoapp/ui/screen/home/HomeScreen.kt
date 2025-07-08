@@ -1,5 +1,6 @@
 package io.github.mamedovilkin.todoapp.ui.screen.home
 
+import android.content.Intent
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
@@ -8,7 +9,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarDuration
@@ -17,6 +20,8 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.SwipeToDismissBox
 import androidx.compose.material3.SwipeToDismissBoxValue
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.material3.rememberSwipeToDismissBoxState
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
@@ -31,8 +36,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.core.net.toUri
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.common.EditTaskBottomSheet
@@ -46,6 +53,7 @@ import io.github.mamedovilkin.todoapp.ui.screen.state.ErrorScreen
 import io.github.mamedovilkin.todoapp.ui.screen.state.LoadingScreen
 import io.github.mamedovilkin.todoapp.ui.screen.state.NoTasksScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
+import io.github.mamedovilkin.todoapp.util.APP_LINK
 import kotlinx.coroutines.launch
 import org.koin.androidx.compose.koinViewModel
 
@@ -76,6 +84,7 @@ fun HomeScreen(
     }
     val snackbarHostState = remember { SnackbarHostState() }
     val exception = uiState.exception
+    val isLatestVersion by viewModel.isLatestVersion.collectAsState()
     val userID by viewModel.userID.collectAsState()
     val photoURL by viewModel.photoURL.collectAsState()
     val displayName by viewModel.displayName.collectAsState()
@@ -186,7 +195,9 @@ fun HomeScreen(
                         modifier = if (windowWidthSizeClass == WindowWidthSizeClass.Compact) {
                             Modifier.fillMaxSize()
                         } else {
-                            Modifier.width(600.dp).fillMaxHeight()
+                            Modifier
+                                .width(600.dp)
+                                .fillMaxHeight()
                         },
                     )
                     AnimatedVisibility(
@@ -216,6 +227,7 @@ fun HomeScreen(
             NewTaskBottomSheet(
                 sheetState = newTaskSheetState,
                 isPremium = isPremium,
+                categories = (uiState.result as? Result.Success)?.categories ?: emptySet(),
                 onSave = {
                     viewModel.newTask(it)
                     viewModel.setShowNewTaskBottomSheet(false)
@@ -231,6 +243,7 @@ fun HomeScreen(
             EditTaskBottomSheet(
                 task = uiState.task!!,
                 isPremium = isPremium,
+                categories = (uiState.result as? Result.Success)?.categories ?: emptySet(),
                 sheetState = editTaskSheetState,
                 onSave = {
                     viewModel.updateTask(it.copy(isDone = if (System.currentTimeMillis() > it.datetime) it.isDone else false))
@@ -241,6 +254,32 @@ fun HomeScreen(
                     viewModel.setShowEditTaskBottomSheet(false)
                 },
                 windowHeightSizeClass = windowHeightSizeClass
+            )
+        }
+
+        if (!isLatestVersion) {
+            AlertDialog(
+                onDismissRequest = {},
+                title = {
+                    Text(
+                        text = stringResource(R.string.update_title),
+                        style = MaterialTheme.typography.displayMedium
+                    )
+                },
+                text = {
+                    Text(
+                        text = stringResource(R.string.update_description),
+                        style = MaterialTheme.typography.headlineSmall
+                    )
+                },
+                confirmButton = {
+                    TextButton(onClick = {
+                        context.startActivity(Intent(Intent.ACTION_VIEW, APP_LINK.toUri()))
+                    }) {
+                        Text(stringResource(R.string.update).uppercase())
+                    }
+                },
+                containerColor = MaterialTheme.colorScheme.surfaceVariant
             )
         }
     }

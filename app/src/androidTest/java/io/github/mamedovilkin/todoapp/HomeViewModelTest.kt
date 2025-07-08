@@ -3,10 +3,12 @@ package io.github.mamedovilkin.todoapp
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import io.github.mamedovilkin.database.repository.DataStoreRepository
+import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.mock.FakeDataStoreRepository
+import io.github.mamedovilkin.todoapp.mock.FakeFirestoreRepository
 import io.github.mamedovilkin.todoapp.mock.FakeSyncWorkerRepository
 import io.github.mamedovilkin.todoapp.mock.FakeTaskReminderRepository
 import io.github.mamedovilkin.todoapp.mock.FakeTaskRepository
@@ -40,13 +42,15 @@ class HomeViewModelTest {
     private val testDispatcher = StandardTestDispatcher()
     private val taskRepository: TaskRepository = FakeTaskRepository()
     private val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
-    private val dataStoreRepository: DataStoreRepository = FakeDataStoreRepository()
     private val syncWorkerRepository: SyncWorkerRepository = FakeSyncWorkerRepository()
+    private val firestoreRepository: FirestoreRepository = FakeFirestoreRepository()
+    private val dataStoreRepository: DataStoreRepository = FakeDataStoreRepository()
     private var homeViewModel = HomeViewModel(
         ApplicationProvider.getApplicationContext(),
         taskRepository,
         taskReminderRepository,
         syncWorkerRepository,
+        firestoreRepository,
         dataStoreRepository
     )
 
@@ -113,6 +117,7 @@ class HomeViewModelTest {
             taskRepository,
             taskReminderRepository,
             syncWorkerRepository,
+            firestoreRepository,
             dataStoreRepository
         )
 

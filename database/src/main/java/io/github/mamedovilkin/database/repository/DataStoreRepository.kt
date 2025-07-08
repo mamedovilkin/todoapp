@@ -5,6 +5,7 @@ import kotlinx.coroutines.flow.Flow
 interface DataStoreRepository {
     suspend fun setWasFirstLaunch(wasFirstLaunch: Boolean)
     val wasFirstLaunch: Flow<Boolean>
+
     suspend fun setShowStatistics(showStatistics: Boolean)
     val showStatistics: Flow<Boolean>
 
@@ -22,6 +23,9 @@ interface DataStoreRepository {
 
     suspend fun setRescheduleUncompletedTasks(rescheduleUncompletedTasks: Boolean)
     val rescheduleUncompletedTasks: Flow<Boolean>
+
+    suspend fun setReminderCount(reminderCount: Int)
+    val reminderCount: Flow<Int>
 
     suspend fun setAutoDeleteIndex(autoDeleteIndex: Int)
     val autoDeleteIndex: Flow<Int>

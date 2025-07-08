@@ -6,13 +6,21 @@ import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeDataStoreRepository : DataStoreRepository {
 
+    private val wasFirstLaunchFlow = MutableStateFlow(false)
     private val showStatisticsFlow = MutableStateFlow(false)
     private val userIDFlow = MutableStateFlow("")
     private val photoURLFlow = MutableStateFlow("")
     private val displayNameFlow = MutableStateFlow("")
     private val isPremiumFlow = MutableStateFlow(false)
     private val rescheduleUncompletedTasksFlow = MutableStateFlow(false)
+    private val reminderCountFlow = MutableStateFlow(3)
     private val autoDeleteIndexFlow = MutableStateFlow(0)
+
+    override val wasFirstLaunch: Flow<Boolean> = wasFirstLaunchFlow
+
+    override suspend fun setWasFirstLaunch(wasFirstLaunch: Boolean) {
+        wasFirstLaunchFlow.value = wasFirstLaunch
+    }
 
     override suspend fun setShowStatistics(showStatistics: Boolean) {
         showStatisticsFlow.value = showStatistics
@@ -49,6 +57,12 @@ class FakeDataStoreRepository : DataStoreRepository {
     }
 
     override val rescheduleUncompletedTasks: Flow<Boolean> = rescheduleUncompletedTasksFlow
+
+    override suspend fun setReminderCount(reminderCount: Int) {
+        reminderCountFlow.value = reminderCount
+    }
+
+    override val reminderCount: Flow<Int> = reminderCountFlow
 
     override suspend fun setAutoDeleteIndex(autoDeleteIndex: Int) {
         autoDeleteIndexFlow.value = autoDeleteIndex

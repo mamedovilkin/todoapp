@@ -1,6 +1,7 @@
 package io.github.mamedovilkin.todoapp.ui.screen.premium
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -26,11 +27,16 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.RadioButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -49,9 +55,14 @@ import io.github.mamedovilkin.todoapp.R
 fun PremiumScreen(
     windowWidthSizeClass: WindowWidthSizeClass,
     onBack: () -> Unit,
-    onTryItFree: () -> Unit,
+    onTryItFree: (String) -> Unit,
     isPremium: Boolean
 ) {
+    val productIds = listOf("premium_monthly", "premium_annual")
+    var selectedProductId by remember { mutableStateOf(productIds[0]) }
+    val plans = listOf(stringResource(R.string.monthly), stringResource(R.string.annual, "-16%"))
+    var selectedPlan by remember { mutableStateOf(plans[0]) }
+
     Scaffold(
         topBar = {
             CenterAlignedTopAppBar(
@@ -186,22 +197,76 @@ fun PremiumScreen(
                     modifier = if (windowWidthSizeClass == WindowWidthSizeClass.Compact) {
                         Modifier
                             .fillMaxWidth()
-                            .padding(16.dp)
+                            .padding(vertical = 8.dp)
+                            .padding(horizontal = 16.dp)
                     } else {
                         Modifier
                             .width(600.dp)
-                            .padding(16.dp)
+                            .padding(vertical = 8.dp)
+                            .padding(horizontal = 16.dp)
                     }
                 ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.SpaceAround,
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
+                                    selectedPlan = plans[0]
+                                    selectedProductId = productIds[0]
+                                }
+                        ) {
+                            RadioButton(
+                                selected = (selectedPlan == plans[0]),
+                                onClick = {
+                                    selectedPlan = plans[0]
+                                    selectedProductId = productIds[0]
+                                }
+                            )
+                            Text(
+                                text = plans[0],
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clip(RoundedCornerShape(8.dp))
+                                .clickable {
+                                    selectedPlan = plans[1]
+                                    selectedProductId = productIds[1]
+                                }
+                        ) {
+                            RadioButton(
+                                selected = (selectedPlan == plans[1]),
+                                onClick = {
+                                    selectedPlan = plans[1]
+                                    selectedProductId = productIds[1]
+                                }
+                            )
+                            Text(
+                                text = plans[1],
+                                modifier = Modifier.padding(end = 16.dp)
+                            )
+                        }
+                    }
                     Button(
-                        onClick = onTryItFree,
+                        onClick = { onTryItFree(selectedProductId) },
                         enabled = !isPremium,
                         modifier = Modifier.fillMaxWidth()
                     ) {
                         Text(text = stringResource(R.string.try_it_free))
                     }
                     Text(
-                        text = stringResource(R.string.premium_terms),
+                        text = if (selectedProductId == productIds[0]) {
+                            stringResource(R.string.premium_monthly_terms)
+                        } else {
+                            stringResource(R.string.premium_annual_terms)
+                        },
                         color = Color.Gray,
                         textAlign = TextAlign.Center,
                         lineHeight = 16.sp,

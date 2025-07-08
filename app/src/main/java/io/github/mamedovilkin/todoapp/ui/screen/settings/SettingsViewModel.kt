@@ -7,10 +7,12 @@ import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
+import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
@@ -25,6 +27,7 @@ class SettingsViewModel(
     private val dataStoreRepository: DataStoreRepository,
     private val firestoreRepository: FirestoreRepository,
     private val taskRepository: TaskRepository,
+    private val taskReminderRepository: TaskReminderRepository,
     private val syncWorkerRepository: SyncWorkerRepository
 ) : ViewModel() {
 
@@ -73,6 +76,13 @@ class SettingsViewModel(
             false
         )
 
+    val reminderCount = dataStoreRepository.reminderCount
+        .stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            3
+        )
+
     val autoDeleteIndex = dataStoreRepository.autoDeleteIndex
         .stateIn(
             viewModelScope,
@@ -91,6 +101,20 @@ class SettingsViewModel(
             syncWorkerRepository.scheduleSyncUncompletedTasksWork()
         } else {
             syncWorkerRepository.cancelScheduleSyncUncompletedTasksWork()
+        }
+    }
+
+    fun setReminderCount(reminderCount: Int) = viewModelScope.launch {
+        val tasks = taskRepository.tasks.first()
+
+        tasks.forEach { task ->
+            taskReminderRepository.cancelReminder(task)
+        }
+
+        dataStoreRepository.setReminderCount(reminderCount)
+
+        tasks.forEach { task ->
+            taskReminderRepository.scheduleReminder(task)
         }
     }
 

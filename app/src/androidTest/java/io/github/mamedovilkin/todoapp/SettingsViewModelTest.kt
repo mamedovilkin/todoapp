@@ -8,8 +8,10 @@ import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.mock.FakeDataStoreRepository
 import io.github.mamedovilkin.todoapp.mock.FakeFirestoreRepository
 import io.github.mamedovilkin.todoapp.mock.FakeSyncWorkerRepository
+import io.github.mamedovilkin.todoapp.mock.FakeTaskReminderRepository
 import io.github.mamedovilkin.todoapp.mock.FakeTaskRepository
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
+import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.todoapp.ui.screen.settings.SettingsViewModel
 import junit.framework.TestCase.assertEquals
 import junit.framework.TestCase.assertTrue
@@ -37,11 +39,13 @@ class SettingsViewModelTest {
     private val dataStoreRepository: DataStoreRepository = FakeDataStoreRepository()
     private val firestoreRepository: FirestoreRepository = FakeFirestoreRepository()
     private val taskRepository: TaskRepository = FakeTaskRepository()
+    private val taskReminderRepository: TaskReminderRepository = FakeTaskReminderRepository()
     private val syncWorkerRepository: SyncWorkerRepository = FakeSyncWorkerRepository()
     private var settingsViewModel: SettingsViewModel = SettingsViewModel(
         dataStoreRepository,
         firestoreRepository,
         taskRepository,
+        taskReminderRepository,
         syncWorkerRepository
     )
 
@@ -119,6 +123,90 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun viewModelSetPremium_isPremium() = runTest {
+        val collected = CompletableDeferred<Boolean>()
+
+        val job = launch {
+            settingsViewModel.isPremium.collect { value ->
+                if (value) {
+                    collected.complete(true)
+                    cancel()
+                }
+            }
+        }
+
+        dataStoreRepository.setPremium(true)
+
+        val result = collected.await()
+        assertEquals(true, result)
+
+        job.cancel()
+    }
+
+    @Test
+    fun viewModelSetRescheduleUncompletedTasks_getRescheduleUncompletedTasks() = runTest {
+        val collected = CompletableDeferred<Boolean>()
+
+        val job = launch {
+            settingsViewModel.rescheduleUncompletedTasks.collect { value ->
+                if (value) {
+                    collected.complete(true)
+                    cancel()
+                }
+            }
+        }
+
+        dataStoreRepository.setRescheduleUncompletedTasks(true)
+
+        val result = collected.await()
+        assertEquals(true, result)
+
+        job.cancel()
+    }
+
+    @Test
+    fun viewModelSetReminderCount_getReminderCount() = runTest {
+        val collected = CompletableDeferred<Int>()
+
+        val job = launch {
+            settingsViewModel.reminderCount.collect { value ->
+                if (value == 5) {
+                    collected.complete(value)
+                    cancel()
+                }
+            }
+        }
+
+        dataStoreRepository.setReminderCount(5)
+
+        val result = collected.await()
+        assertEquals(5, result)
+
+        job.cancel()
+    }
+
+    @Test
+    fun viewModelSetAutoDeleteIndex_getAutoDeleteIndex() = runTest {
+        val collected = CompletableDeferred<Int>()
+
+        val job = launch {
+            settingsViewModel.autoDeleteIndex.collect { value ->
+                if (value == 1) {
+                    collected.complete(value)
+                    cancel()
+                }
+            }
+        }
+
+        dataStoreRepository.setAutoDeleteIndex(1)
+
+        val result = collected.await()
+        assertEquals(1, result)
+
+        job.cancel()
+    }
+
+    @Test
     fun viewModelSetShowStatistics_getShowStatistics() = runTest {
         settingsViewModel.setShowStatistics(true)
 
@@ -163,6 +251,7 @@ class SettingsViewModelTest {
             dataStoreRepository,
             firestoreRepository,
             taskRepository,
+            taskReminderRepository,
             syncWorkerRepository
         )
 

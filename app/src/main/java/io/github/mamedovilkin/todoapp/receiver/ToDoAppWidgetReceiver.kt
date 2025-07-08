@@ -6,6 +6,5 @@ import io.github.mamedovilkin.todoapp.ui.widget.ToDoAppWidget
 
 class ToDoAppWidgetReceiver : GlanceAppWidgetReceiver() {
 
-    override val glanceAppWidget: GlanceAppWidget
-        get() = ToDoAppWidget()
+    override val glanceAppWidget: GlanceAppWidget = ToDoAppWidget()
 }

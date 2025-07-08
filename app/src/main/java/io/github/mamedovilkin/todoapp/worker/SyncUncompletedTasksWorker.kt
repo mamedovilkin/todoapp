@@ -8,6 +8,7 @@ import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.isExpired
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
+import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.todoapp.util.isInternetAvailable
 import kotlinx.coroutines.flow.first
 import org.koin.core.component.KoinComponent
@@ -22,6 +23,7 @@ class SyncUncompletedTasksWorker(
 
     private val dataStoreRepository: DataStoreRepository by inject()
     private val taskRepository: TaskRepository by inject()
+    private val taskReminderRepository: TaskReminderRepository by inject()
     private val syncWorkerRepository: SyncWorkerRepository by inject()
 
     override suspend fun doWork(): Result {
@@ -54,6 +56,7 @@ class SyncUncompletedTasksWorker(
 
                 updatedTasks.forEach {
                     taskRepository.update(it)
+                    taskReminderRepository.scheduleReminder(it)
                 }
 
                 syncWorkerRepository.scheduleSyncTasksWork()
