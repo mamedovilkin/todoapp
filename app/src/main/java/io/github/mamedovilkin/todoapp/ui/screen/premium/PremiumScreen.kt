@@ -140,7 +140,7 @@ fun PremiumScreen(
                                 text = stringResource(R.string.premium_summary),
                                 color = MaterialTheme.colorScheme.background,
                                 fontSize = 18.sp,
-                                fontWeight = FontWeight.Light,
+                                fontWeight = FontWeight.SemiBold,
                                 textAlign = TextAlign.Center,
                                 modifier = Modifier
                                     .fillMaxWidth()

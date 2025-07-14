@@ -4,6 +4,10 @@ import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.database.room.Task
 
 class FakeFirestoreRepository : FirestoreRepository {
+    override suspend fun setSubscriptionToken(uid: String, token: String) {}
+
+    override suspend fun getSubscriptionToken(uid: String): String = ""
+
     override suspend fun setLastSignIn(uid: String) {}
 
     override suspend fun getLatestVersion(): String = ""

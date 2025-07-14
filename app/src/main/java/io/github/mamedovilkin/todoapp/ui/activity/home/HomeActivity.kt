@@ -56,16 +56,12 @@ class HomeActivity : ComponentActivity(), KoinComponent {
             if (isInternetAvailable()) {
                 if (RuStoreUtils.isRuStoreInstalled(this@HomeActivity)) {
                     homeActivityViewModel.checkPremiumAvailability { error ->
-                        if (error != null) {
-                            toast(error)
-                        }
+                        if (error != null) { toast(error) }
                     }
                 } else {
                     homeActivityViewModel.setPremium(false)
                     toast(getString(R.string.rustore_is_not_installed_on_this_device))
                 }
-            } else {
-                toast(getString(R.string.no_internet_connection))
             }
         }
     }

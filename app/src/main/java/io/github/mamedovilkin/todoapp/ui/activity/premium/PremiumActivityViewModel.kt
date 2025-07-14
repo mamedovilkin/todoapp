@@ -85,10 +85,13 @@ class PremiumActivityViewModel(
                         purchasesUseCase.getPurchases()
                             .addOnSuccessListener { purchases ->
                                 viewModelScope.launch {
+                                    val subscriptionToken = firestoreRepository.getSubscriptionToken(userID)
+
                                     val hasPremium = purchases.any { purchase ->
                                         purchase.productType == ProductType.SUBSCRIPTION
-                                                && purchase.purchaseState == PurchaseState.CONFIRMED
-                                                && (purchase.productId == "premium_monthly" || purchase.productId == "premium_annual")
+                                        && purchase.purchaseState == PurchaseState.CONFIRMED
+                                        && purchase.subscriptionToken == subscriptionToken
+                                        && (purchase.productId == "premium_monthly" || purchase.productId == "premium_annual")
                                     }
 
                                     dataStoreRepository.setPremium(hasPremium)
@@ -101,7 +104,7 @@ class PremiumActivityViewModel(
                                 }
                             }
                             .addOnFailureListener { error ->
-                                onError(error.message)
+                                error.printStackTrace()
                             }
                     } else {
                         setPremium(false)
@@ -109,7 +112,7 @@ class PremiumActivityViewModel(
                     }
                 }
                 .addOnFailureListener { error ->
-                    onError(error.message)
+                    error.printStackTrace()
                 }
         }
     }
@@ -128,6 +131,7 @@ class PremiumActivityViewModel(
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     fun subscribe(
+        userID: String,
         productId: String,
         onSuccess: () -> Unit,
         onError: (String?) -> Unit
@@ -161,6 +165,16 @@ class PremiumActivityViewModel(
                                         .addOnSuccessListener { purchases ->
                                             viewModelScope.launch {
                                                 val hasPremium = purchases.any { purchase -> purchase.productId == "premium_monthly" || purchase.productId == "premium_annual" }
+
+                                                if (hasPremium) {
+                                                    val subscriptionToken = purchases
+                                                        .first { purchase -> purchase.productId == "premium_monthly" || purchase.productId == "premium_annual" }
+                                                        .subscriptionToken
+                                                        .toString()
+
+                                                    firestoreRepository.setSubscriptionToken(userID, subscriptionToken)
+                                                }
+
                                                 setPremium(hasPremium)
                                                 onSuccess()
                                             }

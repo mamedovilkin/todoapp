@@ -87,7 +87,7 @@ class ToDoApp : Application() {
                     single<FirestoreRepository> { FirestoreRepositoryImpl(this@ToDoApp, get()) }
 
                     // ViewModel
-                    viewModel { HomeActivityViewModel(this@ToDoApp, get(), get(), get(), get()) }
+                    viewModel { HomeActivityViewModel(this@ToDoApp, get(), get(), get(), get(), get()) }
                     viewModel { HomeViewModel(this@ToDoApp, get(), get(), get(), get(), get()) }
                     viewModel { PremiumActivityViewModel(this@ToDoApp, get(), get(), get(), get()) }
                     viewModel { SettingsActivityViewModel(this@ToDoApp, get(), get(), get(), get()) }

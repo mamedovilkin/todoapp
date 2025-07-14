@@ -53,6 +53,7 @@ class PremiumActivity : ComponentActivity(), KoinComponent {
                                         }
                                     } else {
                                         premiumActivityViewModel.subscribe(
+                                            userID = userID,
                                             productId = productId,
                                             onSuccess = {
                                                 finish()
@@ -66,8 +67,6 @@ class PremiumActivity : ComponentActivity(), KoinComponent {
                                     premiumActivityViewModel.setPremium(false)
                                     toast(getString(R.string.rustore_is_not_installed_on_this_device))
                                 }
-                            } else {
-                                toast(getString(R.string.no_internet_connection))
                             }
                         }
                     },

@@ -1,6 +1,6 @@
 /*
     IMPORTANT TO KNOW:
-    TO RUN TESTS IN THIS FILE CORRECTLY YOU NEED TO COMMENT THAT OF CODE
+    TO RUN TESTS IN THIS FILE YOU NEED TO COMMENT THAT PART OF CODE
     IN HomeActivity.kt FILE
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
@@ -8,7 +8,7 @@
     }
 
     ALSO RUN EACH FUNCTION SEPARATELY
-    AND DON'T FORGET UNCOMMENT THAT CODE AFTER ALL TESTS WILL FINISH.
+    AND DON'T FORGET UNCOMMENT THAT PART OF CODE AFTER ALL TESTS WILL FINISH.
 */
 package io.github.mamedovilkin.todoapp
 
@@ -30,8 +30,10 @@ import androidx.compose.ui.test.performTextInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeLeft
 import io.github.mamedovilkin.todoapp.ui.activity.home.HomeActivity
+import io.github.mamedovilkin.todoapp.util.convertToTime
 import org.junit.Rule
 import org.junit.Test
+import java.util.Calendar
 
 class HomeScreenTest {
 
@@ -576,5 +578,39 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Premium")
             .assertIsNotDisplayed()
+    }
+
+    @Test
+    fun homeScreen_addReminderCheckedTaskWithReminderCreated() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("New task")
+            .performTextInput("Task")
+
+        composeTestRule
+            .onNodeWithTag("Add reminder")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        val calendar = Calendar.getInstance()
+        val time = convertToTime(
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            composeTestRule.activity.applicationContext
+        )
+
+        composeTestRule
+            .onNodeWithText("Today at $time")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .assertIsDisplayed()
     }
 }

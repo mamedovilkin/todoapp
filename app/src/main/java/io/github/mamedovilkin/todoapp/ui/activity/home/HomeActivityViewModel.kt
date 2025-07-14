@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import io.github.mamedovilkin.database.repository.DataStoreRepository
+import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
@@ -18,6 +19,7 @@ class HomeActivityViewModel(
     private val application: Application,
     private val taskRepository: TaskRepository,
     private val dataStoreRepository: DataStoreRepository,
+    private val firestoreRepository: FirestoreRepository,
     private val taskReminderRepository: TaskReminderRepository,
     private val ruStoreBillingClient: RuStoreBillingClient
 ) : AndroidViewModel(application) {
@@ -50,26 +52,26 @@ class HomeActivityViewModel(
                         purchasesUseCase.getPurchases()
                             .addOnSuccessListener { purchases ->
                                 viewModelScope.launch {
+                                    val subscriptionToken = firestoreRepository.getSubscriptionToken(userID)
                                     val hasPremium = purchases.any { purchase ->
                                         purchase.productType == ProductType.SUBSCRIPTION
                                         && purchase.purchaseState == PurchaseState.CONFIRMED
+                                        && purchase.subscriptionToken == subscriptionToken
                                         && (purchase.productId == "premium_monthly" || purchase.productId == "premium_annual")
                                     }
                                     setPremium(hasPremium)
                                 }
                             }
                             .addOnFailureListener { error ->
-                                onError(error.message)
+                                error.printStackTrace()
                             }
                     } else {
-                        viewModelScope.launch {
-                            setPremium(false)
-                        }
+                        setPremium(false)
                         onError(application.getString(R.string.not_authorized_in_rustore))
                     }
                 }
                 .addOnFailureListener { error ->
-                    onError(error.message)
+                    error.printStackTrace()
                 }
         }
     }
