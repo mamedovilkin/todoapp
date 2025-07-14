@@ -149,7 +149,9 @@ class HomeViewModel(
     fun newTask(task: Task) = viewModelScope.launch {
         var newTask = task.copy(id = UUID.randomUUID().toString())
 
-        newTask = taskReminderRepository.scheduleReminder(newTask)
+        if (newTask.datetime != 0L) {
+            newTask = taskReminderRepository.scheduleReminder(newTask)
+        }
 
         taskRepository.insert(newTask)
         syncWorkerRepository.scheduleSyncTasksWork()
@@ -167,8 +169,10 @@ class HomeViewModel(
             updatedAt = System.currentTimeMillis()
         )
 
-        taskReminderRepository.cancelReminder(updatedTask)
-        taskReminderRepository.scheduleReminder(updatedTask)
+        if (updatedTask.datetime != 0L) {
+            taskReminderRepository.cancelReminder(updatedTask)
+            taskReminderRepository.scheduleReminder(updatedTask)
+        }
         taskRepository.update(updatedTask)
         syncWorkerRepository.scheduleSyncTasksWork()
     }

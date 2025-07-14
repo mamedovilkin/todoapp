@@ -49,7 +49,6 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringArrayResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -231,8 +230,7 @@ fun SettingsScreen(
                                     Column {
                                         Text(
                                             text = stringResource(R.string.your_plan).uppercase(),
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Light,
+                                            fontSize = 16.sp
                                         )
                                         Text(
                                             text = stringResource(R.string.premium).uppercase(),
@@ -264,8 +262,7 @@ fun SettingsScreen(
                                     Column {
                                         Text(
                                             text = stringResource(R.string.your_plan).uppercase(),
-                                            fontSize = 16.sp,
-                                            fontWeight = FontWeight.Light,
+                                            fontSize = 16.sp
                                         )
                                         Text(
                                             text = stringResource(R.string.free).uppercase(),

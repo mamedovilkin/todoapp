@@ -110,6 +110,7 @@
     <string name="premium_short_summary">Advanced features and convenient tools help you stay organized and efficient.</string>
     <string name="learn_more">Learn more</string>
     <string name="close">Close</string>
+    <string name="add_reminder">Add reminder</string>
     <string-array name="auto_delete">
         <item>Never</item>
         <item>Daily</item>

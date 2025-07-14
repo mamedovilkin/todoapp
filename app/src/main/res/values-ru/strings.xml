@@ -106,6 +106,7 @@
     <string name="premium_short_summary">Расширенные функции и удобные инструменты помогут Вам оставаться организованным и эффективным.</string>
     <string name="learn_more">Узнать больше</string>
     <string name="close">Закрыть</string>
+    <string name="add_reminder">Добавить напоминание</string>
     <string-array name="auto_delete">
         <item>Никогда</item>
         <item>Ежедневно</item>

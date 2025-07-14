@@ -68,9 +68,11 @@ class SettingsActivityViewModel(
                         purchasesUseCase.getPurchases()
                             .addOnSuccessListener { purchases ->
                                 viewModelScope.launch {
+                                    val subscriptionToken = firestoreRepository.getSubscriptionToken(userID)
                                     val hasPremium = purchases.any { purchase ->
                                         purchase.productType == ProductType.SUBSCRIPTION
                                         && purchase.purchaseState == PurchaseState.CONFIRMED
+                                        && purchase.subscriptionToken == subscriptionToken
                                         && (purchase.productId == "premium_monthly" || purchase.productId == "premium_annual")
                                     }
                                     setPremium(hasPremium)
