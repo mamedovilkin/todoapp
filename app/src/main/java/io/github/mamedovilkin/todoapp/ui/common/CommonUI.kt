@@ -61,6 +61,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
@@ -282,7 +283,6 @@ fun TaskItem(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val priorityTypes = stringArrayResource(R.array.priority_types)
     val priorityColor = remember(task.priorityType) {
         when (task.priorityType) {
             PriorityType.NONE -> Color.Unspecified
@@ -304,6 +304,9 @@ fun TaskItem(
         Checkbox(
             checked = task.isDone,
             onCheckedChange = { onToggle() },
+            colors = CheckboxDefaults.colors(
+                uncheckedColor = priorityColor,
+            ),
             modifier = Modifier.testTag("Toggle")
         )
         Column(
@@ -313,39 +316,20 @@ fun TaskItem(
                 .padding(end = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            if (task.category.isNotEmpty() && !task.isDone || task.priorityType != PriorityType.NONE) {
-                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
-                    AnimatedVisibility(task.category.isNotEmpty() && !task.isDone) {
-                        Text(
-                            text = task.category,
-                            maxLines = 1,
-                            modifier = Modifier
-                                .background(
-                                    color = MaterialTheme.colorScheme.primaryContainer,
-                                    shape = RoundedCornerShape(4.dp)
-                                )
-                                .padding(horizontal = 8.dp)
-                                .testTag(stringResource(R.string.category)),
-                            fontSize = 12.sp,
-                            color = MaterialTheme.colorScheme.primary,
+            AnimatedVisibility(!task.isDone && task.category.isNotEmpty()) {
+                Text(
+                    text = task.category,
+                    maxLines = 1,
+                    modifier = Modifier
+                        .background(
+                            color = MaterialTheme.colorScheme.primaryContainer,
+                            shape = RoundedCornerShape(4.dp)
                         )
-                    }
-                    AnimatedVisibility(task.priorityType != PriorityType.NONE) {
-                        Text(
-                            text = priorityTypes[PriorityType.entries.indexOf(task.priorityType)].lowercase(),
-                            maxLines = 1,
-                            modifier = Modifier
-                                .background(
-                                    color = priorityColor,
-                                    shape = RoundedCornerShape(4.dp)
-                                )
-                                .padding(horizontal = 8.dp)
-                                .testTag(stringResource(R.string.priority)),
-                            fontSize = 12.sp,
-                            color = Color.White,
-                        )
-                    }
-                }
+                        .padding(horizontal = 8.dp)
+                        .testTag(stringResource(R.string.category)),
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.primary,
+                )
             }
             Text(
                 text = task.title,
