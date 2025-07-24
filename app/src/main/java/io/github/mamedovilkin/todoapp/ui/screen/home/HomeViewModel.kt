@@ -8,6 +8,7 @@ import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.PriorityType
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
@@ -38,6 +39,7 @@ sealed class Result {
 data class HomeUiState(
     val query: String = "",
     val selectedCategory: String = "",
+    val selectedPriority: PriorityType = PriorityType.NONE,
     val notDoneTasksCount: Int = 0,
     val result: Result = Result.Loading,
     val exception: Exception? = null,
@@ -172,6 +174,8 @@ class HomeViewModel(
         if (updatedTask.datetime != 0L) {
             taskReminderRepository.cancelReminder(updatedTask)
             taskReminderRepository.scheduleReminder(updatedTask)
+        } else {
+            taskReminderRepository.cancelReminder(updatedTask)
         }
         taskRepository.update(updatedTask)
         syncWorkerRepository.scheduleSyncTasksWork()
@@ -230,7 +234,18 @@ class HomeViewModel(
     fun setSelectedCategory(selectedCategory: String) {
         _uiState.update { currentState ->
             currentState.copy(
+                query = "",
+                selectedPriority = PriorityType.NONE,
                 selectedCategory = if (currentState.selectedCategory == selectedCategory) "" else selectedCategory
+            )
+        }
+    }
+
+    fun setSelectedPriority(selectedPriority: PriorityType) {
+        _uiState.update { currentState ->
+            currentState.copy(
+                selectedCategory = "",
+                selectedPriority = selectedPriority
             )
         }
     }

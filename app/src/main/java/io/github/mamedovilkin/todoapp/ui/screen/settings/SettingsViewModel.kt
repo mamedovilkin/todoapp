@@ -6,6 +6,7 @@ import androidx.lifecycle.viewModelScope
 import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.todoapp.repository.SyncWorkerRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -114,7 +115,9 @@ class SettingsViewModel(
         dataStoreRepository.setReminderCount(reminderCount)
 
         tasks.forEach { task ->
-            taskReminderRepository.scheduleReminder(task)
+            if (task.datetime != 0L && !(task.isDone && task.repeatType == RepeatType.ONE_TIME)) {
+                taskReminderRepository.scheduleReminder(task)
+            }
         }
     }
 

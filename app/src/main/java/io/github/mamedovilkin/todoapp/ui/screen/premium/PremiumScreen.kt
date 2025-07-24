@@ -1,6 +1,8 @@
 package io.github.mamedovilkin.todoapp.ui.screen.premium
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -214,7 +216,7 @@ fun PremiumScreen(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
+                                .border(BorderStroke(2.dp, if (selectedPlan == plans[0]) MaterialTheme.colorScheme.primary else Color.Transparent), RoundedCornerShape(8.dp))
                                 .clickable {
                                     selectedPlan = plans[0]
                                     selectedProductId = productIds[0]
@@ -229,13 +231,14 @@ fun PremiumScreen(
                             )
                             Text(
                                 text = plans[0],
+                                color = if (selectedPlan == plans[0]) MaterialTheme.colorScheme.primary else Color.Unspecified,
                                 modifier = Modifier.padding(end = 16.dp)
                             )
                         }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(8.dp))
+                                .border(BorderStroke(2.dp, if (selectedPlan == plans[1]) MaterialTheme.colorScheme.primary else Color.Transparent), RoundedCornerShape(8.dp))
                                 .clickable {
                                     selectedPlan = plans[1]
                                     selectedProductId = productIds[1]
@@ -250,6 +253,7 @@ fun PremiumScreen(
                             )
                             Text(
                                 text = plans[1],
+                                color = if (selectedPlan == plans[1]) MaterialTheme.colorScheme.primary else Color.Unspecified,
                                 modifier = Modifier.padding(end = 16.dp)
                             )
                         }

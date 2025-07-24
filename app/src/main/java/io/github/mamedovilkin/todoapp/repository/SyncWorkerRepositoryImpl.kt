@@ -49,6 +49,22 @@ class SyncWorkerRepositoryImpl(
         WorkManager.getInstance(context).enqueue(workRequest)
     }
 
+    override fun scheduleSyncPeriodicTasksWork() {
+        val constraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+
+        val syncPeriodicTasksWorker = PeriodicWorkRequestBuilder<SyncTasksWorker>(1, TimeUnit.HOURS)
+            .setConstraints(constraints)
+            .build()
+
+        WorkManager.getInstance(context).enqueueUniquePeriodicWork(
+            "syncPeriodicTasksWorker",
+            ExistingPeriodicWorkPolicy.KEEP,
+            syncPeriodicTasksWorker
+        )
+    }
+
     override fun scheduleSyncUncompletedTasksWork() {
         val constraints = Constraints.Builder()
             .setRequiredNetworkType(NetworkType.CONNECTED)

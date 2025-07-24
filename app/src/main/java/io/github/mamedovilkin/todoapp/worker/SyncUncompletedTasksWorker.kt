@@ -35,7 +35,7 @@ class SyncUncompletedTasksWorker(
             try {
                 val updatedTasks = tasks
                     .filter {
-                        it.isExpired() && !it.isDone && it.repeatType == RepeatType.ONE_TIME
+                        it.isExpired() && !it.isDone && it.repeatType == RepeatType.ONE_TIME  && it.datetime != 0L
                     }
                     .map {
                         val oldDatetime = Calendar.getInstance().apply {

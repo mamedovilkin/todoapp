@@ -4,6 +4,7 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,9 @@ class BootReceiver : BroadcastReceiver(), KoinComponent {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
             CoroutineScope(Dispatchers.IO).launch {
-                val tasks = taskRepository.tasks.first()
+                val tasks = taskRepository.tasks.first().filter {
+                    it.datetime != 0L && !(it.isDone && it.repeatType == RepeatType.ONE_TIME)
+                }
 
                 tasks.forEach { task ->
                     taskReminderRepository.scheduleReminder(task)

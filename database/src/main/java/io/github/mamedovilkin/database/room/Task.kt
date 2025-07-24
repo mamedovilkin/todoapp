@@ -10,6 +10,10 @@ enum class RepeatType {
     ONE_TIME, DAILY, WEEKLY, MONTHLY, YEARLY
 }
 
+enum class PriorityType {
+    NONE, LOW, MEDIUM, HIGH
+}
+
 @Entity(tableName = "tasks")
 @Parcelize
 data class Task(
@@ -22,6 +26,7 @@ data class Task(
     val isSynced: Boolean = false,
     val repeatType: RepeatType = RepeatType.ONE_TIME,
     val repeatDaysOfWeek: List<Int> = emptyList(),
+    val priorityType: PriorityType = PriorityType.NONE,
     val updatedAt: Long = System.currentTimeMillis(),
 ) : Parcelable
 
@@ -36,6 +41,7 @@ fun Task.toHashMap(): HashMap<String, Any> {
         "isSynced" to isSynced,
         "repeatType" to repeatType.name,
         "repeatDaysOfWeek" to repeatDaysOfWeek,
+        "priorityType" to priorityType.name,
         "updatedAt" to updatedAt,
     )
 }

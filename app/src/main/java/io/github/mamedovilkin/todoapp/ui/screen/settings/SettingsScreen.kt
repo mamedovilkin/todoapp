@@ -17,6 +17,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
 import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.CalendarMonth
 import androidx.compose.material.icons.outlined.Code
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Feedback
@@ -74,6 +75,7 @@ fun SettingsScreen(
     onSignOut: () -> Unit,
     onPremium: () -> Unit,
     onManageSubscription: () -> Unit,
+    onImport: () -> Unit,
     onFeedback: () -> Unit,
     onRateUs: () -> Unit,
     onTellFriend: () -> Unit,
@@ -227,16 +229,10 @@ fun SettingsScreen(
                                         .fillMaxWidth()
                                         .padding(16.dp)
                                 ) {
-                                    Column {
-                                        Text(
-                                            text = stringResource(R.string.your_plan).uppercase(),
-                                            fontSize = 16.sp
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.premium).uppercase(),
-                                            style = MaterialTheme.typography.displayMedium
-                                        )
-                                    }
+                                    Text(
+                                        text = stringResource(R.string.premium),
+                                        style = MaterialTheme.typography.displayMedium
+                                    )
                                     FilledTonalButton(
                                         onClick = onManageSubscription,
                                         colors = ButtonDefaults.buttonColors(
@@ -259,16 +255,10 @@ fun SettingsScreen(
                                         .fillMaxWidth()
                                         .padding(16.dp)
                                 ) {
-                                    Column {
-                                        Text(
-                                            text = stringResource(R.string.your_plan).uppercase(),
-                                            fontSize = 16.sp
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.free).uppercase(),
-                                            style = MaterialTheme.typography.displayMedium
-                                        )
-                                    }
+                                    Text(
+                                        text = stringResource(R.string.free),
+                                        style = MaterialTheme.typography.displayMedium
+                                    )
                                     Button(onClick = onPremium) {
                                         Text(
                                             text = stringResource(R.string.go_premium),
@@ -527,6 +517,15 @@ fun SettingsScreen(
                             }
                         }
                     }
+                }
+
+                item {
+                    Setting(
+                        imageVector = Icons.Outlined.CalendarMonth,
+                        title = stringResource(R.string.import_events_from_calendar),
+                        showEndIcon = false,
+                        onClick = onImport
+                    )
                 }
 
                 item {

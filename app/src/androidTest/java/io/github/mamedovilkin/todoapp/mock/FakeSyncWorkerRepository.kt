@@ -7,6 +7,8 @@ class FakeSyncWorkerRepository : SyncWorkerRepository {
 
     override fun scheduleSyncTasksWork() {}
 
+    override fun scheduleSyncPeriodicTasksWork() {}
+
     override fun scheduleSyncUncompletedTasksWork() {}
 
     override fun cancelScheduleSyncUncompletedTasksWork() {}

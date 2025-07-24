@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
+import android.provider.CalendarContract
 import android.text.format.DateFormat
 import android.widget.Toast
 import io.github.mamedovilkin.todoapp.R
@@ -131,4 +132,17 @@ fun vibrate(context: Context) {
     } else {
         vibrator.vibrate(50)
     }
+}
+
+fun hasAvailableCalendars(context: Context): Boolean {
+    val projection = arrayOf(CalendarContract.Calendars._ID)
+    val cursor = context.contentResolver.query(
+        CalendarContract.Calendars.CONTENT_URI,
+        projection,
+        null,
+        null,
+        null
+    )
+    val hasCalendars = cursor?.use { it.count > 0 } ?: false
+    return hasCalendars
 }

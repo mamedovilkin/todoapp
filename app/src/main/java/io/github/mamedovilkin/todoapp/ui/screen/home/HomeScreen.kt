@@ -161,6 +161,7 @@ fun HomeScreen(
                         showVerticalGradient = showUpFloatingActionButton,
                         selectedCategory = uiState.selectedCategory,
                         categories = result.categories,
+                        selectedPriority = uiState.selectedPriority,
                         onSelection = { viewModel.setSelectedCategory(it) },
                         onEdit = {
                             viewModel.setTaskToEdit(it)
@@ -170,6 +171,7 @@ fun HomeScreen(
                             viewModel.searchForTasks(it)
                         },
                         onClear = { viewModel.searchForTasks("") },
+                        onPriority = { viewModel.setSelectedPriority(it) },
                         onToggle = { viewModel.toggleTask(it.copy(isDone = !it.isDone)) },
                         onDelete = {
                             viewModel.deleteTask(it)
