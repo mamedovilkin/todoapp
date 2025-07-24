@@ -23,6 +23,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
@@ -44,6 +45,7 @@ import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Repeat
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Title
@@ -63,6 +65,7 @@ import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDefaults
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DisplayMode
+import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
@@ -105,12 +108,14 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.painterResource
@@ -127,23 +132,28 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.Popup
+import androidx.compose.ui.window.PopupProperties
 import com.bumptech.glide.integration.compose.ExperimentalGlideComposeApi
 import com.bumptech.glide.integration.compose.GlideImage
+import io.github.mamedovilkin.database.room.PriorityType
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.isExpired
 import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.activity.premium.PremiumActivity
+import io.github.mamedovilkin.todoapp.ui.activity.settings.SettingsActivity
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
+import io.github.mamedovilkin.todoapp.ui.theme.greenColor
+import io.github.mamedovilkin.todoapp.ui.theme.orangeColor
+import io.github.mamedovilkin.todoapp.ui.theme.redColor
+import io.github.mamedovilkin.todoapp.ui.theme.textColor
 import io.github.mamedovilkin.todoapp.util.convertMillisToDate
 import io.github.mamedovilkin.todoapp.util.convertMillisToDatetime
 import io.github.mamedovilkin.todoapp.util.convertToTime
-import java.util.Calendar
-import io.github.mamedovilkin.todoapp.ui.activity.settings.SettingsActivity
-import io.github.mamedovilkin.todoapp.ui.theme.textColor
 import io.github.mamedovilkin.todoapp.util.getDate
 import io.github.mamedovilkin.todoapp.util.getGreeting
-import kotlin.collections.filter
+import java.util.Calendar
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalGlideComposeApi::class)
 @Composable
@@ -272,6 +282,16 @@ fun TaskItem(
     onToggle: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val priorityTypes = stringArrayResource(R.array.priority_types)
+    val priorityColor = remember(task.priorityType) {
+        when (task.priorityType) {
+            PriorityType.NONE -> Color.Unspecified
+            PriorityType.LOW -> greenColor
+            PriorityType.MEDIUM -> orangeColor
+            PriorityType.HIGH -> redColor
+        }
+    }
+
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
@@ -293,20 +313,39 @@ fun TaskItem(
                 .padding(end = 8.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
         ) {
-            AnimatedVisibility(task.category.isNotEmpty() && !task.isDone) {
-                Text(
-                    text = task.category,
-                    maxLines = 1,
-                    modifier = Modifier
-                        .background(
-                            color = MaterialTheme.colorScheme.primaryContainer,
-                            shape = RoundedCornerShape(4.dp)
+            if (task.category.isNotEmpty() && !task.isDone || task.priorityType != PriorityType.NONE) {
+                Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
+                    AnimatedVisibility(task.category.isNotEmpty() && !task.isDone) {
+                        Text(
+                            text = task.category,
+                            maxLines = 1,
+                            modifier = Modifier
+                                .background(
+                                    color = MaterialTheme.colorScheme.primaryContainer,
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 8.dp)
+                                .testTag(stringResource(R.string.category)),
+                            fontSize = 12.sp,
+                            color = MaterialTheme.colorScheme.primary,
                         )
-                        .padding(horizontal = 8.dp)
-                        .testTag(stringResource(R.string.category)),
-                    fontSize = 12.sp,
-                    color = MaterialTheme.colorScheme.primary,
-                )
+                    }
+                    AnimatedVisibility(task.priorityType != PriorityType.NONE) {
+                        Text(
+                            text = priorityTypes[PriorityType.entries.indexOf(task.priorityType)].lowercase(),
+                            maxLines = 1,
+                            modifier = Modifier
+                                .background(
+                                    color = priorityColor,
+                                    shape = RoundedCornerShape(4.dp)
+                                )
+                                .padding(horizontal = 8.dp)
+                                .testTag(stringResource(R.string.priority)),
+                            fontSize = 12.sp,
+                            color = Color.White,
+                        )
+                    }
+                }
             }
             Text(
                 text = task.title,
@@ -454,10 +493,16 @@ private fun StatisticsCardDonePreview() {
 @Composable
 fun StickySearchBar(
     query: String,
+    isPremium: Boolean,
     showVerticalGradient: Boolean,
+    selectedPriority: PriorityType,
     onSearch: (String) -> Unit,
     onClear: () -> Unit,
+    onPriority: (PriorityType) -> Unit,
 ) {
+    var expandedPriority by remember { mutableStateOf(false) }
+    val priorityFilter = stringArrayResource(R.array.priority_filter)
+
     Column {
         Surface(
             modifier = Modifier.background( MaterialTheme.colorScheme.background)
@@ -477,6 +522,50 @@ fun StickySearchBar(
                     )
                 },
                 trailingIcon = {
+                    AnimatedVisibility(
+                        query.isEmpty() && isPremium,
+                        enter = slideInHorizontally { (it) / 3 } + fadeIn(),
+                        exit = slideOutHorizontally { (it) / 3 } + fadeOut(),
+                    ) {
+                        IconButton(
+                            onClick = { expandedPriority = true },
+                            modifier = Modifier.testTag(stringResource(R.string.priority))
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.FilterList,
+                                contentDescription = stringResource(R.string.priority)
+                            )
+                        }
+                        DropdownMenu(
+                            expanded = expandedPriority,
+                            onDismissRequest = { expandedPriority = false }
+                        ) {
+                            priorityFilter.forEach { item ->
+                                DropdownMenuItem(
+                                    text = {
+                                        Text(
+                                            text = item,
+                                            maxLines = 1,
+                                            style = if (item == priorityFilter[PriorityType.entries.indexOf(selectedPriority)]) {
+                                                MaterialTheme.typography.displaySmall
+                                            } else {
+                                                MaterialTheme.typography.headlineSmall
+                                            },
+                                            color = if (item == priorityFilter[PriorityType.entries.indexOf(selectedPriority)]) {
+                                                MaterialTheme.colorScheme.primary
+                                            } else {
+                                                Color.Unspecified
+                                            }
+                                        )
+                                    },
+                                    onClick = {
+                                        onPriority(PriorityType.entries[priorityFilter.indexOf(item)])
+                                        expandedPriority = false
+                                    }
+                                )
+                            }
+                        }
+                    }
                     AnimatedVisibility(
                         query.isNotEmpty(),
                         enter = slideInHorizontally { (it) / 3 } + fadeIn(),
@@ -533,9 +622,12 @@ private fun StickySearchBarPreview() {
     ToDoAppTheme {
         StickySearchBar(
             query = "",
+            isPremium = true,
             showVerticalGradient = false,
+            selectedPriority = PriorityType.NONE,
             onSearch = {},
-            onClear = {}
+            onClear = {},
+            onPriority = {}
         )
     }
 }
@@ -553,9 +645,11 @@ fun TaskList(
     showVerticalGradient: Boolean,
     selectedCategory: String,
     categories: Set<String>,
+    selectedPriority: PriorityType,
     onSelection: (String) -> Unit,
     onSearch: (String) -> Unit,
     onClear: () -> Unit,
+    onPriority: (PriorityType) -> Unit,
     onEdit: (Task) -> Unit,
     onToggle: (Task) -> Unit,
     onDelete: (Task) -> Unit,
@@ -563,12 +657,14 @@ fun TaskList(
 ) {
     val context = LocalContext.current
     var showPremiumAd by remember { mutableStateOf(true) }
-    val filteredTasks by remember(query, selectedCategory, tasks) {
+    val filteredTasks by remember(query, selectedCategory, selectedPriority, tasks) {
         derivedStateOf {
             if (query.isNotEmpty()) {
                 tasks.filter { it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true) }
             } else if (selectedCategory.isNotEmpty()) {
                 tasks.filter { it.category == selectedCategory }
+            } else if (selectedPriority != PriorityType.NONE) {
+                tasks.filter { it.priorityType == selectedPriority }
             } else {
                 tasks
             }
@@ -682,9 +778,12 @@ fun TaskList(
         stickyHeader {
             StickySearchBar(
                 query = query,
+                isPremium = isPremium,
                 showVerticalGradient = showVerticalGradient,
+                selectedPriority = selectedPriority,
                 onSearch = onSearch,
                 onClear = onClear,
+                onPriority = onPriority
             )
         }
 
@@ -759,13 +858,13 @@ fun TaskList(
                             Text(
                                 text = convertMillisToDatetime(task, LocalContext.current),
                                 style = MaterialTheme.typography.titleMedium,
-                                color = if (task.isExpired()) Color.Red else Color.Unspecified,
+                                color = if (task.isExpired()) redColor else Color.Unspecified,
                             )
                             AnimatedVisibility(isPremium && task.repeatType != RepeatType.ONE_TIME) {
                                 Icon(
                                     imageVector = Icons.Default.Repeat,
                                     contentDescription = stringResource(R.string.repeat),
-                                    tint = if (task.isExpired()) Color.Red else LocalContentColor.current,
+                                    tint = if (task.isExpired()) redColor else LocalContentColor.current,
                                     modifier = Modifier
                                         .size(16.dp)
                                         .testTag(stringResource(R.string.repeat))
@@ -798,7 +897,7 @@ fun NewTaskBottomSheet(
     var title by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var category by remember { mutableStateOf("") }
-    var expanded by remember { mutableStateOf(false) }
+    var expandedRepeat by remember { mutableStateOf(false) }
     val repeatTypes = stringArrayResource(R.array.repeat_types)
     var selectedRepeat by remember { mutableStateOf(repeatTypes[0]) }
     val repeatDaysOfWeek = stringArrayResource(R.array.repeat_days_of_week)
@@ -807,6 +906,19 @@ fun NewTaskBottomSheet(
     var hour by remember { mutableIntStateOf(Calendar.getInstance().get(Calendar.HOUR_OF_DAY)) }
     var minute by remember { mutableIntStateOf(Calendar.getInstance().get(Calendar.MINUTE)) }
     var addReminder by remember { mutableStateOf(false) }
+    var expandedPriority by remember { mutableStateOf(false) }
+    val priorityTypes = stringArrayResource(R.array.priority_types)
+    var selectedPriority by remember { mutableStateOf(priorityTypes[0]) }
+    var expandedSuggestions by remember { mutableStateOf(false) }
+    val suggestions = remember(category) {
+        if (category.isNotEmpty()) {
+            categories.filter { it.startsWith(category, ignoreCase = true) && it != category }
+        } else {
+            categories.toList()
+        }
+    }
+    val density = LocalDensity.current
+    val y = with(density) { 56.dp.roundToPx() }
 
     ModalBottomSheet(
         onDismissRequest = onCancel,
@@ -823,140 +935,66 @@ fun NewTaskBottomSheet(
                 )
                 .verticalScroll(rememberScrollState())
         ) {
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                maxLines = 3,
-                label = { Text(text = stringResource(R.string.title)) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Title,
-                        contentDescription = stringResource(R.string.title)
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(stringResource(R.string.new_task))
+            TitleTextFieldBottomSheet(
+                title = title,
+                onTitleChange = { title = it }
             )
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                maxLines = 3,
-                label = { Text(text = stringResource(R.string.description)) },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_description),
-                        contentDescription = stringResource(R.string.description)
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(stringResource(R.string.description))
+            DescriptionTextFieldBottomSheet(
+                description = description,
+                onDescriptionChange = { description = it }
             )
             if (isPremium || categories.size < 3) {
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = { category = it },
-                    singleLine = true,
-                    label = { Text(text = stringResource(R.string.category)) },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_category),
-                            contentDescription = stringResource(R.string.category)
+                Column {
+                    CategoryTextFieldBottomSheet(
+                        category = category,
+                        onCategoryChange = {
+                            category = it
+                            expandedSuggestions = it.isNotEmpty()
+                        },
+                        onCategoryFocusChange = { expandedSuggestions = it }
+                    )
+                    if (expandedSuggestions) {
+                        SuggestionsPopup(
+                            y = y,
+                            onDismissRequest = { expandedSuggestions = false },
+                            suggestions = suggestions,
+                            onSuggestion = {
+                                category = it
+                                expandedSuggestions = false
+                            }
                         )
-                    },
-                    trailingIcon = {
-                        if (category.length > 25) {
-                            Text(
-                                text = "${category.length}/25",
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
-                        } else {
-                            Text(
-                                text = "${category.length}/25",
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
-                        }
-                    },
-                    isError = category.length > 25,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(stringResource(R.string.category))
+                    }
+                }
+            }
+            if (isPremium) {
+                PriorityDropdownMenu(
+                    expandedPriority = expandedPriority,
+                    onExpandedChange = { expandedPriority = !expandedPriority },
+                    selectedPriority = selectedPriority,
+                    onDismissRequest = { expandedPriority = false },
+                    priorityTypes = priorityTypes,
+                    onPriority = {
+                        selectedPriority = it
+                        expandedPriority = false
+                    }
                 )
             }
             AnimatedVisibility(addReminder) {
                 Column {
                     if (isPremium) {
-                        ExposedDropdownMenuBox(
-                            expanded = expanded,
-                            onExpandedChange = { expanded = !expanded },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            OutlinedTextField(
-                                value = selectedRepeat,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text(stringResource(R.string.repeat)) },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Filled.Repeat,
-                                        contentDescription = stringResource(R.string.repeat)
-                                    )
-                                },
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                                },
-                                modifier = Modifier
-                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
-                                    .fillMaxWidth()
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
-                            ) {
-                                repeatTypes.forEach { selected ->
-                                    DropdownMenuItem(
-                                        text = { Text(selected) },
-                                        onClick = {
-                                            selectedRepeat = selected
-                                            expanded = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                        AnimatedVisibility(selectedRepeat == repeatTypes[2]) {
-                            LazyRow(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                items(repeatDaysOfWeek) { dayOfWeek ->
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        var isChecked by remember { mutableStateOf(selectedRepeatDaysOfWeek.contains(repeatDaysOfWeek.indexOf(dayOfWeek))) }
-
-                                        Checkbox(
-                                            checked = isChecked,
-                                            onCheckedChange = {
-                                                if (it) {
-                                                    isChecked = true
-                                                    selectedRepeatDaysOfWeek.add(repeatDaysOfWeek.indexOf(dayOfWeek))
-                                                } else {
-                                                    if (selectedRepeatDaysOfWeek.size > 1) {
-                                                        isChecked = false
-                                                        selectedRepeatDaysOfWeek.remove(repeatDaysOfWeek.indexOf(dayOfWeek))
-                                                    }
-                                                }
-                                            }
-                                        )
-                                        Text(dayOfWeek)
-                                    }
-                                }
-                            }
-                        }
+                        RepeatDropdownMenu(
+                            expandedRepeat = expandedRepeat,
+                            onExpandedChange = { expandedRepeat = !expandedRepeat },
+                            selectedRepeat = selectedRepeat,
+                            onDismissRequest = { expandedRepeat = false },
+                            repeatTypes = repeatTypes,
+                            onRepeat = {
+                                selectedRepeat = it
+                                expandedRepeat = false
+                            },
+                            repeatDaysOfWeek = repeatDaysOfWeek,
+                            selectedRepeatDaysOfWeek = selectedRepeatDaysOfWeek
+                        )
                     }
                     DateTimePickerTextFields(
                         date = date,
@@ -971,23 +1009,11 @@ fun NewTaskBottomSheet(
                     )
                 }
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable { addReminder = !addReminder }
-                    .testTag(stringResource(R.string.add_reminder))
-            ) {
-                Checkbox(
-                    checked = addReminder,
-                    onCheckedChange = { addReminder = it }
-                )
-                Text(
-                    text = stringResource(R.string.add_reminder),
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-            }
+            AddReminderCheckbox(
+                addReminder = addReminder,
+                onAddReminder = { addReminder = !addReminder },
+                onCheckedChange = { addReminder = it }
+            )
             Row(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 modifier = Modifier.fillMaxWidth()
@@ -1008,7 +1034,8 @@ fun NewTaskBottomSheet(
                             category = category.lowercase().trim(),
                             datetime = if (addReminder) calendar.timeInMillis else 0L,
                             repeatType = if (addReminder) if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size == repeatDaysOfWeek.size) RepeatType.DAILY else RepeatType.entries[repeatTypes.indexOf(selectedRepeat)] else RepeatType.ONE_TIME,
-                            repeatDaysOfWeek = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size != repeatDaysOfWeek.size && addReminder) selectedRepeatDaysOfWeek.toList() else emptyList()
+                            repeatDaysOfWeek = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size != repeatDaysOfWeek.size && addReminder) selectedRepeatDaysOfWeek.toList() else emptyList(),
+                            priorityType = PriorityType.entries[priorityTypes.indexOf(selectedPriority)]
                         ))
                         title = ""
                         date = 0L
@@ -1038,17 +1065,30 @@ fun EditTaskBottomSheet(
     var title by remember { mutableStateOf(task.title) }
     var description by remember { mutableStateOf(task.description) }
     var category by remember { mutableStateOf(task.category) }
-    var expanded by remember { mutableStateOf(false) }
+    var expandedRepeat by remember { mutableStateOf(false) }
     val repeatTypes = stringArrayResource(R.array.repeat_types)
     var selectedRepeat by remember { mutableStateOf(repeatTypes[RepeatType.entries.indexOf(task.repeatType)]) }
     val repeatDaysOfWeek = stringArrayResource(R.array.repeat_days_of_week)
     val selectedRepeatDaysOfWeek = task.repeatDaysOfWeek.toMutableList()
+    var expandedPriority by remember { mutableStateOf(false) }
     val calendar = Calendar.getInstance()
     calendar.timeInMillis = task.datetime
     var date by remember { mutableLongStateOf(calendar.timeInMillis) }
     var hour by remember { mutableIntStateOf(calendar.get(Calendar.HOUR_OF_DAY)) }
     var minute by remember { mutableIntStateOf(calendar.get(Calendar.MINUTE)) }
     var addReminder by remember { mutableStateOf(task.datetime != 0L) }
+    val priorityTypes = stringArrayResource(R.array.priority_types)
+    var selectedPriority by remember { mutableStateOf(priorityTypes[PriorityType.entries.indexOf(task.priorityType)]) }
+    var expandedSuggestions by remember { mutableStateOf(false) }
+    val suggestions = remember(category) {
+        if (category.isNotEmpty()) {
+            categories.filter { it.startsWith(category, ignoreCase = true) && it != category }
+        } else {
+            categories.toList()
+        }
+    }
+    val density = LocalDensity.current
+    val y = with(density) { 56.dp.roundToPx() }
 
     ModalBottomSheet(
         onDismissRequest = onCancel,
@@ -1065,142 +1105,66 @@ fun EditTaskBottomSheet(
                 )
                 .verticalScroll(rememberScrollState())
         ) {
-            OutlinedTextField(
-                value = title,
-                onValueChange = { title = it },
-                maxLines = 3,
-                label = { Text(text = stringResource(R.string.title)) },
-                leadingIcon = {
-                    Icon(
-                        imageVector = Icons.Filled.Title,
-                        contentDescription = stringResource(R.string.title)
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(stringResource(R.string.edit_task))
+            TitleTextFieldBottomSheet(
+                title = title,
+                onTitleChange = { title = it }
             )
-            OutlinedTextField(
-                value = description,
-                onValueChange = { description = it },
-                maxLines = 3,
-                label = { Text(text = stringResource(R.string.description)) },
-                leadingIcon = {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_description),
-                        contentDescription = stringResource(R.string.description)
-                    )
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .testTag(stringResource(R.string.description))
+            DescriptionTextFieldBottomSheet(
+                description = description,
+                onDescriptionChange = { description = it }
             )
-            if (isPremium || task.category.isNotEmpty() || categories.size < 3) {
-                OutlinedTextField(
-                    value = category,
-                    onValueChange = { category = it },
-                    singleLine = true,
-                    label = { Text(text = stringResource(R.string.category)) },
-                    leadingIcon = {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_category),
-                            contentDescription = stringResource(R.string.category)
+            if (isPremium || categories.size < 3) {
+                Column {
+                    CategoryTextFieldBottomSheet(
+                        category = category,
+                        onCategoryChange = {
+                            category = it
+                            expandedSuggestions = it.isNotEmpty()
+                        },
+                        onCategoryFocusChange = { expandedSuggestions = it }
+                    )
+                    if (expandedSuggestions) {
+                        SuggestionsPopup(
+                            y = y,
+                            onDismissRequest = { expandedSuggestions = false },
+                            suggestions = suggestions,
+                            onSuggestion = {
+                                category = it
+                                expandedSuggestions = false
+                            }
                         )
-                    },
-                    trailingIcon = {
-                        if (category.length > 25) {
-                            Text(
-                                text = "${category.length}/25",
-                                color = MaterialTheme.colorScheme.error,
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
-                        } else {
-                            Text(
-                                text = "${category.length}/25",
-                                modifier = Modifier.padding(end = 16.dp)
-                            )
-                        }
-                    },
-                    isError = category.length > 25,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .testTag(stringResource(R.string.category))
+                    }
+                }
+            }
+            if (isPremium) {
+                PriorityDropdownMenu(
+                    expandedPriority = expandedPriority,
+                    onExpandedChange = { expandedPriority = !expandedPriority },
+                    selectedPriority = selectedPriority,
+                    onDismissRequest = { expandedPriority = false },
+                    priorityTypes = priorityTypes,
+                    onPriority = {
+                        selectedPriority = it
+                        expandedPriority = false
+                    }
                 )
             }
             AnimatedVisibility(addReminder) {
                 Column {
                     if (isPremium) {
-                        ExposedDropdownMenuBox(
-                            expanded = expanded,
-                            onExpandedChange = { expanded = !expanded },
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            OutlinedTextField(
-                                value = selectedRepeat,
-                                onValueChange = {},
-                                readOnly = true,
-                                label = { Text(stringResource(R.string.repeat)) },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = Icons.Filled.Repeat,
-                                        contentDescription = stringResource(R.string.repeat)
-                                    )
-                                },
-                                trailingIcon = {
-                                    ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                                },
-                                modifier = Modifier
-                                    .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
-                                    .fillMaxWidth()
-                            )
-                            ExposedDropdownMenu(
-                                expanded = expanded,
-                                onDismissRequest = { expanded = false }
-                            ) {
-                                repeatTypes.forEach { selected ->
-                                    DropdownMenuItem(
-                                        text = { Text(selected) },
-                                        onClick = {
-                                            selectedRepeat = selected
-                                            expanded = false
-                                        }
-                                    )
-                                }
-                            }
-                        }
-                        AnimatedVisibility(selectedRepeat == repeatTypes[2]) {
-                            LazyRow(
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                items(repeatDaysOfWeek) { dayOfWeek ->
-                                    Column(
-                                        verticalArrangement = Arrangement.Center,
-                                        horizontalAlignment = Alignment.CenterHorizontally
-                                    ) {
-                                        var isChecked by remember { mutableStateOf(selectedRepeatDaysOfWeek.contains(repeatDaysOfWeek.indexOf(dayOfWeek))) }
-
-                                        Checkbox(
-                                            checked = isChecked,
-                                            onCheckedChange = {
-                                                if (it) {
-                                                    isChecked = true
-                                                    selectedRepeatDaysOfWeek.add(repeatDaysOfWeek.indexOf(dayOfWeek))
-                                                } else {
-                                                    if (selectedRepeatDaysOfWeek.size > 1) {
-                                                        isChecked = false
-                                                        selectedRepeatDaysOfWeek.remove(
-                                                            repeatDaysOfWeek.indexOf(dayOfWeek)
-                                                        )
-                                                    }
-                                                }
-                                            }
-                                        )
-                                        Text(dayOfWeek)
-                                    }
-                                }
-                            }
-                        }
+                        RepeatDropdownMenu(
+                            expandedRepeat = expandedRepeat,
+                            onExpandedChange = { expandedRepeat = !expandedRepeat },
+                            selectedRepeat = selectedRepeat,
+                            onDismissRequest = { expandedRepeat = false },
+                            repeatTypes = repeatTypes,
+                            onRepeat = {
+                                selectedRepeat = it
+                                expandedRepeat = false
+                            },
+                            repeatDaysOfWeek = repeatDaysOfWeek,
+                            selectedRepeatDaysOfWeek = selectedRepeatDaysOfWeek
+                        )
                     }
                     DateTimePickerTextFields(
                         date = date,
@@ -1215,46 +1179,35 @@ fun EditTaskBottomSheet(
                     )
                 }
             }
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(8.dp))
-                    .clickable {
-                        addReminder = !addReminder
-                        if (task.datetime == 0L) {
-                            calendar.timeInMillis = System.currentTimeMillis()
-                        } else {
-                            calendar.timeInMillis = task.datetime
-                        }
-                        date = calendar.timeInMillis
-                        hour = calendar.get(Calendar.HOUR_OF_DAY)
-                        minute = calendar.get(Calendar.MINUTE)
-                        calendar.set(Calendar.HOUR_OF_DAY, hour)
-                        calendar.set(Calendar.MINUTE, minute)
+            AddReminderCheckbox(
+                addReminder = addReminder,
+                onAddReminder = {
+                    addReminder = !addReminder
+                    if (task.datetime == 0L) {
+                        calendar.timeInMillis = System.currentTimeMillis()
+                    } else {
+                        calendar.timeInMillis = task.datetime
                     }
-            ) {
-                Checkbox(
-                    checked = addReminder,
-                    onCheckedChange = {
-                        addReminder = it
-                        if (task.datetime == 0L) {
-                            calendar.timeInMillis = System.currentTimeMillis()
-                        } else {
-                            calendar.timeInMillis = task.datetime
-                        }
-                        date = calendar.timeInMillis
-                        hour = calendar.get(Calendar.HOUR_OF_DAY)
-                        minute = calendar.get(Calendar.MINUTE)
-                        calendar.set(Calendar.HOUR_OF_DAY, hour)
-                        calendar.set(Calendar.MINUTE, minute)
+                    date = calendar.timeInMillis
+                    hour = calendar.get(Calendar.HOUR_OF_DAY)
+                    minute = calendar.get(Calendar.MINUTE)
+                    calendar.set(Calendar.HOUR_OF_DAY, hour)
+                    calendar.set(Calendar.MINUTE, minute)
+                },
+                onCheckedChange = {
+                    addReminder = it
+                    if (task.datetime == 0L) {
+                        calendar.timeInMillis = System.currentTimeMillis()
+                    } else {
+                        calendar.timeInMillis = task.datetime
                     }
-                )
-                Text(
-                    text = stringResource(R.string.add_reminder),
-                    modifier = Modifier.padding(start = 4.dp)
-                )
-            }
+                    date = calendar.timeInMillis
+                    hour = calendar.get(Calendar.HOUR_OF_DAY)
+                    minute = calendar.get(Calendar.MINUTE)
+                    calendar.set(Calendar.HOUR_OF_DAY, hour)
+                    calendar.set(Calendar.MINUTE, minute)
+                }
+            )
             Button(
                 onClick = {
                     calendar.clear()
@@ -1267,7 +1220,8 @@ fun EditTaskBottomSheet(
                         category = category.lowercase().trim(),
                         datetime = if (addReminder) calendar.timeInMillis else 0L,
                         repeatType = if (addReminder) if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size == repeatDaysOfWeek.size) RepeatType.DAILY else RepeatType.entries[repeatTypes.indexOf(selectedRepeat)] else RepeatType.ONE_TIME,
-                        repeatDaysOfWeek = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size != repeatDaysOfWeek.size && addReminder) selectedRepeatDaysOfWeek.toList() else emptyList()
+                        repeatDaysOfWeek = if (selectedRepeat == repeatTypes[2] && selectedRepeatDaysOfWeek.size != repeatDaysOfWeek.size && addReminder) selectedRepeatDaysOfWeek.toList() else emptyList(),
+                        priorityType = PriorityType.entries[priorityTypes.indexOf(selectedPriority)]
                     ))
                 },
                 enabled = title.isNotEmpty() && category.length <= 25,
@@ -1285,6 +1239,277 @@ fun EditTaskBottomSheet(
                 modifier = Modifier.fillMaxWidth()
             ) { Text(stringResource(R.string.cancel)) }
         }
+    }
+}
+
+@Composable
+fun TitleTextFieldBottomSheet(
+    title: String,
+    onTitleChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = title,
+        onValueChange = onTitleChange,
+        maxLines = 3,
+        label = { Text(text = stringResource(R.string.title)) },
+        leadingIcon = {
+            Icon(
+                imageVector = Icons.Filled.Title,
+                contentDescription = stringResource(R.string.title)
+            )
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .testTag(stringResource(R.string.title))
+    )
+}
+
+@Composable
+fun DescriptionTextFieldBottomSheet(
+    description: String,
+    onDescriptionChange: (String) -> Unit
+) {
+    OutlinedTextField(
+        value = description,
+        onValueChange = onDescriptionChange,
+        maxLines = 5,
+        label = { Text(text = stringResource(R.string.description)) },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_description),
+                contentDescription = stringResource(R.string.description)
+            )
+        },
+        modifier = Modifier
+            .fillMaxWidth()
+            .heightIn(min = 56.dp, max = 200.dp)
+            .testTag(stringResource(R.string.description))
+    )
+}
+
+@Composable
+fun CategoryTextFieldBottomSheet(
+    category: String,
+    onCategoryChange: (String) -> Unit,
+    onCategoryFocusChange: (Boolean) -> Unit,
+) {
+    OutlinedTextField(
+        value = category,
+        onValueChange = onCategoryChange,
+        singleLine = true,
+        label = { Text(text = stringResource(R.string.category)) },
+        leadingIcon = {
+            Icon(
+                painter = painterResource(R.drawable.ic_category),
+                contentDescription = stringResource(R.string.category)
+            )
+        },
+        trailingIcon = {
+            if (category.length > 25) {
+                Text(
+                    text = "${category.length}/25",
+                    color = MaterialTheme.colorScheme.error,
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+            } else {
+                Text(
+                    text = "${category.length}/25",
+                    modifier = Modifier.padding(end = 16.dp)
+                )
+            }
+        },
+        isError = category.length > 25,
+        modifier = Modifier
+            .onFocusChanged { onCategoryFocusChange(it.isFocused) }
+            .fillMaxWidth()
+            .testTag(stringResource(R.string.category))
+    )
+}
+
+@Composable
+fun SuggestionsPopup(
+    y: Int,
+    onDismissRequest: () -> Unit,
+    suggestions: List<String>,
+    onSuggestion: (String) -> Unit,
+) {
+    Popup(
+        offset = IntOffset(x = 0, y = y),
+        properties = PopupProperties(focusable = false),
+        onDismissRequest = onDismissRequest
+    ) {
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 300.dp)
+                .padding(16.dp)
+                .clip(RoundedCornerShape(4.dp))
+                .background(MaterialTheme.colorScheme.background)
+        ) {
+            items(suggestions) { suggestion ->
+                Text(
+                    text = suggestion,
+                    modifier = Modifier
+                        .clickable {
+                            onSuggestion(suggestion)
+                        }
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun PriorityDropdownMenu(
+    expandedPriority: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    selectedPriority: String,
+    onDismissRequest: () -> Unit,
+    priorityTypes: Array<String>,
+    onPriority: (String) -> Unit,
+) {
+    ExposedDropdownMenuBox(
+        expanded = expandedPriority,
+        onExpandedChange = onExpandedChange,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = selectedPriority,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.priority)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.FilterList,
+                    contentDescription = stringResource(R.string.priority)
+                )
+            },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPriority)
+            },
+            modifier = Modifier
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                .fillMaxWidth()
+        )
+        ExposedDropdownMenu(
+            expanded = expandedPriority,
+            onDismissRequest = onDismissRequest
+        ) {
+            priorityTypes.forEach { selected ->
+                DropdownMenuItem(
+                    text = { Text(selected) },
+                    onClick = { onPriority(selected) }
+                )
+            }
+        }
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+fun RepeatDropdownMenu(
+    expandedRepeat: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
+    selectedRepeat: String,
+    repeatTypes: Array<String>,
+    onDismissRequest: () -> Unit,
+    onRepeat: (String) -> Unit,
+    repeatDaysOfWeek: Array<String>,
+    selectedRepeatDaysOfWeek: MutableList<Int>
+) {
+    ExposedDropdownMenuBox(
+        expanded = expandedRepeat,
+        onExpandedChange = onExpandedChange,
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        OutlinedTextField(
+            value = selectedRepeat,
+            onValueChange = {},
+            readOnly = true,
+            label = { Text(stringResource(R.string.repeat)) },
+            leadingIcon = {
+                Icon(
+                    imageVector = Icons.Filled.Repeat,
+                    contentDescription = stringResource(R.string.repeat)
+                )
+            },
+            trailingIcon = {
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedRepeat)
+            },
+            modifier = Modifier
+                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                .fillMaxWidth()
+        )
+        ExposedDropdownMenu(
+            expanded = expandedRepeat,
+            onDismissRequest = onDismissRequest
+        ) {
+            repeatTypes.forEach { selected ->
+                DropdownMenuItem(
+                    text = { Text(selected) },
+                    onClick = { onRepeat(selected) }
+                )
+            }
+        }
+    }
+    AnimatedVisibility(selectedRepeat == repeatTypes[2]) {
+        LazyRow(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            items(repeatDaysOfWeek) { dayOfWeek ->
+                Column(
+                    verticalArrangement = Arrangement.Center,
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    var isChecked by remember { mutableStateOf(selectedRepeatDaysOfWeek.contains(repeatDaysOfWeek.indexOf(dayOfWeek))) }
+
+                    Checkbox(
+                        checked = isChecked,
+                        onCheckedChange = {
+                            if (it) {
+                                isChecked = true
+                                selectedRepeatDaysOfWeek.add(repeatDaysOfWeek.indexOf(dayOfWeek))
+                            } else {
+                                if (selectedRepeatDaysOfWeek.size > 1) {
+                                    isChecked = false
+                                    selectedRepeatDaysOfWeek.remove(repeatDaysOfWeek.indexOf(dayOfWeek))
+                                }
+                            }
+                        }
+                    )
+                    Text(dayOfWeek)
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun AddReminderCheckbox(
+    addReminder: Boolean,
+    onAddReminder: () -> Unit,
+    onCheckedChange: (Boolean) -> Unit,
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(8.dp))
+            .clickable { onAddReminder() }
+            .testTag(stringResource(R.string.add_reminder))
+    ) {
+        Checkbox(
+            checked = addReminder,
+            onCheckedChange = onCheckedChange
+        )
+        Text(
+            text = stringResource(R.string.add_reminder),
+            modifier = Modifier.padding(start = 4.dp)
+        )
     }
 }
 

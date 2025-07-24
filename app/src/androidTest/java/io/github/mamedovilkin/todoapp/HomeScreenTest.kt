@@ -76,7 +76,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Walk my dog")
 
         composeTestRule
@@ -96,7 +96,7 @@ class HomeScreenTest {
                 .performClick()
 
             composeTestRule
-                .onNodeWithTag("New task")
+                .onNodeWithTag("Title")
                 .performTextInput("Task #$i")
 
             composeTestRule
@@ -126,7 +126,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Walk my dog")
 
         composeTestRule
@@ -138,11 +138,11 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("Edit task")
+            .onNodeWithTag("Title")
             .performTextClearance()
 
         composeTestRule
-            .onNodeWithTag("Edit task")
+            .onNodeWithTag("Title")
             .performTextInput("Clean my room up")
 
         composeTestRule
@@ -161,7 +161,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Walk my dog")
 
         composeTestRule
@@ -216,7 +216,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Walk my dog")
 
         composeTestRule
@@ -247,7 +247,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Walk my dog")
 
         composeTestRule
@@ -271,7 +271,7 @@ class HomeScreenTest {
                 .performClick()
 
             composeTestRule
-                .onNodeWithTag("New task")
+                .onNodeWithTag("Title")
                 .performTextInput("Task #$i")
 
             composeTestRule
@@ -296,7 +296,7 @@ class HomeScreenTest {
                 .performClick()
 
             composeTestRule
-                .onNodeWithTag("New task")
+                .onNodeWithTag("Title")
                 .performTextInput("Task #$i")
 
             composeTestRule
@@ -331,7 +331,7 @@ class HomeScreenTest {
                 .performClick()
 
             composeTestRule
-                .onNodeWithTag("New task")
+                .onNodeWithTag("Title")
                 .performTextInput("Task #$i")
 
             composeTestRule
@@ -363,7 +363,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Task")
 
         composeTestRule
@@ -386,7 +386,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Task")
 
         composeTestRule
@@ -414,7 +414,7 @@ class HomeScreenTest {
                 .performClick()
 
             composeTestRule
-                .onNodeWithTag("New task")
+                .onNodeWithTag("Title")
                 .performTextInput("Task #$i")
 
             composeTestRule
@@ -438,7 +438,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Task")
 
         composeTestRule
@@ -481,7 +481,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Walk my dog")
 
         composeTestRule
@@ -508,7 +508,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Task")
 
         composeTestRule
@@ -531,7 +531,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Task")
 
         composeTestRule
@@ -560,7 +560,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Task")
 
         composeTestRule
@@ -587,7 +587,7 @@ class HomeScreenTest {
             .performClick()
 
         composeTestRule
-            .onNodeWithTag("New task")
+            .onNodeWithTag("Title")
             .performTextInput("Task")
 
         composeTestRule
@@ -611,6 +611,38 @@ class HomeScreenTest {
 
         composeTestRule
             .onNodeWithText("Task")
+            .assertIsDisplayed()
+    }
+
+    @Test
+    fun homeScreen_addedTaskWithCategorySuggestionsIsDisplayed() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Title")
+            .performTextInput("Task #1")
+
+        composeTestRule
+            .onNodeWithTag("Category")
+            .performTextInput("task")
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Category")
+            .performClick()
+
+        composeTestRule
+            .onAllNodesWithText("task")
+            .onLast()
             .assertIsDisplayed()
     }
 }

@@ -21,7 +21,7 @@ class BootReceiver : BroadcastReceiver(), KoinComponent {
     override fun onReceive(context: Context?, intent: Intent?) {
         if (intent?.action == Intent.ACTION_BOOT_COMPLETED) {
             CoroutineScope(Dispatchers.IO).launch {
-                val tasks = taskRepository.tasks.first()
+                val tasks = taskRepository.tasks.first().filter { it.datetime != 0L }
 
                 tasks.forEach { task ->
                     taskReminderRepository.scheduleReminder(task)

@@ -4,6 +4,7 @@ import android.app.Application
 import com.google.firebase.firestore.DocumentSnapshot
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.SetOptions
+import io.github.mamedovilkin.database.room.PriorityType
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.toHashMap
@@ -143,6 +144,8 @@ fun DocumentSnapshot.toTask(): Task? {
         val repeatType = RepeatType.entries.firstOrNull { it.name == repeatTypeRaw } ?: RepeatType.ONE_TIME
         val repeatDaysOfWeekRaw = get("repeatDaysOfWeek") as List<*>
         val repeatDaysOfWeek: List<Int> = repeatDaysOfWeekRaw.filterIsInstance<Number>().map { it.toInt() }
+        val priorityTypeRaw = getString("priorityType")
+        val priorityType = PriorityType.entries.firstOrNull { it.name == priorityTypeRaw } ?: PriorityType.NONE
 
         Task(
             id = id,
@@ -154,6 +157,7 @@ fun DocumentSnapshot.toTask(): Task? {
             isSynced = getBoolean("isSynced") == true,
             repeatType = repeatType,
             repeatDaysOfWeek = repeatDaysOfWeek,
+            priorityType = priorityType,
             updatedAt = getLong("updatedAt") ?: 0L,
         )
     } catch (_: Exception) {

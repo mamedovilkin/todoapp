@@ -1,5 +1,6 @@
 package io.github.mamedovilkin.todoapp.util
 
+const val REQUEST_CODE_READ_CALENDAR = 2
 const val CHANNEL_ID = "TASK_REMINDER"
 const val REQUEST_CODE = 0
 const val RESCHEDULE_REQUEST_CODE = 1

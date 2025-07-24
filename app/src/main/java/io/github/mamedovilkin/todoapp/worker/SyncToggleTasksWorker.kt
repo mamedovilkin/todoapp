@@ -32,7 +32,7 @@ class SyncToggleTasksWorker(
             try {
                 val updatedTasks = tasks
                     .filter {
-                        it.isTodayTask() && it.isDone && it.repeatType != RepeatType.ONE_TIME
+                        it.isTodayTask() && it.isDone && it.repeatType != RepeatType.ONE_TIME && it.datetime != 0L
                     }.map {
                         it.copy(
                             isDone = false,

@@ -1,6 +1,8 @@
 package io.github.mamedovilkin.todoapp.ui.activity.settings
 
+import android.Manifest
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -9,6 +11,8 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import io.github.mamedovilkin.todoapp.R
@@ -17,7 +21,9 @@ import io.github.mamedovilkin.todoapp.ui.screen.settings.SettingsScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.util.APP_LINK
 import io.github.mamedovilkin.todoapp.util.FEEDBACK_EMAIL
+import io.github.mamedovilkin.todoapp.util.REQUEST_CODE_READ_CALENDAR
 import io.github.mamedovilkin.todoapp.util.WEBSITE_LINK
+import io.github.mamedovilkin.todoapp.util.hasAvailableCalendars
 import io.github.mamedovilkin.todoapp.util.isInternetAvailable
 import io.github.mamedovilkin.todoapp.util.toast
 import kotlinx.coroutines.launch
@@ -114,6 +120,18 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                         }
                     },
                     onManageSubscription = { manageSubscription() },
+                    onImport = {
+                        ActivityCompat.requestPermissions(
+                            this,
+                            arrayOf(Manifest.permission.READ_CALENDAR),
+                            REQUEST_CODE_READ_CALENDAR
+                        )
+
+                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED && hasAvailableCalendars(this)) {
+                            settingsActivityViewModel.getTasksFromCalendar()
+                            onBackPressedDispatcher.onBackPressed()
+                        }
+                    },
                     onFeedback = { sendFeedback() },
                     onRateUs = { rateUs() },
                     onTellFriend = { tellFriend() },

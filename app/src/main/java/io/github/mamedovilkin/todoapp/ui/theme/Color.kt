@@ -53,3 +53,7 @@ val textColor = ColorProvider(
     day = Color.Black,
     night = Color.White
 )
+
+val greenColor = Color(0xFF4CAF50)
+val orangeColor = Color(0xFFFF9800)
+val redColor = Color(0xFFC62828)
