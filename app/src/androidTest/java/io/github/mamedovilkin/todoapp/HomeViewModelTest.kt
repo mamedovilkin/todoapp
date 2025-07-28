@@ -6,6 +6,7 @@ import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.FirestoreRepository
 import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
+import io.github.mamedovilkin.database.room.PriorityType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.todoapp.mock.FakeDataStoreRepository
 import io.github.mamedovilkin.todoapp.mock.FakeFirestoreRepository
@@ -126,6 +127,39 @@ class HomeViewModelTest {
         val showStatistics = homeViewModel.showStatistics.first { it }
 
         assertTrue(showStatistics)
+    }
+
+    @Test
+    fun viewModelSetPremium_isPremium() = runTest {
+        val dataStoreRepository = FakeDataStoreRepository().apply {
+            setPremium(true)
+        }
+
+        homeViewModel = HomeViewModel(
+            ApplicationProvider.getApplicationContext(),
+            taskRepository,
+            taskReminderRepository,
+            syncWorkerRepository,
+            firestoreRepository,
+            dataStoreRepository
+        )
+
+        advanceUntilIdle()
+
+        val isPremium = homeViewModel.isPremium.first { it }
+
+        assertTrue(isPremium)
+    }
+
+    @Test
+    fun viewModelSetHidePremiumAd_getHidePremiumAd() = runTest {
+        homeViewModel.setHidePremiumAd(true)
+
+        advanceUntilIdle()
+
+        val hidePremiumAd = homeViewModel.hidePremiumAd.first { it }
+
+        assertTrue(hidePremiumAd)
     }
 
     @Test
@@ -270,5 +304,16 @@ class HomeViewModelTest {
         val selectedCategory = homeViewModel.uiState.value.selectedCategory
 
         assertEquals("test", selectedCategory)
+    }
+
+    @Test
+    fun viewModelSetSelectedPriority_selectedPriority() = runTest {
+        homeViewModel.setSelectedPriority(PriorityType.HIGH)
+
+        advanceUntilIdle()
+
+        val selectedPriority = homeViewModel.uiState.value.selectedPriority
+
+        assertEquals(PriorityType.HIGH, selectedPriority)
     }
 }

@@ -278,7 +278,6 @@ fun NewTaskFloatingActionButtonPreview() {
 @Composable
 fun TaskItem(
     task: Task,
-    isPremium: Boolean,
     onEdit: (Task) -> Unit,
     onToggle: () -> Unit,
     modifier: Modifier = Modifier
@@ -353,7 +352,7 @@ fun TaskItem(
                     color = Color.Gray
                 )
             }
-            AnimatedVisibility(isPremium && task.isDone && task.repeatType != RepeatType.ONE_TIME) {
+            AnimatedVisibility(task.isDone && task.repeatType != RepeatType.ONE_TIME) {
                 Text(
                     text = stringResource(R.string.next, convertMillisToDatetime(task, LocalContext.current)),
                     style = MaterialTheme.typography.headlineSmall,
@@ -370,7 +369,6 @@ private fun TaskItemPreview() {
     ToDoAppTheme {
         TaskItem(
             task = Task(title = "Clean my room up"),
-            isPremium = false,
             onEdit = {},
             onToggle = {}
         )
@@ -383,7 +381,6 @@ private fun TaskItemDonePreview() {
     ToDoAppTheme {
         TaskItem(
             task = Task(title = "Clean my room up", isDone = true),
-            isPremium = false,
             onEdit = {},
             onToggle = {}
         )
@@ -620,6 +617,7 @@ private fun StickySearchBarPreview() {
 fun TaskList(
     displayName: String,
     showStatistics: Boolean,
+    hidePremiumAd: Boolean,
     isPremium: Boolean,
     innerPadding: PaddingValues,
     lazyListState: LazyListState,
@@ -637,10 +635,10 @@ fun TaskList(
     onEdit: (Task) -> Unit,
     onToggle: (Task) -> Unit,
     onDelete: (Task) -> Unit,
+    onHide: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
-    var showPremiumAd by remember { mutableStateOf(true) }
     val filteredTasks by remember(query, selectedCategory, selectedPriority, tasks) {
         derivedStateOf {
             if (query.isNotEmpty()) {
@@ -668,7 +666,7 @@ fun TaskList(
         state = lazyListState,
         contentPadding = PaddingValues(top = 0.dp, bottom = 72.dp)
     ) {
-        if (!isPremium && showPremiumAd) {
+        if (!isPremium && !hidePremiumAd) {
             item {
                 Column(
                     modifier = Modifier
@@ -700,9 +698,7 @@ fun TaskList(
                             tint = textColor.getColor(context),
                             modifier = Modifier
                                 .size(18.dp)
-                                .clickable(onClick = {
-                                    showPremiumAd = false
-                                })
+                                .clickable(onClick = onHide)
                                 .testTag("Close")
                         )
                     }
@@ -844,7 +840,7 @@ fun TaskList(
                                 style = MaterialTheme.typography.titleMedium,
                                 color = if (task.isExpired()) redColor else Color.Unspecified,
                             )
-                            AnimatedVisibility(isPremium && task.repeatType != RepeatType.ONE_TIME) {
+                            AnimatedVisibility(task.repeatType != RepeatType.ONE_TIME) {
                                 Icon(
                                     imageVector = Icons.Default.Repeat,
                                     contentDescription = stringResource(R.string.repeat),
@@ -858,7 +854,6 @@ fun TaskList(
                     }
                     TaskItem(
                         task = task,
-                        isPremium = isPremium,
                         onEdit = { onEdit(it) },
                         onToggle = { onToggle(task) }
                     )
@@ -965,21 +960,19 @@ fun NewTaskBottomSheet(
             }
             AnimatedVisibility(addReminder) {
                 Column {
-                    if (isPremium) {
-                        RepeatDropdownMenu(
-                            expandedRepeat = expandedRepeat,
-                            onExpandedChange = { expandedRepeat = !expandedRepeat },
-                            selectedRepeat = selectedRepeat,
-                            onDismissRequest = { expandedRepeat = false },
-                            repeatTypes = repeatTypes,
-                            onRepeat = {
-                                selectedRepeat = it
-                                expandedRepeat = false
-                            },
-                            repeatDaysOfWeek = repeatDaysOfWeek,
-                            selectedRepeatDaysOfWeek = selectedRepeatDaysOfWeek
-                        )
-                    }
+                    RepeatDropdownMenu(
+                        expandedRepeat = expandedRepeat,
+                        onExpandedChange = { expandedRepeat = !expandedRepeat },
+                        selectedRepeat = selectedRepeat,
+                        onDismissRequest = { expandedRepeat = false },
+                        repeatTypes = repeatTypes,
+                        onRepeat = {
+                            selectedRepeat = it
+                            expandedRepeat = false
+                        },
+                        repeatDaysOfWeek = repeatDaysOfWeek,
+                        selectedRepeatDaysOfWeek = selectedRepeatDaysOfWeek
+                    )
                     DateTimePickerTextFields(
                         date = date,
                         hour = hour,
@@ -1135,21 +1128,19 @@ fun EditTaskBottomSheet(
             }
             AnimatedVisibility(addReminder) {
                 Column {
-                    if (isPremium) {
-                        RepeatDropdownMenu(
-                            expandedRepeat = expandedRepeat,
-                            onExpandedChange = { expandedRepeat = !expandedRepeat },
-                            selectedRepeat = selectedRepeat,
-                            onDismissRequest = { expandedRepeat = false },
-                            repeatTypes = repeatTypes,
-                            onRepeat = {
-                                selectedRepeat = it
-                                expandedRepeat = false
-                            },
-                            repeatDaysOfWeek = repeatDaysOfWeek,
-                            selectedRepeatDaysOfWeek = selectedRepeatDaysOfWeek
-                        )
-                    }
+                    RepeatDropdownMenu(
+                        expandedRepeat = expandedRepeat,
+                        onExpandedChange = { expandedRepeat = !expandedRepeat },
+                        selectedRepeat = selectedRepeat,
+                        onDismissRequest = { expandedRepeat = false },
+                        repeatTypes = repeatTypes,
+                        onRepeat = {
+                            selectedRepeat = it
+                            expandedRepeat = false
+                        },
+                        repeatDaysOfWeek = repeatDaysOfWeek,
+                        selectedRepeatDaysOfWeek = selectedRepeatDaysOfWeek
+                    )
                     DateTimePickerTextFields(
                         date = date,
                         hour = calendar.get(Calendar.HOUR_OF_DAY),

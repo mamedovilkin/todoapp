@@ -53,6 +53,7 @@ class PremiumActivityViewModel(
 
     fun signInWithVK(onError: (String?) -> Unit) = viewModelScope.launch {
         VKID.instance.authorize(object : VKIDAuthCallback {
+
             @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
             override fun onAuth(accessToken: AccessToken) {
                 val userID = accessToken.userID.toString()
@@ -158,28 +159,12 @@ class PremiumActivityViewModel(
                                     onError(application.getString(R.string.failure))
                                 }
                                 is PaymentResult.Success -> {
-                                    purchasesUseCase.getPurchases()
-                                        .addOnSuccessListener { purchases ->
-                                            viewModelScope.launch {
-                                                val hasPremium = purchases.any { purchase -> purchase.productId == "premium_monthly" || purchase.productId == "premium_annual" }
-
-                                                if (hasPremium) {
-                                                    val subscriptionToken = purchases
-                                                        .first { purchase -> purchase.productId == "premium_monthly" || purchase.productId == "premium_annual" }
-                                                        .subscriptionToken
-                                                        .toString()
-
-                                                    firestoreRepository.setSubscriptionToken(userID, subscriptionToken)
-                                                }
-
-                                                setPremium(hasPremium)
-                                                onSuccess()
-                                            }
-                                        }
-                                        .addOnFailureListener { error ->
-                                            setPremium(false)
-                                            onError(error.message.toString())
-                                        }
+                                    successPurchase(
+                                        userID,
+                                        purchasesUseCase,
+                                        onSuccess,
+                                        onError
+                                    )
                                 }
                             }
                         }
@@ -198,41 +183,76 @@ class PremiumActivityViewModel(
     }
 
     @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    private fun successPurchase(
+        userID: String,
+        purchasesUseCase: PurchasesUseCase,
+        onSuccess: () -> Unit,
+        onError: (String?) -> Unit
+    ) {
+        purchasesUseCase.getPurchases()
+            .addOnSuccessListener { purchases ->
+                viewModelScope.launch {
+                    val hasPremium = purchases.any { purchase -> purchase.productId == "premium_monthly" || purchase.productId == "premium_annual" }
+
+                    if (hasPremium) {
+                        val subscriptionToken = purchases
+                            .first { purchase -> purchase.productId == "premium_monthly" || purchase.productId == "premium_annual" }
+                            .subscriptionToken
+                            .toString()
+
+                        firestoreRepository.setSubscriptionToken(userID, subscriptionToken)
+                    }
+
+                    setPremium(hasPremium)
+                    onSuccess()
+                }
+            }
+            .addOnFailureListener { error ->
+                setPremium(false)
+                onError(error.message.toString())
+            }
+    }
+
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
     fun setPremium(isPremium: Boolean) = viewModelScope.launch {
         dataStoreRepository.setPremium(isPremium)
 
         if (isPremium) {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                val importance = NotificationManager.IMPORTANCE_HIGH
-
-                val channel = NotificationChannel(
-                    application.resources.getString(R.string.premium).uppercase(),
-                    application.resources.getString(R.string.premium),
-                    importance
-                )
-
-                channel.description = application.resources.getString(R.string.premium)
-
-                val notificationManager = application.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
-
-                notificationManager?.createNotificationChannel(channel)
-            }
-
-            val builder = NotificationCompat.Builder(application, application.resources.getString(R.string.premium).uppercase())
-                .setSmallIcon(R.drawable.ic_task)
-                .setContentTitle(application.getString(R.string.premium))
-                .setStyle(
-                    NotificationCompat.BigTextStyle().bigText(application.getString(R.string.premium_notification))
-                )
-                .setPriority(NotificationCompat.PRIORITY_HIGH)
-                .setVibrate(LongArray(0))
-                .setAutoCancel(true)
-
-            NotificationManagerCompat.from(application).notify(2, builder.build())
-
+            sendPremiumNotification()
             syncWorkerRepository.scheduleSyncToggleTasksWork()
         } else {
             syncWorkerRepository.cancelScheduleSyncToggleTasksWork()
         }
+    }
+
+    @RequiresPermission(Manifest.permission.POST_NOTIFICATIONS)
+    private fun sendPremiumNotification() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val importance = NotificationManager.IMPORTANCE_HIGH
+
+            val channel = NotificationChannel(
+                application.resources.getString(R.string.premium).uppercase(),
+                application.resources.getString(R.string.premium),
+                importance
+            )
+
+            channel.description = application.resources.getString(R.string.premium)
+
+            val notificationManager = application.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager?
+
+            notificationManager?.createNotificationChannel(channel)
+        }
+
+        val builder = NotificationCompat.Builder(application, application.resources.getString(R.string.premium).uppercase())
+            .setSmallIcon(R.drawable.ic_task)
+            .setContentTitle(application.getString(R.string.premium))
+            .setStyle(
+                NotificationCompat.BigTextStyle().bigText(application.getString(R.string.premium_notification))
+            )
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setVibrate(LongArray(0))
+            .setAutoCancel(true)
+
+        NotificationManagerCompat.from(application).notify(2, builder.build())
     }
 }
