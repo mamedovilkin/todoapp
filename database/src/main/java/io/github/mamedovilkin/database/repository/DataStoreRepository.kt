@@ -29,4 +29,7 @@ interface DataStoreRepository {
 
     suspend fun setAutoDeleteIndex(autoDeleteIndex: Int)
     val autoDeleteIndex: Flow<Int>
+
+    suspend fun setHidePremiumAd(hidePremiumAd: Boolean)
+    val hidePremiumAd: Flow<Boolean>
 }

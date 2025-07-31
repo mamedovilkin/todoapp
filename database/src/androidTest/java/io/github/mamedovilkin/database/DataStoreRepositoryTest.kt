@@ -107,4 +107,13 @@ class DataStoreRepositoryTest {
 
         assertEquals(1, autoDeleteIndex)
     }
+
+    @Test
+    fun repositorySetHidePremiumAd_hidePremiumAd() = runBlocking {
+        dataStoreRepository.setHidePremiumAd(true)
+
+        val hidePremiumAd = dataStoreRepository.hidePremiumAd.first()
+
+        assertTrue(hidePremiumAd)
+    }
 }

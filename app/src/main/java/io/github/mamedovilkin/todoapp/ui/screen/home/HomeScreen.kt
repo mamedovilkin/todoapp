@@ -90,6 +90,7 @@ fun HomeScreen(
     val displayName by viewModel.displayName.collectAsState()
     val showStatistics by viewModel.showStatistics.collectAsState()
     val isPremium by viewModel.isPremium.collectAsState()
+    val hidePremiumAd by viewModel.hidePremiumAd.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.setShowNewTaskBottomSheet(shouldOpenNewTaskDialog)
@@ -153,6 +154,7 @@ fun HomeScreen(
                         displayName = displayName,
                         showStatistics = showStatistics,
                         isPremium = isPremium,
+                        hidePremiumAd = hidePremiumAd,
                         innerPadding = innerPadding,
                         lazyListState = lazyListState,
                         tasks = result.tasks,
@@ -194,6 +196,7 @@ fun HomeScreen(
                                 }
                             }
                         },
+                        onHide = { viewModel.setHidePremiumAd(true) },
                         modifier = if (windowWidthSizeClass == WindowWidthSizeClass.Compact) {
                             Modifier.fillMaxSize()
                         } else {

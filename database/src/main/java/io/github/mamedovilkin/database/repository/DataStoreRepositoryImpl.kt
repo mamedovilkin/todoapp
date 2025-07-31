@@ -32,6 +32,7 @@ class DataStoreRepositoryImpl(
         val RESCHEDULE_UNCOMPLETED_TASKS = booleanPreferencesKey("rescheduleUncompletedTasks")
         val REMINDER_COUNT = intPreferencesKey("reminderCount")
         val AUTO_DELETE = intPreferencesKey("autoDelete")
+        val HIDE_PREMIUM_AD = booleanPreferencesKey("hidePremiumAd")
     }
 
     override suspend fun setWasFirstLaunch(wasFirstLaunch: Boolean) {
@@ -149,6 +150,19 @@ class DataStoreRepositoryImpl(
             emit(emptyPreferences())
         }.map { preferences ->
             preferences[AUTO_DELETE] ?: 0
+        }
+
+    override suspend fun setHidePremiumAd(hidePremiumAd: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[HIDE_PREMIUM_AD] = hidePremiumAd
+        }
+    }
+
+    override val hidePremiumAd: Flow<Boolean> = dataStore.data
+        .catch {
+            emit(emptyPreferences())
+        }.map { preferences ->
+            preferences[HIDE_PREMIUM_AD] == true
         }
 }
 

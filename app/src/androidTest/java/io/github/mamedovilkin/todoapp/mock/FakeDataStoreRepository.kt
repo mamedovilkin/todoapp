@@ -17,6 +17,7 @@ class FakeDataStoreRepository : DataStoreRepository {
     private val autoDeleteIndexFlow = MutableStateFlow(0)
 
     override val wasFirstLaunch: Flow<Boolean> = wasFirstLaunchFlow
+    private val showHidePremiumAd = MutableStateFlow(false)
 
     override suspend fun setWasFirstLaunch(wasFirstLaunch: Boolean) {
         wasFirstLaunchFlow.value = wasFirstLaunch
@@ -69,4 +70,10 @@ class FakeDataStoreRepository : DataStoreRepository {
     }
 
     override val autoDeleteIndex: Flow<Int> = autoDeleteIndexFlow
+
+    override suspend fun setHidePremiumAd(hidePremiumAd: Boolean) {
+        showHidePremiumAd.value = hidePremiumAd
+    }
+
+    override val hidePremiumAd: Flow<Boolean> = showHidePremiumAd
 }

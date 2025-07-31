@@ -7,7 +7,6 @@
         ...
     }
 
-    ALSO RUN EACH FUNCTION SEPARATELY
     AND DON'T FORGET UNCOMMENT THAT PART OF CODE AFTER ALL TESTS WILL FINISH.
 */
 package io.github.mamedovilkin.todoapp
@@ -86,18 +85,26 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Walk my dog")
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Walk my dog")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
     }
 
     @Test
     fun homeScreen_toggleDoneTaskChecked() {
-        repeat(15) { i ->
+        repeat(15) {
             composeTestRule
                 .onNodeWithText("New task")
                 .performClick()
 
             composeTestRule
                 .onNodeWithTag("Title")
-                .performTextInput("Task #$i")
+                .performTextInput("Task")
 
             composeTestRule
                 .onNodeWithText("Save")
@@ -117,6 +124,21 @@ class HomeScreenTest {
             .onAllNodesWithTag("Toggle")
             .onLast()
             .assertIsOn()
+
+        composeTestRule
+            .onNodeWithTag("Up")
+            .performClick()
+
+        repeat(15) {
+            composeTestRule
+                .onAllNodesWithText("Task")
+                .onFirst()
+                .performClick()
+
+            composeTestRule
+                .onNodeWithText("Delete")
+                .performClick()
+        }
     }
 
     @Test
@@ -152,6 +174,14 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Clean my room up")
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Clean my room up")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
     }
 
     @Test
@@ -226,6 +256,26 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("You have task to do!")
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Walk my dog")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Settings")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Show Statistics")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Back")
+            .performClick()
     }
 
     @Test
@@ -261,18 +311,38 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("All tasks completed!")
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Walk my dog")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Settings")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Show Statistics")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Back")
+            .performClick()
     }
 
     @Test
     fun homeScreen_scrollListUpButtonDisplayed() {
-        repeat(15) { i ->
+        repeat(15) {
             composeTestRule
                 .onNodeWithText("New task")
                 .performClick()
 
             composeTestRule
                 .onNodeWithTag("Title")
-                .performTextInput("Task #$i")
+                .performTextInput("Task")
 
             composeTestRule
                 .onNodeWithText("Save")
@@ -286,6 +356,21 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithTag("Up")
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag("Up")
+            .performClick()
+
+        repeat(15) {
+            composeTestRule
+                .onAllNodesWithText("Task")
+                .onFirst()
+                .performClick()
+
+            composeTestRule
+                .onNodeWithText("Delete")
+                .performClick()
+        }
     }
 
     @Test
@@ -321,6 +406,16 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Task #0")
             .assertIsDisplayed()
+
+        repeat(15) { i ->
+            composeTestRule
+                .onNodeWithText("Task #$i")
+                .performClick()
+
+            composeTestRule
+                .onNodeWithText("Delete")
+                .performClick()
+        }
     }
 
     @Test
@@ -354,6 +449,16 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("New task")
             .assertIsDisplayed()
+
+        repeat(15) { i ->
+            composeTestRule
+                .onNodeWithText("Task #$i")
+                .performClick()
+
+            composeTestRule
+                .onNodeWithText("Delete")
+                .performClick()
+        }
     }
 
     @Test
@@ -377,6 +482,18 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithTag("Clear")
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag("Clear")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
     }
 
     @Test
@@ -404,6 +521,14 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Test")
             .assertIsNotDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
     }
 
     @Test
@@ -429,6 +554,20 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Task #2")
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag("Clear")
+            .performClick()
+
+        repeat(2) { i ->
+            composeTestRule
+                .onNodeWithText("Task #$i")
+                .performClick()
+
+            composeTestRule
+                .onNodeWithText("Delete")
+                .performClick()
+        }
     }
 
     @Test
@@ -472,6 +611,14 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Task")
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
     }
 
     @Test
@@ -522,6 +669,14 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Description")
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
     }
 
     @Test
@@ -551,6 +706,14 @@ class HomeScreenTest {
             .onAllNodesWithText("category")
             .onLast()
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
     }
 
     @Test
@@ -578,6 +741,14 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Premium")
             .assertIsNotDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
     }
 
     @Test
@@ -612,6 +783,14 @@ class HomeScreenTest {
         composeTestRule
             .onNodeWithText("Task")
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
     }
 
     @Test
@@ -622,7 +801,7 @@ class HomeScreenTest {
 
         composeTestRule
             .onNodeWithTag("Title")
-            .performTextInput("Task #1")
+            .performTextInput("Task")
 
         composeTestRule
             .onNodeWithTag("Category")
@@ -644,5 +823,71 @@ class HomeScreenTest {
             .onAllNodesWithText("task")
             .onLast()
             .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Cancel")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
+    }
+
+    @Test
+    fun homeScreen_addedTaskWithRepeatTaskWithRepeatIsDisplayed() {
+        composeTestRule
+            .onNodeWithText("New task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithTag("Title")
+            .performTextInput("Task")
+
+        composeTestRule
+            .onNodeWithTag("Add reminder")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("One time")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Daily")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Save")
+            .performClick()
+
+        val calendar = Calendar.getInstance()
+        val time = convertToTime(
+            calendar.get(Calendar.HOUR_OF_DAY),
+            calendar.get(Calendar.MINUTE),
+            composeTestRule.activity.applicationContext
+        )
+
+        composeTestRule
+            .onNodeWithTag("Repeat")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithTag("Toggle")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Next: Tomorrow at $time")
+            .assertIsDisplayed()
+
+        composeTestRule
+            .onNodeWithText("Task")
+            .performClick()
+
+        composeTestRule
+            .onNodeWithText("Delete")
+            .performClick()
     }
 }
