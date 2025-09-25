@@ -69,6 +69,7 @@ import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -78,7 +79,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -170,7 +170,8 @@ fun ToDoAppTopBar(
             Icon(
                 painter = painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = stringResource(R.string.app_name),
-                tint = MaterialTheme.colorScheme.background
+                tint = MaterialTheme.colorScheme.background,
+                modifier = Modifier.size(64.dp)
             )
         },
         actions = {
@@ -1366,7 +1367,7 @@ fun PriorityDropdownMenu(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPriority)
             },
             modifier = Modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
                 .fillMaxWidth()
         )
         ExposedDropdownMenu(
@@ -1415,7 +1416,7 @@ fun RepeatDropdownMenu(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedRepeat)
             },
             modifier = Modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
                 .fillMaxWidth()
         )
         ExposedDropdownMenu(
@@ -1924,7 +1925,7 @@ fun Spinner(
     ) {
         Row(
             modifier = modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, expanded)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, expanded)
                 .clickable(onClick = { expanded = !expanded })
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,
