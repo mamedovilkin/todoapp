@@ -18,9 +18,6 @@ interface DataStoreRepository {
     suspend fun setDisplayName(displayName: String)
     val displayName: Flow<String>
 
-    suspend fun setPremium(isPremium: Boolean)
-    val isPremium: Flow<Boolean>
-
     suspend fun setRescheduleUncompletedTasks(rescheduleUncompletedTasks: Boolean)
     val rescheduleUncompletedTasks: Flow<Boolean>
 
@@ -29,7 +26,4 @@ interface DataStoreRepository {
 
     suspend fun setAutoDeleteIndex(autoDeleteIndex: Int)
     val autoDeleteIndex: Flow<Int>
-
-    suspend fun setHidePremiumAd(hidePremiumAd: Boolean)
-    val hidePremiumAd: Flow<Boolean>
 }

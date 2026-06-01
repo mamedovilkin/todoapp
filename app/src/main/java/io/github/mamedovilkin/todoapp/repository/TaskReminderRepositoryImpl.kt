@@ -37,9 +37,8 @@ class TaskReminderRepositoryImpl(
     override suspend fun scheduleReminder(task: Task): Task {
         val updatedTask = getTaskWithUpdatedDatetime(task)
         val reminderCount = dataStoreRepository.reminderCount.first()
-        val isPremium = dataStoreRepository.isPremium.first()
 
-        val pendingIntents = getPendingIntents(updatedTask, reminderCount, isPremium)
+        val pendingIntents = getPendingIntents(updatedTask)
 
         for (i in 0 until reminderCount) {
             alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, updatedTask.datetime + offsets[i], pendingIntents[i])
@@ -50,8 +49,7 @@ class TaskReminderRepositoryImpl(
 
     override suspend fun cancelReminder(task: Task) {
         val reminderCount = dataStoreRepository.reminderCount.first()
-        val isPremium = dataStoreRepository.isPremium.first()
-        val pendingIntents = getPendingIntents(task, reminderCount, isPremium)
+        val pendingIntents = getPendingIntents(task)
 
         for (i in 0 until reminderCount) {
             alarmManager.cancel(pendingIntents[i])
@@ -147,7 +145,7 @@ class TaskReminderRepositoryImpl(
         return now.timeInMillis
     }
 
-    override fun getPendingIntents(task: Task, reminderCount: Int, isPremium: Boolean): List<PendingIntent> {
+    override fun getPendingIntents(task: Task): List<PendingIntent> {
         return offsets.map { offset ->
             val intent = Intent(context, TaskReminderReceiver::class.java).apply {
                 putExtra(TASK_ID_KEY, task.id)

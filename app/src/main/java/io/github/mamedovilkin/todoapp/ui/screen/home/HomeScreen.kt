@@ -68,6 +68,8 @@ fun HomeScreen(
     viewModel: HomeViewModel = koinViewModel()
 ) {
     val context = LocalContext.current
+    val taskDeletedString =  stringResource(R.string.task_deleted)
+    val undoString =  stringResource(R.string.undo)
     val lazyListState = rememberLazyListState()
     val newTaskSheetState = rememberModalBottomSheetState(
         skipPartiallyExpanded = true
@@ -82,15 +84,13 @@ fun HomeScreen(
             lazyListState.firstVisibleItemIndex > 0
         }
     }
-    val snackbarHostState = remember { SnackbarHostState() }
+    val snackBarHostState = remember { SnackbarHostState() }
     val exception = uiState.exception
     val isLatestVersion by viewModel.isLatestVersion.collectAsState()
     val userID by viewModel.userID.collectAsState()
     val photoURL by viewModel.photoURL.collectAsState()
     val displayName by viewModel.displayName.collectAsState()
     val showStatistics by viewModel.showStatistics.collectAsState()
-    val isPremium by viewModel.isPremium.collectAsState()
-    val hidePremiumAd by viewModel.hidePremiumAd.collectAsState()
 
     LaunchedEffect(Unit) {
         viewModel.setShowNewTaskBottomSheet(shouldOpenNewTaskDialog)
@@ -100,7 +100,7 @@ fun HomeScreen(
 
         exception?.let {
             coroutineScope.launch {
-                snackbarHostState.showSnackbar(
+                snackBarHostState.showSnackbar(
                     message = it.message.toString(),
                     duration = SnackbarDuration.Short
                 )
@@ -115,10 +115,10 @@ fun HomeScreen(
                 photoURL = photoURL
             )
         },
-        snackbarHost = { SnackbarHost(hostState = snackbarHostState) { snackbarData ->
+        snackbarHost = { SnackbarHost(hostState = snackBarHostState) { snackBarData ->
             val dismissState = rememberSwipeToDismissBoxState(confirmValueChange = {
                 if (it == SwipeToDismissBoxValue.EndToStart || it == SwipeToDismissBoxValue.StartToEnd) {
-                    snackbarHostState.currentSnackbarData?.dismiss()
+                    snackBarHostState.currentSnackbarData?.dismiss()
                 }
                 true
             })
@@ -127,7 +127,7 @@ fun HomeScreen(
                 state = dismissState,
                 backgroundContent = {},
             ) {
-                Snackbar(snackbarData)
+                Snackbar(snackBarData)
             }
         }
         },
@@ -153,8 +153,6 @@ fun HomeScreen(
                     TaskList(
                         displayName = displayName,
                         showStatistics = showStatistics,
-                        isPremium = isPremium,
-                        hidePremiumAd = hidePremiumAd,
                         innerPadding = innerPadding,
                         lazyListState = lazyListState,
                         tasks = result.tasks,
@@ -179,9 +177,9 @@ fun HomeScreen(
                             viewModel.deleteTask(it)
 
                             coroutineScope.launch {
-                                val snackBar = snackbarHostState.showSnackbar(
-                                    message = context.getString(R.string.task_deleted),
-                                    actionLabel = context.getString(R.string.undo),
+                                val snackBar = snackBarHostState.showSnackbar(
+                                    message = taskDeletedString,
+                                    actionLabel = undoString,
                                     duration = SnackbarDuration.Short
                                 )
 
@@ -196,7 +194,6 @@ fun HomeScreen(
                                 }
                             }
                         },
-                        onHide = { viewModel.setHidePremiumAd(true) },
                         modifier = if (windowWidthSizeClass == WindowWidthSizeClass.Compact) {
                             Modifier.fillMaxSize()
                         } else {
@@ -231,7 +228,6 @@ fun HomeScreen(
         if (uiState.showNewTaskBottomSheet) {
             NewTaskBottomSheet(
                 sheetState = newTaskSheetState,
-                isPremium = isPremium,
                 categories = (uiState.result as? Result.Success)?.categories ?: emptySet(),
                 onSave = {
                     viewModel.newTask(it)
@@ -247,7 +243,6 @@ fun HomeScreen(
         if (uiState.showEditTaskBottomSheet && uiState.task != null) {
             EditTaskBottomSheet(
                 task = uiState.task!!,
-                isPremium = isPremium,
                 categories = (uiState.result as? Result.Success)?.categories ?: emptySet(),
                 sheetState = editTaskSheetState,
                 onSave = {

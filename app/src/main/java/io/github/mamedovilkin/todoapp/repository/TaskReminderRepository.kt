@@ -9,5 +9,5 @@ interface TaskReminderRepository {
     suspend fun cancelReminder(task: Task)
     fun getTaskWithUpdatedDatetime(task: Task): Task
     fun getNextWeeklyReminder(task: Task, base: Calendar): Long
-    fun getPendingIntents(task: Task, reminderCount: Int, isPremium: Boolean): List<PendingIntent>
+    fun getPendingIntents(task: Task): List<PendingIntent>
 }

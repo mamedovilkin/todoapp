@@ -38,7 +38,7 @@ import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 
-class ToDoAppWidget() : GlanceAppWidget(), KoinComponent {
+class ToDoAppWidget : GlanceAppWidget(), KoinComponent {
 
     override val stateDefinition = PreferencesGlanceStateDefinition
 

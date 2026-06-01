@@ -25,12 +25,10 @@ class SyncTasksWorker(
 
     override suspend fun doWork(): Result {
         val userID = dataStoreRepository.userID.first()
-        val isPremium = dataStoreRepository.isPremium.first()
 
-        if (userID.isNotEmpty() && isPremium && isInternetAvailable()) {
+        if (userID.isNotEmpty() && isInternetAvailable()) {
             try {
-                val uid = userID
-                val remoteTasks = firestoreRepository.get(uid)
+                val remoteTasks = firestoreRepository.get(userID)
                 val localTasks = taskRepository.tasks.first()
                 val localTasksMap = localTasks.associateBy { it.id }
                 val remoteTaskIds = remoteTasks.map { it.id }.toSet()
@@ -61,7 +59,7 @@ class SyncTasksWorker(
 
                         localUpdatedAt > remoteUpdatedAt -> {
                             val synced = localTask.copy(isSynced = true)
-                            firestoreRepository.insert(uid, synced)
+                            firestoreRepository.insert(userID, synced)
                             taskRepository.update(synced)
                         }
                     }
@@ -70,7 +68,7 @@ class SyncTasksWorker(
                 for (localTask in localTasks) {
                     if (localTask.id !in remoteTaskIds && !localTask.isSynced) {
                         val synced = localTask.copy(isSynced = true)
-                        firestoreRepository.insert(uid, synced)
+                        firestoreRepository.insert(userID, synced)
                         taskRepository.update(synced)
                     }
                 }

@@ -9,14 +9,11 @@ import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
-import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.getValue
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.core.net.toUri
 import androidx.lifecycle.lifecycleScope
 import io.github.mamedovilkin.todoapp.R
-import io.github.mamedovilkin.todoapp.ui.activity.premium.PremiumActivity
 import io.github.mamedovilkin.todoapp.ui.screen.settings.SettingsScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.util.APP_LINK
@@ -29,32 +26,19 @@ import io.github.mamedovilkin.todoapp.util.toast
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
-import ru.rustore.sdk.billingclient.RuStoreBillingClient
-import ru.rustore.sdk.core.util.RuStoreUtils
 
 class SettingsActivity : ComponentActivity(), KoinComponent {
 
     private val settingsActivityViewModel: SettingsActivityViewModel by inject()
-    private val ruStoreBillingClient: RuStoreBillingClient by inject()
-
-    override fun onNewIntent(intent: Intent) {
-        super.onNewIntent(intent)
-        ruStoreBillingClient.onNewIntent(intent)
-    }
 
     @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (savedInstanceState == null) {
-            ruStoreBillingClient.onNewIntent(intent)
-        }
-
         enableEdgeToEdge()
         setContent {
             val windowSizeClass = calculateWindowSizeClass(this)
             val packageInfo = packageManager.getPackageInfo(packageName, 0)
-            val userID: String by settingsActivityViewModel.userID.collectAsState()
 
             ToDoAppTheme {
                 SettingsScreen(
@@ -64,15 +48,10 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     onSignIn = {
                         lifecycleScope.launch {
                             if (isInternetAvailable()) {
-                                if (RuStoreUtils.isRuStoreInstalled(this@SettingsActivity)) {
-                                    settingsActivityViewModel.signInWithVK { error ->
-                                        if (error != null) {
-                                            toast(error)
-                                        }
+                                settingsActivityViewModel.signInWithVK { error ->
+                                    if (error != null) {
+                                        toast(error)
                                     }
-                                } else {
-                                    settingsActivityViewModel.setPremium(false)
-                                    toast(getString(R.string.rustore_is_not_installed_on_this_device))
                                 }
                             } else {
                                 toast(getString(R.string.no_internet_connection))
@@ -92,34 +71,6 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                             }
                         }
                     },
-                    onPremium = {
-                        lifecycleScope.launch {
-                            if (isInternetAvailable()) {
-                                if (RuStoreUtils.isRuStoreInstalled(this@SettingsActivity)) {
-                                    if (userID.isEmpty()) {
-                                        settingsActivityViewModel.signInWithVK { error ->
-                                            if (error != null) {
-                                                toast(error)
-                                            }
-                                        }
-                                    } else {
-                                        startActivity(
-                                            Intent(
-                                                this@SettingsActivity,
-                                                PremiumActivity::class.java
-                                            )
-                                        )
-                                    }
-                                } else {
-                                    settingsActivityViewModel.setPremium(false)
-                                    toast(getString(R.string.rustore_is_not_installed_on_this_device))
-                                }
-                            } else {
-                                toast(getString(R.string.no_internet_connection))
-                            }
-                        }
-                    },
-                    onManageSubscription = { manageSubscription() },
                     onImport = {
                         ActivityCompat.requestPermissions(
                             this,
@@ -127,7 +78,11 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                             REQUEST_CODE_READ_CALENDAR
                         )
 
-                        if (ContextCompat.checkSelfPermission(this, Manifest.permission.READ_CALENDAR) == PackageManager.PERMISSION_GRANTED && hasAvailableCalendars(this)) {
+                        if (ContextCompat.checkSelfPermission(
+                                this,
+                                Manifest.permission.READ_CALENDAR
+                            ) == PackageManager.PERMISSION_GRANTED && hasAvailableCalendars(this)
+                        ) {
                             settingsActivityViewModel.getTasksFromCalendar()
                             onBackPressedDispatcher.onBackPressed()
                         }
@@ -138,14 +93,6 @@ class SettingsActivity : ComponentActivity(), KoinComponent {
                     onAboutDeveloper = { openDeveloperWebsite() }
                 )
             }
-        }
-    }
-
-    private fun manageSubscription() {
-        if (RuStoreUtils.isRuStoreInstalled(this)) {
-            startActivity(Intent(Intent.ACTION_VIEW, "rustore://profile/subscriptions".toUri()))
-        } else {
-            startActivity(Intent(Intent.ACTION_VIEW, "https://www.rustore.ru/".toUri()))
         }
     }
 

@@ -17,23 +17,13 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.core.app.ActivityCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
-import androidx.lifecycle.lifecycleScope
 import io.github.mamedovilkin.database.room.Task
-import io.github.mamedovilkin.todoapp.R
 import io.github.mamedovilkin.todoapp.ui.screen.home.HomeScreen
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.util.NOTIFICATION_PERMISSION_REQUEST_CODE
 import io.github.mamedovilkin.todoapp.util.TASK_KEY
-import io.github.mamedovilkin.todoapp.util.isInternetAvailable
-import io.github.mamedovilkin.todoapp.util.toast
-import kotlinx.coroutines.launch
-import org.koin.core.component.KoinComponent
-import org.koin.core.component.inject
-import ru.rustore.sdk.core.util.RuStoreUtils
 
-class HomeActivity : ComponentActivity(), KoinComponent {
-
-    private val homeActivityViewModel: HomeActivityViewModel by inject()
+class HomeActivity : ComponentActivity() {
 
     override fun onStart() {
         super.onStart()
@@ -49,19 +39,6 @@ class HomeActivity : ComponentActivity(), KoinComponent {
                     arrayOf(Manifest.permission.POST_NOTIFICATIONS),
                     NOTIFICATION_PERMISSION_REQUEST_CODE
                 )
-            }
-        }
-
-        lifecycleScope.launch {
-            if (isInternetAvailable()) {
-                if (RuStoreUtils.isRuStoreInstalled(this@HomeActivity)) {
-                    homeActivityViewModel.checkPremiumAvailability { error ->
-                        if (error != null) { toast(error) }
-                    }
-                } else {
-                    homeActivityViewModel.setPremium(false)
-                    toast(getString(R.string.rustore_is_not_installed_on_this_device))
-                }
             }
         }
     }

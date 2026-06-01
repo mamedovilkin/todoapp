@@ -15,33 +15,6 @@ class FirestoreRepositoryImpl(
     private val firestore: FirebaseFirestore,
 ) : FirestoreRepository {
 
-    override suspend fun setSubscriptionToken(uid: String, token: String) {
-        try {
-            firestore
-                .collection("users")
-                .document(uid)
-                .set(mapOf("subscriptionToken" to token), SetOptions.merge())
-                .await()
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
-    }
-
-    override suspend fun getSubscriptionToken(uid: String): String {
-        return try {
-            val document = firestore
-                .collection("users")
-                .document(uid)
-                .get()
-                .await()
-
-            document.getString("subscriptionToken") ?: ""
-        } catch (e: Exception) {
-            e.printStackTrace()
-            ""
-        }
-    }
-
     override suspend fun setLastSignIn(uid: String) {
         try {
             firestore

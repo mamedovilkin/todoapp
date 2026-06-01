@@ -63,13 +63,6 @@ class SettingsViewModel(
             false
         )
 
-    val isPremium = dataStoreRepository.isPremium
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            false
-        )
-
     val rescheduleUncompletedTasks = dataStoreRepository.rescheduleUncompletedTasks
         .stateIn(
             viewModelScope,
@@ -148,14 +141,12 @@ class SettingsViewModel(
             taskRepository.deleteAll()
         }
 
-        val deleteAllDataRemoteJob = viewModelScope.launch {
-            if (userID.value.isNotEmpty()) {
-                firestoreRepository.deleteAllData(userID.value)
-            }
-        }
-
         deleteAllDataLocalJob.invokeOnCompletion {
-            deleteAllDataRemoteJob
+            viewModelScope.launch {
+                if (userID.value.isNotEmpty()) {
+                    firestoreRepository.deleteAllData(userID.value)
+                }
+            }
         }
     }
 }

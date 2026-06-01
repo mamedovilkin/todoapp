@@ -1,13 +1,12 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.parcelize)
     alias(libs.plugins.ksp)
 }
 
 android {
     namespace = "io.github.mamedovilkin.database"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         minSdk = 24
@@ -57,11 +56,4 @@ dependencies {
 
     // DataStore
     implementation(libs.androidx.datastore.core.android)
-
-    // Testing
-    testImplementation(libs.junit)
-
-    androidTestImplementation(libs.androidx.datastore.core.android)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.junit)
 }

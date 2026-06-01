@@ -79,11 +79,6 @@
 
         </activity>
 
-        <activity
-            android:name=".ui.activity.premium.PremiumActivity"
-            android:exported="true"
-            android:theme="@style/Theme.ToDoApp" />
-
     </application>
 
 </manifest>

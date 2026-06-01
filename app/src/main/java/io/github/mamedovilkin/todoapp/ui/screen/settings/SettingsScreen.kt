@@ -24,11 +24,8 @@ import androidx.compose.material.icons.outlined.Feedback
 import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.StarOutline
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -73,8 +70,6 @@ fun SettingsScreen(
     onBack: () -> Unit,
     onSignIn: () -> Unit,
     onSignOut: () -> Unit,
-    onPremium: () -> Unit,
-    onManageSubscription: () -> Unit,
     onImport: () -> Unit,
     onFeedback: () -> Unit,
     onRateUs: () -> Unit,
@@ -84,13 +79,13 @@ fun SettingsScreen(
 ) {
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
+    val noInternetConnectionString = stringResource(R.string.no_internet_connection)
     val autoDeleteArray = stringArrayResource(R.array.auto_delete)
     val uiState by viewModel.uiState.collectAsState()
     val userID by viewModel.userID.collectAsState()
     val photoURL by viewModel.photoURL.collectAsState()
     val displayName by viewModel.displayName.collectAsState()
     val showStatistics by viewModel.showStatistics.collectAsState()
-    val isPremium by viewModel.isPremium.collectAsState()
     val rescheduleUncompletedTasks by viewModel.rescheduleUncompletedTasks.collectAsState()
     val reminderCount by viewModel.reminderCount.collectAsState()
     val autoDeleteIndex by viewModel.autoDeleteIndex.collectAsState()
@@ -114,7 +109,7 @@ fun SettingsScreen(
                     if (isInternetAvailable()) {
                         viewModel.deleteAllData()
                     } else {
-                        Toast.makeText(context, context.getString(R.string.no_internet_connection), Toast.LENGTH_LONG).show()
+                        Toast.makeText(context, noInternetConnectionString, Toast.LENGTH_LONG).show()
                     }
                 }
             }
@@ -213,64 +208,6 @@ fun SettingsScreen(
                     }
                 }
 
-                if (userID.isNotEmpty()) {
-                    item {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            if (isPremium) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.premium),
-                                        style = MaterialTheme.typography.displayMedium
-                                    )
-                                    FilledTonalButton(
-                                        onClick = onManageSubscription,
-                                        colors = ButtonDefaults.buttonColors(
-                                            contentColor = MaterialTheme.colorScheme.primary,
-                                            containerColor = MaterialTheme.colorScheme.background
-                                        )
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.manage_subscription),
-                                            textAlign = TextAlign.Center,
-                                            maxLines = 1
-                                        )
-                                    }
-                                }
-                            } else {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.free),
-                                        style = MaterialTheme.typography.displayMedium
-                                    )
-                                    Button(onClick = onPremium) {
-                                        Text(
-                                            text = stringResource(R.string.go_premium),
-                                            textAlign = TextAlign.Center
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-
                 item {
                     Card(
                         colors = CardDefaults.cardColors(
@@ -322,197 +259,195 @@ fun SettingsScreen(
                     }
                 }
 
-                if (isPremium) {
-                    item {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ),
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
                             modifier = Modifier.fillMaxWidth()
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    modifier = Modifier
-                                        .weight(1F)
-                                        .padding(16.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_reschedule),
-                                        contentDescription = stringResource(R.string.reschedule_uncompleted_tasks_to_tomorrow),
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.reschedule_uncompleted_tasks_to_tomorrow),
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        style = MaterialTheme.typography.headlineMedium,
-                                    )
-                                }
-                                Switch(
-                                    checked = rescheduleUncompletedTasks,
-                                    onCheckedChange = {
-                                        viewModel.setRescheduleUncompletedTasks(it)
-                                    },
-                                    colors = SwitchDefaults.colors(
-                                        uncheckedTrackColor = MaterialTheme.colorScheme.background
-                                    ),
-                                    modifier = Modifier
-                                        .padding(end = 16.dp)
-                                        .testTag("Reschedule")
-                                )
-                            }
-                        }
-                    }
-
-                    item {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    modifier = Modifier
-                                        .weight(1F)
-                                        .padding(16.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_reminder_count),
-                                        contentDescription = stringResource(R.string.reminder_count_per_task),
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.reminder_count_per_task),
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        style = MaterialTheme.typography.headlineMedium
-                                    )
-                                }
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    IconButton(
-                                        onClick = { viewModel.setReminderCount(reminderCount - 1) },
-                                        enabled = reminderCount > 1
-                                    ) {
-                                        Icon(Icons.Default.Remove, contentDescription = stringResource(
-                                            R.string.decrease
-                                        ))
-                                    }
-                                    Text(
-                                        text = reminderCount.toString(),
-                                        modifier = Modifier.width(16.dp),
-                                        textAlign = TextAlign.Center,
-                                        fontSize = 18.sp
-                                    )
-                                    IconButton(
-                                        onClick = { viewModel.setReminderCount(reminderCount + 1) },
-                                        enabled = reminderCount < 5
-                                    ) {
-                                        Icon(Icons.Default.Add, contentDescription = stringResource(
-                                            R.string.increase
-                                        ))
-                                    }
-                                }
-                            }
-                        }
-                    }
-
-                    item {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier.fillMaxWidth()
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    modifier = Modifier
-                                        .weight(1F)
-                                        .padding(16.dp)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(R.drawable.ic_auto_delete),
-                                        contentDescription = stringResource(R.string.automatically_delete_completed_tasks),
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.automatically_delete_completed_tasks),
-                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        style = MaterialTheme.typography.headlineMedium
-                                    )
-                                }
-                                Spinner(
-                                    items = autoDeleteArray,
-                                    selectedItem = autoDeleteArray[autoDeleteIndex],
-                                    onItemSelected = {
-                                        viewModel.setAutoDeleteIndex(autoDeleteArray.indexOf(it))
-                                    },
-                                    modifier = Modifier.testTag("Auto Delete")
-                                )
-                            }
-                        }
-                    }
-
-                    item {
-                        Card(
-                            colors = CardDefaults.cardColors(
-                                containerColor = MaterialTheme.colorScheme.primaryContainer
-                            ),
-                            modifier = Modifier.fillMaxWidth()
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .clickable { viewModel.setShowDeleteAllDataDialog(true) }
+                                    .weight(1F)
+                                    .padding(16.dp)
                             ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp),
-                                    modifier = Modifier
-                                        .padding(16.dp)
-                                        .weight(1F)
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_reschedule),
+                                    contentDescription = stringResource(R.string.reschedule_uncompleted_tasks_to_tomorrow),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.reschedule_uncompleted_tasks_to_tomorrow),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    style = MaterialTheme.typography.headlineMedium,
+                                )
+                            }
+                            Switch(
+                                checked = rescheduleUncompletedTasks,
+                                onCheckedChange = {
+                                    viewModel.setRescheduleUncompletedTasks(it)
+                                },
+                                colors = SwitchDefaults.colors(
+                                    uncheckedTrackColor = MaterialTheme.colorScheme.background
+                                ),
+                                modifier = Modifier
+                                    .padding(end = 16.dp)
+                                    .testTag("Reschedule")
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier
+                                    .weight(1F)
+                                    .padding(16.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_reminder_count),
+                                    contentDescription = stringResource(R.string.reminder_count_per_task),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.reminder_count_per_task),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
+                            }
+                            Row(verticalAlignment = Alignment.CenterVertically) {
+                                IconButton(
+                                    onClick = { viewModel.setReminderCount(reminderCount - 1) },
+                                    enabled = reminderCount > 1
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Outlined.Delete,
-                                        contentDescription = stringResource(R.string.delete_all_data),
-                                        tint = MaterialTheme.colorScheme.onPrimaryContainer,
-                                        modifier = Modifier.size(24.dp)
+                                    Icon(Icons.Default.Remove, contentDescription = stringResource(
+                                        R.string.decrease
+                                    ))
+                                }
+                                Text(
+                                    text = reminderCount.toString(),
+                                    modifier = Modifier.width(16.dp),
+                                    textAlign = TextAlign.Center,
+                                    fontSize = 18.sp
+                                )
+                                IconButton(
+                                    onClick = { viewModel.setReminderCount(reminderCount + 1) },
+                                    enabled = reminderCount < 5
+                                ) {
+                                    Icon(Icons.Default.Add, contentDescription = stringResource(
+                                        R.string.increase
+                                    ))
+                                }
+                            }
+                        }
+                    }
+                }
+
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier
+                                    .weight(1F)
+                                    .padding(16.dp)
+                            ) {
+                                Icon(
+                                    painter = painterResource(R.drawable.ic_auto_delete),
+                                    contentDescription = stringResource(R.string.automatically_delete_completed_tasks),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Text(
+                                    text = stringResource(R.string.automatically_delete_completed_tasks),
+                                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    style = MaterialTheme.typography.headlineMedium
+                                )
+                            }
+                            Spinner(
+                                items = autoDeleteArray,
+                                selectedItem = autoDeleteArray[autoDeleteIndex],
+                                onItemSelected = {
+                                    viewModel.setAutoDeleteIndex(autoDeleteArray.indexOf(it))
+                                },
+                                modifier = Modifier.testTag("Auto Delete")
+                            )
+                        }
+                    }
+                }
+
+                item {
+                    Card(
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.primaryContainer
+                        ),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.SpaceBetween,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .clickable { viewModel.setShowDeleteAllDataDialog(true) }
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier
+                                    .padding(16.dp)
+                                    .weight(1F)
+                            ) {
+                                Icon(
+                                    imageVector = Icons.Outlined.Delete,
+                                    contentDescription = stringResource(R.string.delete_all_data),
+                                    tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                                    modifier = Modifier.size(24.dp)
+                                )
+                                Column(
+                                    verticalArrangement = Arrangement.Center
+                                ) {
+                                    Text(
+                                        text = stringResource(R.string.delete_all_data),
+                                        color = MaterialTheme.colorScheme.onPrimaryContainer,
+                                        style = MaterialTheme.typography.headlineMedium
                                     )
-                                    Column(
-                                        verticalArrangement = Arrangement.Center
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.delete_all_data),
-                                            color = MaterialTheme.colorScheme.onPrimaryContainer,
-                                            style = MaterialTheme.typography.headlineMedium
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.delete_all_data_summary),
-                                            color = MaterialTheme.colorScheme.secondary,
-                                            style = MaterialTheme.typography.headlineSmall
-                                        )
-                                    }
+                                    Text(
+                                        text = stringResource(R.string.delete_all_data_summary),
+                                        color = MaterialTheme.colorScheme.secondary,
+                                        style = MaterialTheme.typography.headlineSmall
+                                    )
                                 }
                             }
                         }
