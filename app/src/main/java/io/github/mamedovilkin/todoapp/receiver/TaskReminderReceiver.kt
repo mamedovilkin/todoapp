@@ -11,7 +11,6 @@ import android.os.Build
 import androidx.annotation.RequiresPermission
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
-import io.github.mamedovilkin.database.repository.DataStoreRepository
 import io.github.mamedovilkin.database.repository.TaskRepository
 import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
@@ -26,7 +25,6 @@ import io.github.mamedovilkin.todoapp.util.TASK_ID_KEY
 import io.github.mamedovilkin.todoapp.util.TASK_KEY
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
@@ -34,7 +32,6 @@ import org.koin.core.component.inject
 class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
 
     private val taskRepository: TaskRepository by inject()
-    private val dataStoreRepository: DataStoreRepository by inject()
     private val syncWorkerRepository: SyncWorkerRepository by inject()
 
     @Suppress("DEPRECATION")
@@ -83,17 +80,10 @@ class TaskReminderReceiver : BroadcastReceiver(), KoinComponent {
             .setVibrate(LongArray(0))
             .setContentIntent(pendingIntent)
             .addAction(0, context.getString(R.string.mark_as_completed), markTaskCompletedPendingIntent)
+            .addAction(0, context.getString(R.string.reschedule), reschedulePendingIntent)
             .setAutoCancel(true)
 
-        CoroutineScope(Dispatchers.IO).launch {
-            val isPremium = dataStoreRepository.isPremium.first()
-
-            if (isPremium) {
-                builder.addAction(0, context.getString(R.string.reschedule), reschedulePendingIntent)
-            }
-        }.invokeOnCompletion {
-            NotificationManagerCompat.from(context).notify(task.id.hashCode(), builder.build())
-        }
+        NotificationManagerCompat.from(context).notify(task.id.hashCode(), builder.build())
     }
 
     private fun createNotificationChannelIfNeeded(context: Context) {

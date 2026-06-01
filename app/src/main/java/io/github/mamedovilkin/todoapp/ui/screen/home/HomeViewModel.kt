@@ -54,7 +54,7 @@ class HomeViewModel(
     private val taskReminderRepository: TaskReminderRepository,
     private val syncWorkerRepository: SyncWorkerRepository,
     private val firestoreRepository: FirestoreRepository,
-    private val dataStoreRepository: DataStoreRepository
+    dataStoreRepository: DataStoreRepository
 ) : AndroidViewModel(application) {
 
     private val _uiState = MutableStateFlow(HomeUiState())
@@ -85,20 +85,6 @@ class HomeViewModel(
         )
 
     val showStatistics = dataStoreRepository.showStatistics
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            false
-        )
-
-    val isPremium = dataStoreRepository.isPremium
-        .stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            false
-        )
-
-    val hidePremiumAd = dataStoreRepository.hidePremiumAd
         .stateIn(
             viewModelScope,
             SharingStarted.WhileSubscribed(5000),
@@ -254,9 +240,5 @@ class HomeViewModel(
                 selectedPriority = selectedPriority
             )
         }
-    }
-
-    fun setHidePremiumAd(hidePremiumAd: Boolean) = viewModelScope.launch {
-        dataStoreRepository.setHidePremiumAd(hidePremiumAd)
     }
 }

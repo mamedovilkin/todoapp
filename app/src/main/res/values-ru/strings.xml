@@ -53,31 +53,9 @@
     <string name="category">Категория</string>
     <string name="back">Назад</string>
     <string name="repeat">Повтор</string>
-    <string name="free">Бесплатный</string>
-    <string name="go_premium">Перейти на Premium</string>
     <string name="no_internet_connection">Нет интернет соединения</string>
     <string name="delete_all_data">Удалить все данные</string>
     <string name="do_you_really_want_to_delete_all_data">Вы действительно хотите удалить все данные?</string>
-    <string name="premium_summary">
-        Получите максимум от своего дня с ToDoApp Premium. Расширенные функции и удобные инструменты помогут Вам оставаться организованным и эффективным. Продуктивность — без компромиссов. Подписка помогает нам делать ToDoApp ещё лучше.
-    </string>
-    <string name="whats_in_subscription">Что в подписке?</string>
-    <string-array name="premium_features">
-        <item>Синхронизация между устройствами — оставайтесь организованными в любом месте.</item>
-        <item>Устанавливайте приоритет задач — низкий, средний или высокий — чтобы сосредоточиться на главном и не упустить важное.</item>
-        <item>Категории задач — наводите порядок с помощью удобной группировки.</item>
-        <item>Расширенные уведомления — до 5 напоминаний для каждой задачи, чтобы точно ничего не упустить.</item>
-        <item>Перенос из уведомления — откладывайте задачи прямо из уведомлений, не заходя в приложение.</item>
-        <item>Автоматический перенос на завтра — невыполненные задачи не исчезнут, а плавно перейдут на следующий день.</item>
-        <item>Автоудаление завершённых задач — сохраняйте список дел чистым и актуальным без лишних движений.</item>
-    </string-array>
-    <string name="try_it_free">Попробовать бесплатно</string>
-    <string name="premium_monthly_terms">14 дней бесплатно, затем 99.00₽ в месяц.\nОтменить можно в любое время. Применяются условия использования.</string>
-    <string name="premium_annual_terms">14 дней бесплатно, затем 999.00₽ в год.\nОтменить можно в любое время. Применяются условия использования.</string>
-    <string name="manage_subscription">Управлять подпиской</string>
-    <string name="cancelled">Отменено</string>
-    <string name="failure">Ошибка</string>
-    <string name="invalid_payment_state">Неверное состояние платежа</string>
     <string name="reschedule">Перенести</string>
     <string name="delete_all_data_summary">Все данные будут удалены из локальной и удалённой базы данных</string>
     <string name="reschedule_uncompleted_tasks_to_tomorrow">Переносить невыполненые задачи на завтра</string>
@@ -86,24 +64,16 @@
     <string name="good_evening">Добрый вечер, %1$s</string>
     <string name="good_night">Доброй ночи, %1$s</string>
     <string name="automatically_delete_completed_tasks">Автоматически удалять выполненные задачи</string>
-    <string name="rustore_is_not_installed_on_this_device">RuStore не установлен на этом устройстве</string>
-    <string name="not_authorized_in_rustore">Не авторизован в RuStore</string>
     <string name="report_issues_suggest_new_features">Сообщайте о проблемах, предлагайте новые функции</string>
     <string name="next">Следующее: %1$s</string>
     <string name="title">Название</string>
-    <string name="premium_notification">Премиум активирован. Спасибо за поддержку! Если у вас возникнут вопросы или проблемы, пожалуйста, свяжитесь с нами через "Настройки" > "Обратная связь".</string>
     <string name="date_today_pattern">EEEE, d MMMM</string>
     <string name="update_title">В RuStore доступна новая версия ToDoApp!</string>
     <string name="update_description">Обновите приложение до последней версии, чтобы продолжить его использование. Это обновление включает новые функции, исправления ошибок и улучшение производительности.</string>
     <string name="update">Обновить</string>
-    <string name="monthly">На месяц</string>
-    <string name="annual">На год (%1$s скидка)</string>
     <string name="reminder_count_per_task">Колличество напоминаний на задачу</string>
     <string name="decrease">Уменьшить</string>
     <string name="increase">Увеличить</string>
-    <string name="premium_short_summary">Расширенные функции и удобные инструменты помогут Вам оставаться организованным и эффективным.\n14 дней бесплатно. Отменить можно в любое время.\nПрименяются условия использования.</string>
-    <string name="learn_more">Узнать больше</string>
-    <string name="close">Закрыть</string>
     <string name="add_reminder">Добавить напоминание</string>
     <string name="priority">Приоритет</string>
     <string name="import_events_from_calendar">Импортировать события из календаря</string>

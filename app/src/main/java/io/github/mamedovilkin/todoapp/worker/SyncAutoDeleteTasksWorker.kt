@@ -25,9 +25,8 @@ class SyncAutoDeleteTasksWorker(
     override suspend fun doWork(): Result {
         val tasks = taskRepository.tasks.first()
         val userID = dataStoreRepository.userID.first()
-        val isPremium = dataStoreRepository.isPremium.first()
 
-        if (userID.isNotEmpty() && isPremium && isInternetAvailable()) {
+        if (userID.isNotEmpty() && isInternetAvailable()) {
             try {
                 val completedTasks = tasks.filter {
                     it.isDone && it.repeatType == RepeatType.ONE_TIME

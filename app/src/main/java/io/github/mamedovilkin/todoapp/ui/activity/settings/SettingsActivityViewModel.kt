@@ -20,10 +20,6 @@ import io.github.mamedovilkin.todoapp.repository.TaskReminderRepository
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import ru.rustore.sdk.billingclient.RuStoreBillingClient
-import ru.rustore.sdk.billingclient.model.product.ProductType
-import ru.rustore.sdk.billingclient.model.purchase.PurchaseState
-import ru.rustore.sdk.billingclient.usecase.PurchasesUseCase
 import java.util.UUID
 
 class SettingsActivityViewModel(
@@ -32,8 +28,7 @@ class SettingsActivityViewModel(
     private val taskReminderRepository: TaskReminderRepository,
     private val dataStoreRepository: DataStoreRepository,
     private val firestoreRepository: FirestoreRepository,
-    private val syncWorkerRepository: SyncWorkerRepository,
-    private val ruStoreBillingClient: RuStoreBillingClient
+    private val syncWorkerRepository: SyncWorkerRepository
 ) : AndroidViewModel(application) {
 
     val userID = dataStoreRepository.userID
@@ -51,50 +46,13 @@ class SettingsActivityViewModel(
                 val displayName = accessToken.userData.firstName
 
                 saveUser(userID, photoURL, displayName)
-                checkPremiumAvailability(userID, onError = {
-                    onError(it)
-                })
+                syncWorkerRepository.scheduleSyncToggleTasksWork()
             }
 
             override fun onFail(fail: VKIDAuthFail) {
                 onError(fail.description)
             }
         })
-    }
-
-    private fun checkPremiumAvailability(
-        userID: String,
-        onError: (String?) -> Unit
-    ) = viewModelScope.launch {
-        if (userID.isNotEmpty()) {
-            ruStoreBillingClient.userInfo.getAuthorizationStatus()
-                .addOnSuccessListener {
-                    if (it.authorized) {
-                        val purchasesUseCase: PurchasesUseCase = ruStoreBillingClient.purchases
-
-                        purchasesUseCase.getPurchases()
-                            .addOnSuccessListener { purchases ->
-                                viewModelScope.launch {
-                                    val hasPremium = purchases.any { purchase ->
-                                        purchase.productType == ProductType.SUBSCRIPTION
-                                        && purchase.purchaseState == PurchaseState.CONFIRMED
-                                        && (purchase.productId == "premium_monthly" || purchase.productId == "premium_annual")
-                                    }
-                                    setPremium(hasPremium)
-                                }
-                            }
-                            .addOnFailureListener { error ->
-                                onError(error.message)
-                            }
-                    } else {
-                        setPremium(false)
-                        onError(application.getString(R.string.not_authorized_in_rustore))
-                    }
-                }
-                .addOnFailureListener { error ->
-                    onError(error.message)
-                }
-        }
     }
 
     fun signOut(onError: (String?) -> Unit) = viewModelScope.launch {
@@ -107,16 +65,6 @@ class SettingsActivityViewModel(
                 onError(fail.description)
             }
         })
-    }
-
-    fun setPremium(isPremium: Boolean) = viewModelScope.launch {
-        dataStoreRepository.setPremium(isPremium)
-
-        if (isPremium) {
-            syncWorkerRepository.scheduleSyncToggleTasksWork()
-        } else {
-            syncWorkerRepository.cancelScheduleSyncToggleTasksWork()
-        }
     }
 
     private fun saveUser(
@@ -136,7 +84,6 @@ class SettingsActivityViewModel(
         dataStoreRepository.setUserID("")
         dataStoreRepository.setPhotoURL("")
         dataStoreRepository.setDisplayName("")
-        dataStoreRepository.setPremium(false)
     }
 
     fun getTasksFromCalendar() {

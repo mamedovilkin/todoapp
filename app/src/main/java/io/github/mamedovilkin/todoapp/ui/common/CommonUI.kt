@@ -69,6 +69,7 @@ import androidx.compose.material3.DisplayMode
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuAnchorType
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.FilledTonalButton
@@ -78,7 +79,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
@@ -142,13 +142,11 @@ import io.github.mamedovilkin.database.room.RepeatType
 import io.github.mamedovilkin.database.room.Task
 import io.github.mamedovilkin.database.room.isExpired
 import io.github.mamedovilkin.todoapp.R
-import io.github.mamedovilkin.todoapp.ui.activity.premium.PremiumActivity
 import io.github.mamedovilkin.todoapp.ui.activity.settings.SettingsActivity
 import io.github.mamedovilkin.todoapp.ui.theme.ToDoAppTheme
 import io.github.mamedovilkin.todoapp.ui.theme.greenColor
 import io.github.mamedovilkin.todoapp.ui.theme.orangeColor
 import io.github.mamedovilkin.todoapp.ui.theme.redColor
-import io.github.mamedovilkin.todoapp.ui.theme.textColor
 import io.github.mamedovilkin.todoapp.util.convertMillisToDate
 import io.github.mamedovilkin.todoapp.util.convertMillisToDatetime
 import io.github.mamedovilkin.todoapp.util.convertToTime
@@ -170,7 +168,8 @@ fun ToDoAppTopBar(
             Icon(
                 painter = painterResource(R.drawable.ic_launcher_foreground),
                 contentDescription = stringResource(R.string.app_name),
-                tint = MaterialTheme.colorScheme.background
+                tint = MaterialTheme.colorScheme.background,
+                modifier = Modifier.size(64.dp)
             )
         },
         actions = {
@@ -474,7 +473,6 @@ private fun StatisticsCardDonePreview() {
 @Composable
 fun StickySearchBar(
     query: String,
-    isPremium: Boolean,
     showVerticalGradient: Boolean,
     selectedPriority: PriorityType,
     onSearch: (String) -> Unit,
@@ -504,7 +502,7 @@ fun StickySearchBar(
                 },
                 trailingIcon = {
                     AnimatedVisibility(
-                        query.isEmpty() && isPremium,
+                        query.isEmpty(),
                         enter = slideInHorizontally { (it) / 3 } + fadeIn(),
                         exit = slideOutHorizontally { (it) / 3 } + fadeOut(),
                     ) {
@@ -603,7 +601,6 @@ private fun StickySearchBarPreview() {
     ToDoAppTheme {
         StickySearchBar(
             query = "",
-            isPremium = true,
             showVerticalGradient = false,
             selectedPriority = PriorityType.NONE,
             onSearch = {},
@@ -617,8 +614,6 @@ private fun StickySearchBarPreview() {
 fun TaskList(
     displayName: String,
     showStatistics: Boolean,
-    hidePremiumAd: Boolean,
-    isPremium: Boolean,
     innerPadding: PaddingValues,
     lazyListState: LazyListState,
     tasks: List<Task>,
@@ -635,10 +630,8 @@ fun TaskList(
     onEdit: (Task) -> Unit,
     onToggle: (Task) -> Unit,
     onDelete: (Task) -> Unit,
-    onHide: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val context = LocalContext.current
     val filteredTasks by remember(query, selectedCategory, selectedPriority, tasks) {
         derivedStateOf {
             if (query.isNotEmpty()) {
@@ -666,64 +659,6 @@ fun TaskList(
         state = lazyListState,
         contentPadding = PaddingValues(top = 0.dp, bottom = 72.dp)
     ) {
-        if (!isPremium && !hidePremiumAd) {
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.surfaceVariant)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp),
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .padding(horizontal = 16.dp)
-                    ) {
-                        Icon(
-                            painter = painterResource(R.drawable.ic_task),
-                            contentDescription = stringResource(R.string.app_name),
-                            tint = textColor.getColor(context),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.premium),
-                            color = textColor.getColor(context),
-                            style = MaterialTheme.typography.displaySmall
-                        )
-                        Spacer(modifier = Modifier.weight(1f))
-                        Icon(
-                            painter = painterResource(R.drawable.ic_close),
-                            contentDescription = stringResource(R.string.close),
-                            tint = textColor.getColor(context),
-                            modifier = Modifier
-                                .size(18.dp)
-                                .clickable(onClick = onHide)
-                                .testTag("Close")
-                        )
-                    }
-                    Text(
-                        text = stringResource(R.string.premium_short_summary),
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.learn_more),
-                        style = MaterialTheme.typography.displaySmall,
-                        color = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier
-                            .padding(vertical = 8.dp)
-                            .padding(horizontal = 16.dp)
-                            .clickable(onClick = {
-                                context.startActivity(
-                                    Intent(context, PremiumActivity::class.java)
-                                )
-                            })
-                    )
-                }
-            }
-        }
-
         if (displayName.isNotEmpty()) {
             item {
                 Column(
@@ -758,7 +693,6 @@ fun TaskList(
         stickyHeader {
             StickySearchBar(
                 query = query,
-                isPremium = isPremium,
                 showVerticalGradient = showVerticalGradient,
                 selectedPriority = selectedPriority,
                 onSearch = onSearch,
@@ -867,7 +801,6 @@ fun TaskList(
 @Composable
 fun NewTaskBottomSheet(
     sheetState: SheetState,
-    isPremium: Boolean,
     categories: Set<String>,
     onSave: (Task) -> Unit,
     onCancel: () -> Unit,
@@ -922,42 +855,38 @@ fun NewTaskBottomSheet(
                 description = description,
                 onDescriptionChange = { description = it }
             )
-            if (isPremium || categories.size < 3) {
-                Column {
-                    CategoryTextFieldBottomSheet(
-                        category = category,
-                        onCategoryChange = {
+            Column {
+                CategoryTextFieldBottomSheet(
+                    category = category,
+                    onCategoryChange = {
+                        category = it
+                        expandedSuggestions = it.isNotEmpty()
+                    },
+                    onCategoryFocusChange = { expandedSuggestions = it }
+                )
+                if (expandedSuggestions) {
+                    SuggestionsPopup(
+                        y = y,
+                        onDismissRequest = { expandedSuggestions = false },
+                        suggestions = suggestions,
+                        onSuggestion = {
                             category = it
-                            expandedSuggestions = it.isNotEmpty()
-                        },
-                        onCategoryFocusChange = { expandedSuggestions = it }
+                            expandedSuggestions = false
+                        }
                     )
-                    if (expandedSuggestions) {
-                        SuggestionsPopup(
-                            y = y,
-                            onDismissRequest = { expandedSuggestions = false },
-                            suggestions = suggestions,
-                            onSuggestion = {
-                                category = it
-                                expandedSuggestions = false
-                            }
-                        )
-                    }
                 }
             }
-            if (isPremium) {
-                PriorityDropdownMenu(
-                    expandedPriority = expandedPriority,
-                    onExpandedChange = { expandedPriority = !expandedPriority },
-                    selectedPriority = selectedPriority,
-                    onDismissRequest = { expandedPriority = false },
-                    priorityTypes = priorityTypes,
-                    onPriority = {
-                        selectedPriority = it
-                        expandedPriority = false
-                    }
-                )
-            }
+            PriorityDropdownMenu(
+                expandedPriority = expandedPriority,
+                onExpandedChange = { expandedPriority = !expandedPriority },
+                selectedPriority = selectedPriority,
+                onDismissRequest = { expandedPriority = false },
+                priorityTypes = priorityTypes,
+                onPriority = {
+                    selectedPriority = it
+                    expandedPriority = false
+                }
+            )
             AnimatedVisibility(addReminder) {
                 Column {
                     RepeatDropdownMenu(
@@ -1032,7 +961,6 @@ fun NewTaskBottomSheet(
 fun EditTaskBottomSheet(
     task: Task,
     sheetState: SheetState,
-    isPremium: Boolean,
     categories: Set<String>,
     onSave: (Task) -> Unit,
     onDelete: (Task) -> Unit,
@@ -1090,42 +1018,38 @@ fun EditTaskBottomSheet(
                 description = description,
                 onDescriptionChange = { description = it }
             )
-            if (isPremium || categories.size < 3) {
-                Column {
-                    CategoryTextFieldBottomSheet(
-                        category = category,
-                        onCategoryChange = {
+            Column {
+                CategoryTextFieldBottomSheet(
+                    category = category,
+                    onCategoryChange = {
+                        category = it
+                        expandedSuggestions = it.isNotEmpty()
+                    },
+                    onCategoryFocusChange = { expandedSuggestions = it }
+                )
+                if (expandedSuggestions) {
+                    SuggestionsPopup(
+                        y = y,
+                        onDismissRequest = { expandedSuggestions = false },
+                        suggestions = suggestions,
+                        onSuggestion = {
                             category = it
-                            expandedSuggestions = it.isNotEmpty()
-                        },
-                        onCategoryFocusChange = { expandedSuggestions = it }
+                            expandedSuggestions = false
+                        }
                     )
-                    if (expandedSuggestions) {
-                        SuggestionsPopup(
-                            y = y,
-                            onDismissRequest = { expandedSuggestions = false },
-                            suggestions = suggestions,
-                            onSuggestion = {
-                                category = it
-                                expandedSuggestions = false
-                            }
-                        )
-                    }
                 }
             }
-            if (isPremium) {
-                PriorityDropdownMenu(
-                    expandedPriority = expandedPriority,
-                    onExpandedChange = { expandedPriority = !expandedPriority },
-                    selectedPriority = selectedPriority,
-                    onDismissRequest = { expandedPriority = false },
-                    priorityTypes = priorityTypes,
-                    onPriority = {
-                        selectedPriority = it
-                        expandedPriority = false
-                    }
-                )
-            }
+            PriorityDropdownMenu(
+                expandedPriority = expandedPriority,
+                onExpandedChange = { expandedPriority = !expandedPriority },
+                selectedPriority = selectedPriority,
+                onDismissRequest = { expandedPriority = false },
+                priorityTypes = priorityTypes,
+                onPriority = {
+                    selectedPriority = it
+                    expandedPriority = false
+                }
+            )
             AnimatedVisibility(addReminder) {
                 Column {
                     RepeatDropdownMenu(
@@ -1366,7 +1290,7 @@ fun PriorityDropdownMenu(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedPriority)
             },
             modifier = Modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
                 .fillMaxWidth()
         )
         ExposedDropdownMenu(
@@ -1415,7 +1339,7 @@ fun RepeatDropdownMenu(
                 ExposedDropdownMenuDefaults.TrailingIcon(expanded = expandedRepeat)
             },
             modifier = Modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, true)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, true)
                 .fillMaxWidth()
         )
         ExposedDropdownMenu(
@@ -1924,7 +1848,7 @@ fun Spinner(
     ) {
         Row(
             modifier = modifier
-                .menuAnchor(MenuAnchorType.PrimaryNotEditable, expanded)
+                .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable, expanded)
                 .clickable(onClick = { expanded = !expanded })
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically,

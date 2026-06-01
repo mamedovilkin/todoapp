@@ -20,9 +20,8 @@ class SyncDeleteWorker(
 
     override suspend fun doWork(): Result {
         val userID = dataStoreRepository.userID.first()
-        val isPremium = dataStoreRepository.isPremium.first()
 
-        if (userID.isNotEmpty() && isPremium && isInternetAvailable()) {
+        if (userID.isNotEmpty() && isInternetAvailable()) {
             try {
                 val taskId = inputData.getString("taskId") ?: return Result.failure()
 

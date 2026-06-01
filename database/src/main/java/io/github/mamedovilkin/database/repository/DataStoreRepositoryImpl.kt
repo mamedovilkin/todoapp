@@ -1,22 +1,15 @@
 package io.github.mamedovilkin.database.repository
 
-import android.content.Context
 import androidx.datastore.core.DataStore
-import androidx.datastore.preferences.core.PreferenceDataStoreFactory
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.emptyPreferences
 import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
-import java.io.File
-import java.util.UUID
 
 class DataStoreRepositoryImpl(
     private val dataStore: DataStore<Preferences>
@@ -28,11 +21,9 @@ class DataStoreRepositoryImpl(
         val USER_ID = stringPreferencesKey("userID")
         val PHOTO_URL = stringPreferencesKey("photoURL")
         val DISPLAY_NAME = stringPreferencesKey("displayName")
-        val PREMIUM = booleanPreferencesKey("premium")
         val RESCHEDULE_UNCOMPLETED_TASKS = booleanPreferencesKey("rescheduleUncompletedTasks")
         val REMINDER_COUNT = intPreferencesKey("reminderCount")
         val AUTO_DELETE = intPreferencesKey("autoDelete")
-        val HIDE_PREMIUM_AD = booleanPreferencesKey("hidePremiumAd")
     }
 
     override suspend fun setWasFirstLaunch(wasFirstLaunch: Boolean) {
@@ -100,19 +91,6 @@ class DataStoreRepositoryImpl(
             preferences[DISPLAY_NAME] ?: ""
         }
 
-    override suspend fun setPremium(isPremium: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PREMIUM] = isPremium
-        }
-    }
-
-    override val isPremium: Flow<Boolean> = dataStore.data
-        .catch {
-            emit(emptyPreferences())
-        }.map { preferences ->
-            preferences[PREMIUM] == true
-        }
-
     override suspend fun setRescheduleUncompletedTasks(rescheduleUncompletedTasks: Boolean) {
         dataStore.edit { preferences ->
             preferences[RESCHEDULE_UNCOMPLETED_TASKS] = rescheduleUncompletedTasks
@@ -151,26 +129,4 @@ class DataStoreRepositoryImpl(
         }.map { preferences ->
             preferences[AUTO_DELETE] ?: 0
         }
-
-    override suspend fun setHidePremiumAd(hidePremiumAd: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[HIDE_PREMIUM_AD] = hidePremiumAd
-        }
-    }
-
-    override val hidePremiumAd: Flow<Boolean> = dataStore.data
-        .catch {
-            emit(emptyPreferences())
-        }.map { preferences ->
-            preferences[HIDE_PREMIUM_AD] == true
-        }
-}
-
-fun createTestDataStore(context: Context): DataStore<Preferences> {
-    return PreferenceDataStoreFactory.create(
-        produceFile = {
-            File(context.filesDir, "test_${UUID.randomUUID()}.preferences_pb")
-        },
-        scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
-    )
 }

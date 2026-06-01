@@ -5,7 +5,6 @@ plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.firebase.crashlytics)
     alias(libs.plugins.kotlin.parcelize)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
     alias(libs.plugins.google.services)
     alias(libs.plugins.ksp)
@@ -15,14 +14,14 @@ plugins {
 
 android {
     namespace = "io.github.mamedovilkin.todoapp"
-    compileSdk = 36
+    compileSdk = 37
 
     defaultConfig {
         applicationId = "io.github.mamedovilkin.todoapp"
         minSdk = 24
-        targetSdk = 36
-        versionCode = 12
-        versionName = "2.6"
+        targetSdk = 37
+        versionCode = 14
+        versionName = "3.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -40,8 +39,7 @@ android {
 
     buildTypes {
         release {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
@@ -56,26 +54,20 @@ android {
         isCoreLibraryDesugaringEnabled = true
     }
 
-    kotlin {
-        compilerOptions {
-            jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
-        }
-    }
-
     buildFeatures {
         compose = true
+    }
+}
+
+kotlin {
+    compilerOptions {
+        jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
     }
 }
 
 dependencies {
     // Modules
     implementation(project(":database"))
-
-    // RuStore BillingClient
-    // noinspection UseTomlInstead
-    implementation(platform("ru.rustore.sdk:bom:2025.05.02"))
-    // noinspection UseTomlInstead
-    implementation("ru.rustore.sdk:billingclient")
 
     // VK ID
     implementation(libs.vkid)
@@ -135,26 +127,4 @@ dependencies {
 
     // Glide
     implementation(libs.glide)
-
-    // Testing
-    testImplementation(libs.junit)
-    testImplementation(libs.kotlinx.coroutines.test)
-
-    // Mockito
-    testImplementation(libs.mockito.kotlin)
-    testImplementation(libs.mockito.core)
-
-    androidTestImplementation(platform(libs.androidx.compose.bom))
-    androidTestImplementation(libs.androidx.ui.test.junit4)
-    androidTestImplementation(libs.androidx.espresso.core)
-    androidTestImplementation(libs.androidx.core.testing)
-    androidTestImplementation(libs.androidx.work.testing)
-    androidTestImplementation(libs.mockito.android)
-    androidTestImplementation(libs.androidx.junit)
-
-    debugImplementation(libs.androidx.ui.test.manifest)
-    debugImplementation(libs.androidx.ui.tooling)
-
-    // LeakCanary
-    debugImplementation(libs.leakcanary.android)
 }
